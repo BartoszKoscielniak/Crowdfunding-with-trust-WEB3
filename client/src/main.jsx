@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-import App from './App'
+import App from './components/homepage/App'
 import './index.css'
 import { TransactionProvider } from './context/TransactionContext';
 

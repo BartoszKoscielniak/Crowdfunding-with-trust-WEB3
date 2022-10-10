@@ -1,8 +1,8 @@
 import React, {useContext} from 'react';
 
-import {TransactionContext} from '../context/TransactionContext';
-import { shortenAddress } from '../utils/shortenAddress';
-import dummyData from '../utils/dummydata';
+import {TransactionContext} from '../../context/TransactionContext';
+import { shortenAddress } from '../../utils/shortenAddress';
+import dummyData from '../../utils/dummydata';
 
 const TransactionCard = ({addressTo, addressFrom, timestamp, message, keyword, amount, url}) =>  {
     return (
