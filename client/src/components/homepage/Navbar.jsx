@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { HiMenu, HiMenuAlt4 } from 'react-icons/hi';
 import { AiOutlineClose } from 'react-icons/ai'
+import { Link } from 'react-router-dom';
 
 import logo from '../../../images/logo.png';
 
-const NavbarItem = ({ title, classProps}) => {
+const NavbarItem = ({ item, classProps}) => {
+
     return (
         <li className={`mx-4 cursor-pointer ${classProps}`}>
-            {title}
+            <Link to={item[1]}>{item[0]}</Link>
         </li>
     );
 }
@@ -20,8 +22,8 @@ const Navbar = () => {
             <div className="md:flex-[0.5] flex-initial justify-center items-center">
             </div>
             <ul className="text-white md:flex hidden list-none flex-row justify-between items-center flex-initail">
-                {["Add gathering", "Projects", "Your funds", "Your account","About us"].map((item, index) => (
-                    <NavbarItem key={item + index} title={item}/>
+                {[["Add gathering", "path"], ["Projects", "path"], ["Your funds", "path"], ["Your account", "account"],["About us", "path"]].map((item, index) => (
+                    <NavbarItem key={item + index} item={item}/>
                 ))}
             </ul>
             <div className="flex relative">
@@ -38,7 +40,7 @@ const Navbar = () => {
                             <AiOutlineClose onClick={() => setToggleMenu(false)}/>
                         </li>
                         {["Projects", "Wallet", "About us"].map((item, index) => (
-                        <NavbarItem key={item + index} title={item} classProps="my-2 text-lg"/>
+                        <NavbarItem key={item + index} item={item} classProps="my-2 text-lg"/>
                         ))}
                     </ul>
                 )}

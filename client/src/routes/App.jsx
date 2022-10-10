@@ -1,8 +1,10 @@
-import { Navbar, Welcome, Footer, Services, Transactions } from ".";
+import { Navbar, Welcome, Footer, Services, Transactions } from "../components/homepage";
+import { TransactionProvider } from '../context/TransactionContext';
 
 const App = () => {
  
   return (
+    <TransactionProvider>
     <div className="min-h-screen">
       <div className="gradient-bg-welcome">
         <Navbar/>
@@ -12,6 +14,7 @@ const App = () => {
       <Transactions/>
       <Footer/>
     </div>
+    </TransactionProvider>
   )
 }
 
