@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { HiMenu, HiMenuAlt4 } from 'react-icons/hi';
 import { AiOutlineClose } from 'react-icons/ai'
 import { Link } from 'react-router-dom';
@@ -6,16 +6,28 @@ import { Link } from 'react-router-dom';
 import logo from '../../../images/logo.png';
 
 const NavbarItem = ({ item, classProps}) => {
+    const [isShown, setIsShown] = useState(false);
 
     return (
-        <li className={`mx-4 cursor-pointer ${classProps}`}>
-            <Link to={item[1]}>{item[0]}</Link>
+        <li className={`mx-4 cursor-pointer display: flex justify-center font-sans text-xl antialiased  ${classProps}`} onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
+            <Link to={item[1]}>{item[0]}</Link>   
+            {isShown && (
+                <DropdownMenu content={item[2]}/>
+            )}
         </li>
     );
 }
 
 const Navbar = () => {
     const [toggleMenu, setToggleMenu] = useState(false); 
+    const routingArray = [
+        ["Your account", "account", []],
+        ["Collections", "collections", ['Add collections', 'My collections']],
+        ["Funds", "funds", ['Deposit', 'History']],
+        ["Earn", "earn", ['Profits']],
+        ["About us", []]
+    ];
+    const { connectWallet, currentAccount, formData, sendTransaction, handleChange, isLoading} = useContext(TransactionContext);
 
     return (
         <nav className="w-full flex md:justify-center justify-between items-center p-4">
@@ -49,4 +61,26 @@ const Navbar = () => {
     );
 }
 
+const DropdownMenu = ({content}) => {
+    if (Array.isArray(content) && content.length > 0)
+    {
+        return (
+            <div className='position: absolute bg-transparent  bg-opacity-90 mt-5'>
+                <div className='my-4 p-8 shadow-2xl rounded-xl bg-gray-800'>
+                    {content.map((item, index) => (
+                        <DropdownMenuItem key={item + index}  item={item}/>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+}
+
+const DropdownMenuItem = ({item}) => {
+    return (
+        <div className='py-3 hover:text-slate-400'>
+            <NavLink to={item.toLowerCase().replace(/\s/g, '')}>{item}</NavLink> 
+        </div>
+    )
+}
 export default Navbar;
