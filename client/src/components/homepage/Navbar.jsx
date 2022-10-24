@@ -1,7 +1,10 @@
 import { useState, useContext } from 'react';
 import { HiMenu, HiMenuAlt4 } from 'react-icons/hi';
 import { AiOutlineClose } from 'react-icons/ai'
-import { Link } from 'react-router-dom';
+import { TransactionContext } from '../../context/TransactionContext';
+import { AiFillPlayCircle } from "react-icons/ai";
+
+import { Link, NavLink } from 'react-router-dom';
 
 import logo from '../../../images/logo.png';
 
@@ -30,13 +33,31 @@ const Navbar = () => {
     const { connectWallet, currentAccount, formData, sendTransaction, handleChange, isLoading} = useContext(TransactionContext);
 
     return (
-        <nav className="w-full flex md:justify-center justify-between items-center p-4">
+        <nav className="w-full flex md:justify-center justify-between items-center p-6">
             <div className="md:flex-[0.5] flex-initial justify-center items-center">
             </div>
-            <ul className="text-white md:flex hidden list-none flex-row justify-between items-center flex-initail">
-                {[["Add gathering", "path"], ["Projects", "path"], ["Your funds", "path"], ["Your account", "account"],["About us", "path"]].map((item, index) => (
+            <ul className="w-full flex md:justify-center text-white md:flex list-none flex-row justify-between items-center flex-initail">
+                <li className='font-sans text-2xl antialiased basis-1/4 pl-12'>Crowdfunding</li>
+                <div className='basis-1/2 w-full flex md:justify-center'>
+                {routingArray.map((item, index) => (
                     <NavbarItem key={item + index} item={item}/>
                 ))}
+                </div>
+                <li className='basis-1/4 pr-12'>
+                    <div className='float-right'>
+                    {!currentAccount && (
+                    <button
+                        type="button"
+                        onClick={connectWallet}
+                        className="flex flex-row justify-center items-center p-1 rounded-full cursor-pointer"
+                    >
+                        <p className="font-sans text-2xl antialiased">
+                        Connect Wallet
+                        </p>
+                    </button>
+                    )}
+                    </div>
+                </li>
             </ul>
             <div className="flex relative">
                 {toggleMenu

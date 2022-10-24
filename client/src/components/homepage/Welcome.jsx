@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import { AiFillPlayCircle } from "react-icons/ai";
 import { SiEthereum } from "react-icons/si";
 import { BsInfoCircle } from "react-icons/bs";
 import { shortenAddress } from "../../utils/shortenAddress";
@@ -45,18 +44,6 @@ const Welcome = () => {
             <p className="text-left mt-5 text-white font-light md:w-9/12 w-11/12 text-base">
               Explore the crypto world while supporting startups and charity collections.
             </p>
-            {!currentAccount && (
-              <button
-                type="button"
-                onClick={connectWallet}
-                className="flex flex-row justify-center items-center my-5 bg-[#2952e3] p-3 rounded-full cursor-pointer hover:bg-[#2546bd]"
-              >
-                <AiFillPlayCircle className="text-white mr-2" />
-                <p className="text-white text-base font-semibold">
-                  Connect Wallet
-                </p>
-              </button>
-            )}
           </div>
   
           <div className="flex flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-10">
