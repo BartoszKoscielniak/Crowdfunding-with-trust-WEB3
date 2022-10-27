@@ -5,6 +5,9 @@ import {createBrowserRouter, RouterProvider, Route} from "react-router-dom";
 import App from './routes/App';
 import ErrorPage from './error-page';
 import Account from './routes/Account';
+import Collections from './routes/Collections';
+import Funds from './routes/Funds';
+import Earn from './routes/Earn';
 
 import "./index.css";
 
@@ -18,6 +21,18 @@ const router = createBrowserRouter([
     path: "/account",
     element: <Account />
   },
+  {
+    path: "/collections",
+    element: <Collections />
+  },
+  {
+    path: "/funds",
+    element: <Funds />
+  },
+  {
+    path: "/earn",
+    element: <Earn />
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -25,16 +40,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <RouterProvider router={router}/>
   </React.StrictMode>
 );
-
-
-// import App from './components/homepage/App'
-// import './index.css'
-// import { TransactionProvider } from './context/TransactionContext';
-
-// ReactDOM.createRoot(document.getElementById('root')).render(  
-//   <TransactionProvider>
-//     <React.StrictMode>
-//     <App />
-//   </React.StrictMode>
-//   </TransactionProvider>,
-//)

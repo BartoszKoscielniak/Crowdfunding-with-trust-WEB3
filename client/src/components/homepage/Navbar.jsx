@@ -1,12 +1,10 @@
 import { useState, useContext } from 'react';
-import { HiMenu, HiMenuAlt4 } from 'react-icons/hi';
+import { HiMenuAlt4 } from 'react-icons/hi';
 import { AiOutlineClose } from 'react-icons/ai'
 import { TransactionContext } from '../../context/TransactionContext';
-import { AiFillPlayCircle } from "react-icons/ai";
 
 import { Link, NavLink } from 'react-router-dom';
 
-import logo from '../../../images/logo.png';
 
 const NavbarItem = ({ item, classProps}) => {
     const [isShown, setIsShown] = useState(false);
@@ -23,6 +21,7 @@ const NavbarItem = ({ item, classProps}) => {
 
 const Navbar = () => {
     const [toggleMenu, setToggleMenu] = useState(false); 
+    const { connectWallet, currentAccount, formData, sendTransaction, handleChange, isLoading} = useContext(TransactionContext);
     const routingArray = [
         ["Your account", "account", []],
         ["Collections", "collections", ['Add collections', 'My collections']],
@@ -30,7 +29,6 @@ const Navbar = () => {
         ["Earn", "earn", ['Profits']],
         ["About us", []]
     ];
-    const { connectWallet, currentAccount, formData, sendTransaction, handleChange, isLoading} = useContext(TransactionContext);
 
     return (
         <nav className="w-full flex md:justify-center justify-between items-center p-6">

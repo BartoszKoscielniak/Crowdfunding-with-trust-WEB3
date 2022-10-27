@@ -1,7 +1,12 @@
+import { Navbar } from "../components/homepage";
+import { TransactionProvider } from '../context/TransactionContext';
+
 const Account = () => {
     
     return (
-        <div>Hello account's world</div>
+        <TransactionProvider>
+        <Navbar />
+        </TransactionProvider>
     );
 }
 
