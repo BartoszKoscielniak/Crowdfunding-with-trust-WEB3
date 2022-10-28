@@ -31,7 +31,7 @@ const Navbar = () => {
     ];
 
     return (
-        <nav className="w-full flex md:justify-center justify-between items-center p-6">
+        <nav className="w-full flex md:justify-center justify-between items-center p-6 bg-transparent">
             <div className="md:flex-[0.5] flex-initial justify-center items-center">
             </div>
             <ul className="w-full flex md:justify-center text-white md:flex list-none flex-row justify-between items-center flex-initail">
@@ -49,7 +49,7 @@ const Navbar = () => {
                         onClick={connectWallet}
                         className="flex flex-row justify-center items-center p-1 rounded-full cursor-pointer"
                     >
-                        <p className="font-sans text-2xl antialiased">
+                        <p className="font-sans text-2xl antialiased animate-pulse animate-anim-moving">
                         Connect Wallet
                         </p>
                     </button>
@@ -85,7 +85,7 @@ const DropdownMenu = ({content}) => {
     {
         return (
             <div className='position: absolute bg-transparent  bg-opacity-90 mt-5'>
-                <div className='my-4 p-8 shadow-2xl rounded-xl bg-gray-800'>
+                <div className='my-4 p-8 shadow-2xl rounded-xl bg-zinc-800 opacity-96'>
                     {content.map((item, index) => (
                         <DropdownMenuItem key={item + index}  item={item}/>
                     ))}
@@ -97,7 +97,7 @@ const DropdownMenu = ({content}) => {
 
 const DropdownMenuItem = ({item}) => {
     return (
-        <div className='py-3 hover:text-slate-400'>
+        <div className='py-3 hover:text-slate-400 opacity-100'>
             <NavLink to={item.toLowerCase().replace(/\s/g, '')}>{item}</NavLink> 
         </div>
     )
