@@ -1,36 +1,46 @@
 package com.crowdfunding.crowdfundingapi.config.security;
 
+import com.crowdfunding.crowdfundingapi.config.PasswordConfig;
+import com.crowdfunding.crowdfundingapi.user.UserService;
+import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
+@AllArgsConstructor
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    private final PasswordConfig passwordEncoder;
+    private final UserService userService;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        super.configure(auth);
+        auth.authenticationProvider(daoAuthenticationProvider());
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()//Use in browser apps, disable in non-browser apps
-/*                .sessionManagement()
+                .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilter(new AuthenticationFilter(authenticationManager()))
-                .addFilterAfter(new JwtAuthorizationFilter(), AuthenticationFilter.class)*/
+                .addFilterAfter(new AuthorizationFilter(), AuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("index", "/", "/v3/api-docs/**", "/swagger-ui/**").permitAll()//can make index page to be seen by everyone
+                .antMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()//can make index page to be seen by everyone
                 .anyRequest()
-                .authenticated()
-                .and()
+                .authenticated();
+                /*.and()
                 .formLogin()
                 .loginPage("/login")
                 .permitAll()
@@ -44,6 +54,14 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .clearAuthentication(true)
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
-                .logoutSuccessUrl("/login");
+                .logoutSuccessUrl("/login");*/
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(){
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder.passwordEncoder());
+        provider.setUserDetailsService(userService);
+        return provider;
     }
 }
