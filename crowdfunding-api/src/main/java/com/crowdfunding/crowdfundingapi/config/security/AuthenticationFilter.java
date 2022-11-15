@@ -3,7 +3,9 @@ package com.crowdfunding.crowdfundingapi.config.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -14,18 +16,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.Date;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
+@AllArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
-
-    public AuthenticationFilter(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
+    private final Nonce nonce;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
@@ -35,14 +36,19 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             AuthenticationRequest authenticationRequest = new ObjectMapper().readValue(request.getInputStream(), AuthenticationRequest.class);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    authenticationRequest.getUsername(),
+                    authenticationRequest.getPublicaddress(),
                     authenticationRequest.getPassword()
             );
 
             Authentication authenticate = authenticationManager.authenticate(authentication);
+
+            if (!nonce.verifySignature(authenticationRequest.getPublicaddress(), authenticationRequest.getPassword() , authenticationRequest.getSignature())){
+                throw new BadCredentialsException("Invalid signature");
+            }
+
             return authenticate;
 
-        } catch (IOException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
@@ -60,7 +66,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusWeeks(1)))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
-        
+
         response.addHeader(AUTHORIZATION, "Bearer " + token);
     }
 }

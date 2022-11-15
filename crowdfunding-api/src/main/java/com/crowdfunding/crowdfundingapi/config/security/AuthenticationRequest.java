@@ -1,19 +1,28 @@
 package com.crowdfunding.crowdfundingapi.config.security;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class AuthenticationRequest {
 
-    private String username;
+    private String publicaddress;
     private String password;
+    private String signature;
 
-    public AuthenticationRequest( ) {
+    public String getSignature( ) {
+        return signature;
     }
 
-    public String getUsername( ) {
-        return username;
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public String getPublicaddress( ) {
+        return publicaddress;
+    }
+
+    public void setPublicaddress(String publicaddress) {
+        this.publicaddress = publicaddress;
     }
 
     public String getPassword( ) {
