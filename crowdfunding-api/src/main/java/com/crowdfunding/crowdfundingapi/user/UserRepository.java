@@ -11,7 +11,7 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query("SELECT u FROM User u WHERE u.publicKey = ?1")
-    Optional<User> findUserByPublicKey(String publicKey);
+    @Query("SELECT u FROM User u WHERE u.publicAddress = ?1")
+    Optional<User> findUserByPublicAddress(String publicAddress);
 
 }
