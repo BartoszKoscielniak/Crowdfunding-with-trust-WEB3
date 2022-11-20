@@ -83,7 +83,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.web3j</groupId>
+            <artifactId>core</artifactId>
+            <version>4.8.7</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -103,34 +107,40 @@
             <plugin>
                 <groupId>org.web3j</groupId>
                 <artifactId>web3j-maven-plugin</artifactId>
-                <version>4.5.11</version>
+                <version>4.6.5</version>
                 <configuration>
-                    <packageName>com.crowdfunding.crowdfundingapi.model</packageName>
-                    <sourceDestination>src/main/java/generated</sourceDestination>
+                    <packageName>com.crowdfunding.crowdfundingapi.web3</packageName>
+                    <sourceDestination>src/main/java/com/crowdfunding/crowdfundingapi/web3/wrappedcontracts</sourceDestination>
                     <nativeJavaType>true</nativeJavaType>
                     <outputFormat>java,bin</outputFormat>
                     <soliditySourceFiles>
-                        <directory>src/main/resources/smart-contracts</directory>
+                        <directory>src/main/resources/smartcontracts</directory>
                         <includes>
                             <include>**/*.sol</include>
                         </includes>
                     </soliditySourceFiles>
+                    <abiSourceFiles>
+                        <directory>src/main/resources/abi</directory>
+                        <includes>
+                            <include>**/*.json</include>
+                        </includes>
+                    </abiSourceFiles>
                     <outputDirectory>
                         <java>src/java/generated</java>
                         <bin>src/bin/generated</bin>
                         <abi>src/abi/generated</abi>
                     </outputDirectory>
-<!--                    <contract>
-                        <includes>
+                    <contract>
+<!--                        <includes>
                             <include>greeter</include>
                         </includes>
                         <excludes>
                             <exclude>mortal</exclude>
-                        </excludes>
+                        </excludes>-->
                     </contract>
                     <pathPrefixes>
                         <pathPrefix>dep=../dependencies</pathPrefix>
-                    </pathPrefixes>-->
+                    </pathPrefixes>
                 </configuration>
             </plugin>
         </plugins>
