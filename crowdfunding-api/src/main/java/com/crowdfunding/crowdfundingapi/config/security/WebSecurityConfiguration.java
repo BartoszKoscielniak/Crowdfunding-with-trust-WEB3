@@ -2,6 +2,7 @@ package com.crowdfunding.crowdfundingapi.config.security;
 
 import com.crowdfunding.crowdfundingapi.config.PasswordConfig;
 import com.crowdfunding.crowdfundingapi.user.UserService;
+import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +19,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -46,11 +46,11 @@ public class WebSecurityConfiguration {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilter(new AuthenticationFilter(authenticationManager))
+                .addFilter(new AuthenticationFilter(authenticationManager, nonce))
                 .addFilterAfter(new AuthorizationFilter(), AuthenticationFilter.class)
                 .authenticationManager(authenticationManager)
                 .authorizeRequests()
-                .antMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/api/user/nonce", "/api/user/register").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -62,9 +62,8 @@ public class WebSecurityConfiguration {
     @Bean
     CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000/", "https://localhost:3000/"));
+        configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE"));
-        configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Access-Control-Allow-Origin"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
