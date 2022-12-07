@@ -6,11 +6,16 @@ pragma experimental ABIEncoderV2;
 
 contract Advertise {
 
-    event BuyAdvertisementLog(address sender, address receiver, uint256 collectionId, uint256 adType, uint256 promoTo, uint256 timestamp);
+    address public contractOwner;
+
+    constructor() {
+        contractOwner = msg.sender;
+    }
+
+    event BuyAdvertisementLog(address sender, uint256 collectionId, uint256 adType, uint256 promoTo, uint256 timestamp);
 
     struct AdvertiseStructure {
         address sender;
-        address receiver;
         uint256 promoTo;
         uint256 adType;
     }
@@ -25,7 +30,7 @@ contract Advertise {
     mapping (uint256 => AdvertiseStructure) public advertiseBought;
     mapping (uint256 => AdvertiseTypes) public advertiseType;
 
-    function buyAdvertisement(address _receiver, uint256 _collectionId, uint256 _adTypeId) public {
+    function buyAdvertisement(uint256 _collectionId, uint256 _adTypeId) public payable{
 
         uint256 _promoTo = block.timestamp + advertiseType[_adTypeId].duration;
         if(advertiseBought[_collectionId].sender != address(0x0)){
@@ -34,14 +39,12 @@ contract Advertise {
 
         if(advertiseBought[_collectionId].sender == address(0x0)){
             advertiseBought[_collectionId].sender = msg.sender;
-            advertiseBought[_collectionId].receiver = _receiver;
             advertiseBought[_collectionId].adType = _adTypeId;
             advertiseBought[_collectionId].promoTo = _promoTo;
         }
 
         emit BuyAdvertisementLog(
             msg.sender,
-            _receiver,
             _collectionId,
             _adTypeId,
             _promoTo,
@@ -51,7 +54,7 @@ contract Advertise {
     }
 
     function addAdType(string memory _adName, uint256 _price, uint256 _duration) public {
-
+        require(contractOwner == msg.sender, "Only the contract owner can add advertise types");
         availableAdPlansId++;
         advertiseType[availableAdPlansId].adName = _adName;
         advertiseType[availableAdPlansId].price = _price;

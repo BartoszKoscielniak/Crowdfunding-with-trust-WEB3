@@ -4,70 +4,20 @@ pragma solidity >=0.7.0 <0.9.0;
 //pragma solidity ^ 0.8.9;
 pragma experimental ABIEncoderV2;
 
-contract Commission {
+contract Funds {
 
-    event CommissionEvent(address sender, address receiver, uint256 _amount, uint256 comission, uint256 timestamp);
-
-    struct CommissionStruct {
-        address sender;
-        address receiver;
-        uint256 amount;
-        uint256 commission;
-        uint256 timestamp;
+    address public contractOwner;
+    constructor() {
+        contractOwner = msg.sender;
     }
 
-    CommissionStruct[] commissionsStructArray;
-    function payCommission(address _receiver, uint256 _amount, uint256 _commission) public{
-
-        commissionsStructArray.push(CommissionStruct(
-                msg.sender,
-                _receiver,
-                _amount,
-                _commission,
-                block.timestamp
-            ));
-
-        emit CommissionEvent(
-            msg.sender,
-            _receiver,
-            _amount,
-            _commission,
-            block.timestamp
-        );
-
-    }
-
-    function getCommissionRate(address _receiver, uint256 _amount, string memory _collectionType) public returns(uint256){
-
-        uint256 commission = 0;
-        if(keccak256(abi.encodePacked('CHARITY')) == keccak256(abi.encodePacked(_collectionType)) ){
-            return commission;
-        }
-
-        if(_amount < 50000000000){//50ETH
-            commission = 5000000;
-        } else if(_amount > 50000000000 && _amount < 100000000000) {//50-100
-            commission = 10000000;
-        } else if(_amount > 100000000000 && _amount < 500000000000){//100-500
-            commission = 50000000;
-        } else {//above 500ETH
-            commission = 500000000;
-        }
-
-        payCommission(_receiver, _amount , commission);
-
-        return commission;
-    }
-}
-
-contract Funds is Commission{
-
-    event FundsEmition(address sender, address receiver, uint256 amount,
-        uint256 _phaseId, uint256 timestamp);
+    event FundsEmition(address sender, address receiver, uint256 amount, uint256 _phaseId, uint256 timestamp);
 
     struct FundsStruct {
         address receiver;
         uint256 amount;
+        bool isFraud;
+        bool isPollEnded;
         uint256 timestamp;
     }
 
@@ -81,32 +31,36 @@ contract Funds is Commission{
 
     uint256 public donationsCount;
     mapping (uint256 => FundsStruct) public fundsDonated;
-    TransactionStruct[] transactionHistory;
+    TransactionStruct[] public transactionHistory;
 
-    function depositFunds(address _receiver, uint _amount, uint256 _phaseId, string memory _collectionType) external payable{
+    function getBalance() public view returns(uint){
+        return address(this).balance;
+    }
 
-        uint256 _amountLeft = _amount - Commission.getCommissionRate(_receiver, _amount, _collectionType);
+    function depositFunds(address _receiver, uint _amount, uint256 _phaseId) external payable{
 
         if(fundsDonated[_phaseId].receiver == address(0x0)){
             fundsDonated[_phaseId].receiver = _receiver;
-            fundsDonated[_phaseId].amount = _amountLeft;
+            fundsDonated[_phaseId].amount = _amount;
+            fundsDonated[_phaseId].isFraud = false;
+            fundsDonated[_phaseId].isPollEnded = false;
             fundsDonated[_phaseId].timestamp = block.timestamp;
         }else{
-            fundsDonated[_phaseId].amount += _amountLeft;
+            fundsDonated[_phaseId].amount += _amount;
         }
 
         transactionHistory.push(TransactionStruct(
                 msg.sender,
                 address(this),
                 _phaseId,
-                _amountLeft,
+                _amount,
                 block.timestamp
             ));
 
         emit FundsEmition(
             msg.sender,
             address(this),
-            _amountLeft,
+            _amount,
             _phaseId,
             block.timestamp
         );
@@ -115,7 +69,6 @@ contract Funds is Commission{
     }
 
     function getAllDonatedFunds() public view returns (FundsStruct[] memory){
-
         FundsStruct[] memory temp = new FundsStruct[](donationsCount);
         for (uint i = 0; i < donationsCount; i++){
             temp[i] = fundsDonated[i];
@@ -128,7 +81,32 @@ contract Funds is Commission{
         return transactionHistory;
     }
 
-    function sendFundsToOwner(uint256 _phaseId) public payable{
+    function setFraud(uint256 _phaseId) public {
+        require(msg.sender == contractOwner, "Only contract owner can set status of poll");
+        require(fundsDonated[_phaseId].isPollEnded == false, "Poll already ended");
+        fundsDonated[_phaseId].isFraud = true;
+    }
+
+    function isFraud(uint256 _phaseId) public view returns(bool){
+        return fundsDonated[_phaseId].isFraud;
+    }
+
+    function isPollEnded(uint256 _phaseId) public view returns(bool){
+        return fundsDonated[_phaseId].isPollEnded;
+    }
+
+    function setPollEnded(uint256 _phaseId) public {
+        require(msg.sender == contractOwner);
+        fundsDonated[_phaseId].isPollEnded = true;
+    }
+
+    function sendFundsToOwner(address payable _toReceive, uint256 _phaseId) public {
+
+        require(msg.sender == fundsDonated[_phaseId].receiver,  "Only the collection owner can withdraw funds");
+        require(_toReceive == fundsDonated[_phaseId].receiver,  "Only the collection owner can withdraw funds");
+        require(fundsDonated[_phaseId].amount > 0,              "Insufficient funds");
+        require(fundsDonated[_phaseId].isPollEnded == true,     "Poll has not end");
+        require(fundsDonated[_phaseId].isFraud == false,        "Collection status is fraud. You cannot withdraw funds!");
 
         emit FundsEmition(
             address(this),
@@ -146,19 +124,27 @@ contract Funds is Commission{
                 block.timestamp
             ));
 
+        _toReceive.transfer(fundsDonated[_phaseId].amount);
         fundsDonated[_phaseId].amount = 0;
     }
 
-    function sendFundsToDonators(uint256 _phaseId, address donatorAddress, uint256 amountToReturn) public{
+    function sendFundsToDonators(address payable _toReceive, uint256 _phaseId, uint256 _transactionHistoryId) public{
+        require(msg.sender == transactionHistory[_transactionHistoryId].sender, "Only the funds owner can withdraw funds");
+        require(transactionHistory[_transactionHistoryId].sender == _toReceive, "Only the funds owner can withdraw funds");
+        require(transactionHistory[_transactionHistoryId].phaseId == _phaseId,  "Incorrect Phase ID");
+        require(fundsDonated[_phaseId].isPollEnded == true,                     "Poll has not end");
+        require(fundsDonated[_phaseId].isFraud == true,                         "Collection status is not fraud. You cannot withdraw funds");
 
+        uint256 amountToReturn = transactionHistory[_transactionHistoryId].amount;
         emit FundsEmition(
             address(this),
-            donatorAddress,
+            _toReceive,
             amountToReturn,
             _phaseId,
             block.timestamp
         );
 
+        _toReceive.transfer(amountToReturn);
         fundsDonated[_phaseId].amount -= amountToReturn;
     }
 }
