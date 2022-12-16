@@ -35,11 +35,11 @@ contract Commission {
     CommissionStruct[] commissionsStructArray;
     function payCommission(uint256 _amount, uint256 _commission) public payable{
         commissionsStructArray.push(CommissionStruct(
-                msg.sender,
-                _amount,
-                _commission,
-                block.timestamp
-            ));
+            msg.sender,
+            _amount,
+            _commission,
+            block.timestamp
+        ));
 
         emit CommissionEvent(
             msg.sender,
