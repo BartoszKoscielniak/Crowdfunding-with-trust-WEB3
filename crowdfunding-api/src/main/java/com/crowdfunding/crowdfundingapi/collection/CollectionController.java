@@ -16,7 +16,7 @@ public class CollectionController {
 
     @GetMapping(path = "/{id}")
     public ResponseEntity<Collection> getCollections(@PathVariable Long id){
-        return service.getCollections(id);
+        return service.getCollection(id);
     }
 
     @GetMapping()

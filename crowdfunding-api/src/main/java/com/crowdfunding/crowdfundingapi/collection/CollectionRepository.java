@@ -1,6 +1,5 @@
 package com.crowdfunding.crowdfundingapi.collection;
 
-import com.crowdfunding.crowdfundingapi.collection.Collection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

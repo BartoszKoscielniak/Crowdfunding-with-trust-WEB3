@@ -3,6 +3,7 @@ package com.crowdfunding.crowdfundingapi.poll.vote;
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhase;
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhaseRepository;
 import com.crowdfunding.crowdfundingapi.config.PreparedResponse;
+import com.crowdfunding.crowdfundingapi.poll.PollService;
 import com.crowdfunding.crowdfundingapi.poll.PollState;
 import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
 import com.crowdfunding.crowdfundingapi.support.CollUserType;
@@ -29,8 +30,9 @@ public class VoteService {
     private final CollectionPhaseRepository collectionPhaseRepository;
     private final UserRepository userRepository;
     private final RelationRepository relationRepository;
+    private final PollService pollService;
 
-    public ResponseEntity addVote(Long phaseId, VoteResult result) {
+    public ResponseEntity<Map<String, String>> addVote(Long phaseId, VoteResult result) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findUserByPublicAddress(authentication.getName()).get();
 
@@ -51,7 +53,7 @@ public class VoteService {
         }
 
         if (phase.getPoll().getState() != PollState.IN_PROCESS){
-            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new PreparedResponse().getFailureResponse("Poll ended"));
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new PreparedResponse().getFailureResponse("You cannot vote"));
         }
 
         if (phase.getPoll().getStartDate().isAfter(LocalDate.now())){
@@ -64,6 +66,7 @@ public class VoteService {
                 user
         );
         repository.save(vote);
+        pollService.setPollResult(phase.getPoll());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

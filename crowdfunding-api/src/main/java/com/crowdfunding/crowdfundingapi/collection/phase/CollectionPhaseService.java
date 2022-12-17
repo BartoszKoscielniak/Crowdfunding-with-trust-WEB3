@@ -5,14 +5,19 @@ import com.crowdfunding.crowdfundingapi.collection.CollectionRepository;
 import com.crowdfunding.crowdfundingapi.poll.Poll;
 import com.crowdfunding.crowdfundingapi.poll.PollRepository;
 import com.crowdfunding.crowdfundingapi.poll.PollState;
+import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
+import com.crowdfunding.crowdfundingapi.support.CollUserType;
+import com.crowdfunding.crowdfundingapi.user.User;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -82,5 +87,21 @@ public class CollectionPhaseService {
         repository.delete(collectionPhase);
 
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    public ResponseEntity<User> getCollectionFounder(Long phaseId){
+        Optional<CollectionPhase> phase = repository.findPhaseById(phaseId);
+        if (phase.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Set<CollUserRelation> relations = phase.get().getCollection().getCollUserRelations();
+        List<CollUserRelation> list = relations.stream().toList();
+        for (CollUserRelation collUserRelation : list) {
+            if (collUserRelation.getType() == CollUserType.FOUNDER) {
+                return ResponseEntity.status(HttpStatus.OK).body(collUserRelation.getUser());
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 }

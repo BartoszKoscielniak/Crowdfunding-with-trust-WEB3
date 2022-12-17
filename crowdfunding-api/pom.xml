@@ -127,8 +127,14 @@
                     <contract>
                         <includes>
                             <include>Funds</include>
+                        </includes><!--
+                        <includes>
+                            <include>Commission</include>
                         </includes>
-  <!--                      <excludes>
+                        <includes>
+                            <include>Advertise</include>
+                        </includes>
+-->  <!--                      <excludes>
                             <exclude>mortal</exclude>
                         </excludes>-->
                     </contract>

@@ -92,15 +92,13 @@ public class CommissionService {//TODO:zlapac wyjatki wszystkie
 
             Function function = new Function(
                     "payCommission",
-                    Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(Convert.toWei(amount.toString(), Convert.Unit.ETHER).toBigInteger()),
-                            new org.web3j.abi.datatypes.generated.Uint256(commissionAmount)), List.<TypeReference<?>>of()
+                    Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(Convert.toWei(amount.toString(),
+                                    Convert.Unit.ETHER).toBigInteger()),
+                                    new org.web3j.abi.datatypes.generated.Uint256(commissionAmount)),
+                    List.<TypeReference<?>>of()
             );
 
-            EthSendTransaction transactionResponse = web3Service.sendPayableFunction(function, contract.getContractAddress(), commissionAmount);
-            if (transactionResponse.hasError()){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse(String.valueOf(transactionResponse.getError().getMessage())));
-            }
-            return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(transactionResponse.getResult()));
+            return web3Service.sendPayableFunction(function, contract.getContractAddress(), commissionAmount);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new PreparedResponse().getFailureResponse(e.getMessage()));
         }
@@ -116,7 +114,7 @@ public class CommissionService {//TODO:zlapac wyjatki wszystkie
         }
     }
 
-    private BigInteger getCommissionAmountBigInteger(Double amount, CollectionType type) throws Exception {
+    public BigInteger getCommissionAmountBigInteger(Double amount, CollectionType type) throws Exception {
         Commission commission = loadFundsContract();
         return commission.getCommissionRate(Convert.toWei(amount.toString(), Convert.Unit.ETHER).toBigInteger(), type.toString()).send();
     }

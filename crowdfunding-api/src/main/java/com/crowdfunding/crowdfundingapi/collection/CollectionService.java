@@ -25,7 +25,7 @@ public class CollectionService {
     private final UserService userService;
     private final RelationRepository relationRepository;
 
-    public ResponseEntity<Collection> getCollections(Long id ) {
+    public ResponseEntity<Collection> getCollection(Long id ) {
         Optional<Collection> optionalCollection = repository.findCollectionById(id);
 
         return optionalCollection.map(collection ->
@@ -89,7 +89,7 @@ public class CollectionService {
         }
         Collection collection = optionalCollection.get();
 
-        Set<User> collectionSustainers = getCollectionSupporters(collection);
+        List<User> collectionSustainers = getCollectionAssociatedUsers(collection, CollUserType.SUSTAINER);
         if (!collectionSustainers.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
         }
@@ -115,14 +115,14 @@ public class CollectionService {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    public Set<User> getCollectionSupporters(Collection collection){
-        Set<User> supportingUsers = new HashSet<>();
+    public List<User> getCollectionAssociatedUsers(Collection collection, CollUserType type){
+        List<User> userSet = new ArrayList<>();
         Set<CollUserRelation> collUserRelationsSet = collection.getCollUserRelations();
         collUserRelationsSet.stream().forEach(collUserRelation -> {
-            if (collUserRelation.getType() == CollUserType.SUSTAINER){
-                supportingUsers.add(collUserRelation.getUser());
+            if (collUserRelation.getType() == type){
+                userSet.add(collUserRelation.getUser());
             }
         });
-        return supportingUsers;
+        return userSet;
     }
 }

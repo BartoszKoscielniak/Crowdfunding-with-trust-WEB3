@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,7 +32,7 @@ public class Collection {
     private Set<CollUserRelation> collUserRelations;
 
     @OneToMany(mappedBy = "collection")
-    private Set<CollectionPhase> collectionPhase;
+    private List<CollectionPhase> collectionPhase;
 
     public Collection(Double goal, String baseDescription, CollectionType collectionType, CollUserRelation... collUserRelations) {
         this.goal = goal;

@@ -4,12 +4,14 @@ import com.crowdfunding.crowdfundingapi.collection.CollectionService;
 import com.crowdfunding.crowdfundingapi.config.PreparedResponse;
 import com.crowdfunding.crowdfundingapi.poll.vote.Vote;
 import com.crowdfunding.crowdfundingapi.poll.vote.VoteResult;
+import com.crowdfunding.crowdfundingapi.support.CollUserType;
 import com.crowdfunding.crowdfundingapi.user.User;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -23,7 +25,7 @@ public class PollService {
     private final CollectionService collectionService;
 
     public void setAllowedUsersCount(Poll poll){//TODO:dodaj przy tworzeniu transakcji z wspieraniem oraz dodaj uzytkownika do wspierajacych rowniez
-      Set<User> supportingUsers = collectionService.getCollectionSupporters(poll.getCollectionPhase().getCollection());
+      List<User> supportingUsers = collectionService.getCollectionAssociatedUsers(poll.getCollectionPhase().getCollection(), CollUserType.SUSTAINER);
       int count = supportingUsers.size();
       poll.setAllowedUsersCount(count);
       repository.save(poll);
@@ -52,7 +54,6 @@ public class PollService {
             repository.save(poll);
         }
     }
-    //TODO:uzyutkownik moze pobierac inforamcje tylko ktore go dotycza
     public ResponseEntity<Map<String, String>> getPollResult(Long phaseId){
         Optional<Poll> optionalPoll = repository.findPollByPhaseId(phaseId);
         if (optionalPoll.isEmpty()){
