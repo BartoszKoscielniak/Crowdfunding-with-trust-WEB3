@@ -11,7 +11,7 @@ contract Funds {
         contractOwner = msg.sender;
     }
 
-    event FundsEmition(address sender, address receiver, uint256 amount, uint256 _phaseId, uint256 timestamp);
+    event FundsEmition(address sender, address receiver, uint256 amount, uint256 _collectionId, uint256 timestamp);
 
     struct FundsStruct {
         address receiver;
@@ -24,7 +24,7 @@ contract Funds {
     struct TransactionStruct {
         address sender;
         address receiver;
-        uint256 phaseId;
+        uint256 _collectionId;
         uint256 amount;
         uint timestamp;
     }
@@ -37,22 +37,25 @@ contract Funds {
         return address(this).balance;
     }
 
-    function depositFunds(address _receiver, uint _amount, uint256 _phaseId) external payable{
+    function depositFunds(address _receiver, uint256 _amount, uint256 _collectionId) external payable{
 
-        if(fundsDonated[_phaseId].receiver == address(0x0)){
-            fundsDonated[_phaseId].receiver = _receiver;
-            fundsDonated[_phaseId].amount = _amount;
-            fundsDonated[_phaseId].isFraud = false;
-            fundsDonated[_phaseId].isPollEnded = false;
-            fundsDonated[_phaseId].timestamp = block.timestamp;
+        require(msg.sender != _receiver,    "You cannot deposit funds to own collection");
+        require(_amount > 0,                "Incorrect amount");
+
+        if(fundsDonated[_collectionId].receiver == address(0x0)){
+            fundsDonated[_collectionId].receiver = _receiver;
+            fundsDonated[_collectionId].amount = _amount;
+            fundsDonated[_collectionId].isFraud = false;
+            fundsDonated[_collectionId].isPollEnded = false;
+            fundsDonated[_collectionId].timestamp = block.timestamp;
         }else{
-            fundsDonated[_phaseId].amount += _amount;
+            fundsDonated[_collectionId].amount += _amount;
         }
 
         transactionHistory.push(TransactionStruct(
                 msg.sender,
                 address(this),
-                _phaseId,
+                _collectionId,
                 _amount,
                 block.timestamp
             ));
@@ -61,90 +64,98 @@ contract Funds {
             msg.sender,
             address(this),
             _amount,
-            _phaseId,
+            _collectionId,
             block.timestamp
         );
 
         donationsCount++;
     }
 
-    function getAllDonatedFunds() public view returns (FundsStruct[] memory){
-        FundsStruct[] memory temp = new FundsStruct[](donationsCount);
-        for (uint i = 0; i < donationsCount; i++){
-            temp[i] = fundsDonated[i];
-        }
-
-        return temp;
-    }
-
     function getTransactionHiostory() public view returns(TransactionStruct[] memory){
         return transactionHistory;
     }
 
-    function setFraud(uint256 _phaseId) public {
-        require(msg.sender == contractOwner, "Only contract owner can set status of poll");
-        require(fundsDonated[_phaseId].isPollEnded == false, "Poll already ended");
-        fundsDonated[_phaseId].isFraud = true;
+    function setFraud(uint256 _collectionId) public {
+        require(fundsDonated[_collectionId].receiver != address(0x0),   "Invalid collection ID");
+        require(msg.sender == contractOwner,                            "Only contract owner can set status of poll");
+        require(fundsDonated[_collectionId].isPollEnded == false,       "Poll already ended");
+        fundsDonated[_collectionId].isFraud = true;
     }
 
-    function isFraud(uint256 _phaseId) public view returns(bool){
-        return fundsDonated[_phaseId].isFraud;
+    function isFraud(uint256 _collectionId) public view returns(bool){
+        return fundsDonated[_collectionId].isFraud;
     }
 
-    function isPollEnded(uint256 _phaseId) public view returns(bool){
-        return fundsDonated[_phaseId].isPollEnded;
+    function isPollEnded(uint256 _collectionId) public view returns(bool){
+        return fundsDonated[_collectionId].isPollEnded;
     }
 
-    function setPollEnded(uint256 _phaseId) public {
-        require(msg.sender == contractOwner);
-        fundsDonated[_phaseId].isPollEnded = true;
+    function setPollEnded(uint256 _collectionId) public {
+        require(fundsDonated[_collectionId].receiver != address(0x0),   "Invalid collection ID");
+        require(msg.sender == contractOwner,                            "Only contract owner can set status of poll");
+
+        fundsDonated[_collectionId].isPollEnded = true;
     }
 
-    function sendFundsToOwner(address payable _toReceive, uint256 _phaseId) public {
+    function sendFundsToOwner(address payable _toReceive, uint256 _collectionId) public {
 
-        require(msg.sender == fundsDonated[_phaseId].receiver,  "Only the collection owner can withdraw funds");
-        require(_toReceive == fundsDonated[_phaseId].receiver,  "Only the collection owner can withdraw funds");
-        require(fundsDonated[_phaseId].amount > 0,              "Insufficient funds");
-        require(fundsDonated[_phaseId].isPollEnded == true,     "Poll has not end");
-        require(fundsDonated[_phaseId].isFraud == false,        "Collection status is fraud. You cannot withdraw funds!");
+        require(fundsDonated[_collectionId].receiver != address(0x0),"Invalid collection ID");
+        require(msg.sender == fundsDonated[_collectionId].receiver,  "Only the collection owner can withdraw funds");
+        require(_toReceive == fundsDonated[_collectionId].receiver,  "Only the collection owner can withdraw funds");
+        require(fundsDonated[_collectionId].amount > 0,              "Insufficient funds");
+        require(fundsDonated[_collectionId].isPollEnded == true,     "Poll has not end");
+        require(fundsDonated[_collectionId].isFraud == false,        "Collection status is fraud. You cannot withdraw funds!");
 
         emit FundsEmition(
             address(this),
-            fundsDonated[_phaseId].receiver,
-            fundsDonated[_phaseId].amount,
-            _phaseId,
+            fundsDonated[_collectionId].receiver,
+            fundsDonated[_collectionId].amount,
+            _collectionId,
             block.timestamp
         );
 
         transactionHistory.push(TransactionStruct(
                 address(this),
-                fundsDonated[_phaseId].receiver,
-                _phaseId,
-                fundsDonated[_phaseId].amount,
+                fundsDonated[_collectionId].receiver,
+                _collectionId,
+                fundsDonated[_collectionId].amount,
                 block.timestamp
             ));
 
-        _toReceive.transfer(fundsDonated[_phaseId].amount);
-        fundsDonated[_phaseId].amount = 0;
+        _toReceive.transfer(fundsDonated[_collectionId].amount);
+        fundsDonated[_collectionId].amount = 0;
     }
 
-    function sendFundsToDonators(address payable _toReceive, uint256 _phaseId, uint256 _transactionHistoryId) public{
-        require(msg.sender == transactionHistory[_transactionHistoryId].sender, "Only the funds owner can withdraw funds");
-        require(transactionHistory[_transactionHistoryId].sender == _toReceive, "Only the funds owner can withdraw funds");
-        require(transactionHistory[_transactionHistoryId].phaseId == _phaseId,  "Incorrect Phase ID");
-        require(fundsDonated[_phaseId].isPollEnded == true,                     "Poll has not end");
-        require(fundsDonated[_phaseId].isFraud == true,                         "Collection status is not fraud. You cannot withdraw funds");
+    function sendFundsToDonators(address payable _toReceive, uint256 _collectionId, uint256[] memory _transactionArray) public{
 
-        uint256 amountToReturn = transactionHistory[_transactionHistoryId].amount;
+        require(fundsDonated[_collectionId].receiver != address(0x0),   "Invalid collection ID");
+        require(fundsDonated[_collectionId].isPollEnded == true, "Poll has not end");
+        require(fundsDonated[_collectionId].isFraud == true, "Collection status is not fraud. You cannot withdraw funds");
+
+        uint256 amountToReturn = 0;
+        for(uint256 i = 0; i < _transactionArray.length; i++){
+
+            uint256 _transactionHistoryId = _transactionArray[i];
+            if (transactionHistory[_transactionHistoryId].amount == 0) continue;
+            require(msg.sender == transactionHistory[_transactionHistoryId].sender, "Only the funds owner can withdraw funds");
+            require(transactionHistory[_transactionHistoryId].sender == _toReceive, "Invalid receiver address");
+            require(transactionHistory[_transactionHistoryId]._collectionId == _collectionId,  "Incorrect Collection ID");
+
+            amountToReturn += transactionHistory[_transactionHistoryId].amount;
+            transactionHistory[_transactionHistoryId].amount = 0;
+        }
+
+        require(amountToReturn != 0, "No funds to be refunded");
+
         emit FundsEmition(
             address(this),
             _toReceive,
             amountToReturn,
-            _phaseId,
+            _collectionId,
             block.timestamp
         );
 
         _toReceive.transfer(amountToReturn);
-        fundsDonated[_phaseId].amount -= amountToReturn;
+        fundsDonated[_collectionId].amount -= amountToReturn;
     }
 }
