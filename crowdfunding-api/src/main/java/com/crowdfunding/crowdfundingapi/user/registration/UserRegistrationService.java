@@ -37,7 +37,9 @@ public class UserRegistrationService {
                 return ResponseEntity.badRequest().body(new PreparedResponse().getFailureResponse("Incorrect password format"));
             }
 
-            User newUser = new User(publicAddress, passwordConfig.passwordEncoder().encode(password), nonce.generateNonce());
+            byte[] privateKeyBytes = AdvancedEncryptionStandard.encrypt(privateKey.getBytes());
+
+            User newUser = new User(publicAddress, name, lastname, email, phoneNumber, privateKeyBytes, passwordConfig.passwordEncoder().encode(password), nonce.generateNonce(), UserRole.USER);
             userRepository.save(newUser);
 
             return ResponseEntity.ok(new PreparedResponse().getSuccessResponse("User added"));
