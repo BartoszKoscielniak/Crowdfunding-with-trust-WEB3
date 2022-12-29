@@ -38,7 +38,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String token = authorizationHeader.replace("Bearer ", "");
 
         try {
-            String secretKey = "securedMessages312securedMessages312securedMessages312securedMessages312securedMessages312";
+            String secretKey = "PUR214GkyvRJr3A9XQZ1F50WEBtq5FkrrYSphtom1hD6JFaejNyx2BsYMMSvlnT1qnj5lXhL90iSQZxlNXeHuOQb2LW5tjisVrcgKWf6o";
 
             Jws<Claims> claimsJws = Jwts.parser()
                     .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))

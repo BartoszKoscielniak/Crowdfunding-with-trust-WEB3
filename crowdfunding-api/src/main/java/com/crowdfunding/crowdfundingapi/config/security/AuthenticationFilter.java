@@ -57,7 +57,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
-        String secretKey = "securedMessages312securedMessages312securedMessages312securedMessages312securedMessages312";
+        String secretKey = "PUR214GkyvRJr3A9XQZ1F50WEBtq5FkrrYSphtom1hD6JFaejNyx2BsYMMSvlnT1qnj5lXhL90iSQZxlNXeHuOQb2LW5tjisVrcgKWf6o";
 
         String token = Jwts.builder()
                 .setSubject(authResult.getName())
