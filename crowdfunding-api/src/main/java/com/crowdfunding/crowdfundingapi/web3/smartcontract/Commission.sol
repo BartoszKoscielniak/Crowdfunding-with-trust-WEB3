@@ -23,6 +23,10 @@ contract Commission {
         _to.transfer(address(this).balance);
     }
 
+    function getCommissionHistory() public view returns(CommissionStruct[] memory){
+        return commissionsHistory;
+    }
+
     event CommissionEvent(address sender, uint256 _amount, uint256 comission, uint256 timestamp);
 
     struct CommissionStruct {
@@ -32,14 +36,14 @@ contract Commission {
         uint256 timestamp;
     }
 
-    CommissionStruct[] commissionsStructArray;
+    CommissionStruct[] public commissionsHistory;
     function payCommission(uint256 _amount, uint256 _commission) public payable{
-        commissionsStructArray.push(CommissionStruct(
-            msg.sender,
-            _amount,
-            _commission,
-            block.timestamp
-        ));
+        commissionsHistory.push(CommissionStruct(
+                msg.sender,
+                _amount,
+                _commission,
+                block.timestamp
+            ));
 
         emit CommissionEvent(
             msg.sender,

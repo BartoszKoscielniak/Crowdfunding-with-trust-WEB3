@@ -19,6 +19,11 @@ public class CommissionController {
         return service.getCommissionBalance();
     }
 
+    @GetMapping(path = "/history")
+    public ResponseEntity<Map<String, String>> getHistory() {
+        return service.getHistory();
+    }
+
     @PostMapping(path = "/withdraw")
     public ResponseEntity<Map<String, String>> withdraw() {
         return service.withdrawCommission();

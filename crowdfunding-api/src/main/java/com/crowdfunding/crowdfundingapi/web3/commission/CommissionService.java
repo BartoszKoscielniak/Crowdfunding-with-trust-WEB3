@@ -14,10 +14,13 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.DefaultGasProvider;
+import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -27,7 +30,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class CommissionService {//TODO:zlapac wyjatki wszystkie
+public class CommissionService {
 
     private final Web3Repository repository;
     private final Web3j web3j = new Web3().getWeb3j();
@@ -37,8 +40,9 @@ public class CommissionService {//TODO:zlapac wyjatki wszystkie
 
     private Commission loadFundsContract( ) throws Exception {
         Optional<Web3> fundsContract = repository.findContractByName(CONTRACT_NAME);
-        ContractGasProvider contractGasProvider = new DefaultGasProvider();
-
+        EthBlock.Block block = web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send().getBlock();
+        BigInteger baseFeePerGas = Numeric.toBigInt(block.getBaseFeePerGas());
+        ContractGasProvider contractGasProvider = new StaticGasProvider(baseFeePerGas.multiply(BigInteger.valueOf(3)), DefaultGasProvider.GAS_LIMIT);
         if (fundsContract.isEmpty()){
             String contractAddress = Commission.deploy(
                     web3j,
@@ -72,6 +76,15 @@ public class CommissionService {//TODO:zlapac wyjatki wszystkie
         }
     }
 
+    public ResponseEntity<Map<String, String>> getHistory() {
+        try {
+            Commission commission = loadFundsContract();
+            return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(String.valueOf(commission.getCommissionHistory().send())));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new PreparedResponse().getFailureResponse(e.getMessage()));
+        }
+    }
+
     public ResponseEntity<Map<String, String>> withdrawCommission() {
         TransactionReceipt receipt = null;
         try {
@@ -87,13 +100,11 @@ public class CommissionService {//TODO:zlapac wyjatki wszystkie
     public ResponseEntity<Map<String, String>> payCommission(Double amount, CollectionType type)  {
         try {
             Commission contract = loadFundsContract();
-
             BigInteger commissionAmount = getCommissionAmountBigInteger(amount, type);
 
             Function function = new Function(
                     "payCommission",
-                    Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(Convert.toWei(amount.toString(),
-                                    Convert.Unit.ETHER).toBigInteger()),
+                    Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(Convert.toWei(amount.toString(), Convert.Unit.ETHER).toBigInteger()),
                                     new org.web3j.abi.datatypes.generated.Uint256(commissionAmount)),
                     List.<TypeReference<?>>of()
             );
