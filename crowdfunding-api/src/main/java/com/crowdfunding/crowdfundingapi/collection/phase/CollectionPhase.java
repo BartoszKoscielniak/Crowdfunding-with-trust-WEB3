@@ -2,15 +2,13 @@ package com.crowdfunding.crowdfundingapi.collection.phase;
 
 import com.crowdfunding.crowdfundingapi.collection.Collection;
 import com.crowdfunding.crowdfundingapi.poll.Poll;
-import com.crowdfunding.crowdfundingapi.poll.vote.Vote;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDate;
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Entity
 @Table
@@ -25,6 +23,8 @@ public class CollectionPhase {
     private Long id;
     private Double goal;
     private String description;
+
+    private LocalDateTime till;
 
     @JsonIgnore
     @ManyToOne
@@ -42,9 +42,10 @@ public class CollectionPhase {
         this.poll = poll;
     }
 
-    public CollectionPhase(Double goal, String description, Collection collection) {
+    public CollectionPhase(Double goal, String description, Collection collection, LocalDateTime till) {
         this.goal = goal;
         this.description = description;
         this.collection = collection;
+        this.till = till;
     }
 }

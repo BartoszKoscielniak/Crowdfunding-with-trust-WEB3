@@ -1,11 +1,12 @@
 package com.crowdfunding.crowdfundingapi.collection.phase;
 
-import com.crowdfunding.crowdfundingapi.collection.Collection;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/api/phase")
@@ -25,17 +26,18 @@ public class CollectionPhaseController {
     }
 
     @PostMapping
-    public ResponseEntity<CollectionPhase> addPhase(
+    public ResponseEntity<Map<String, String>> addPhase(
             @RequestParam Double goal,
             @RequestParam String description,
             @RequestParam String deadline,
-            @RequestParam Long collectionId
-    ){
-        return service.addPhase(goal, description, deadline, collectionId);
+            @RequestParam Long collectionId,
+            @RequestParam LocalDateTime till
+            ){
+        return service.addPhase(goal, description, deadline, collectionId, till);
     }
 
     @PutMapping(path = "/{id}")
-    public ResponseEntity<CollectionPhase> updatePhase(
+    public ResponseEntity<Map<String, String>> updatePhase(
             @PathVariable Long id,
             @RequestParam(required = false) String baseDescription
     ){
@@ -43,7 +45,7 @@ public class CollectionPhaseController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Collection> deletePhase(
+    public ResponseEntity<Map<String, String>> deletePhase(
             @PathVariable Long id
     ){
         return service.deletePhase(id);

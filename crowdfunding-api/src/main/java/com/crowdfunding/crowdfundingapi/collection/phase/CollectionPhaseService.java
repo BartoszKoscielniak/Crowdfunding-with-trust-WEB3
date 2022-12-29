@@ -2,6 +2,7 @@ package com.crowdfunding.crowdfundingapi.collection.phase;
 
 import com.crowdfunding.crowdfundingapi.collection.Collection;
 import com.crowdfunding.crowdfundingapi.collection.CollectionRepository;
+import com.crowdfunding.crowdfundingapi.config.PreparedResponse;
 import com.crowdfunding.crowdfundingapi.poll.Poll;
 import com.crowdfunding.crowdfundingapi.poll.PollRepository;
 import com.crowdfunding.crowdfundingapi.poll.PollState;
@@ -14,10 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -44,13 +43,13 @@ public class CollectionPhaseService {
         return ResponseEntity.status(HttpStatus.OK).body(optionalCollection);
     }
 
-    public ResponseEntity<CollectionPhase> addPhase(Double goal, String description, String deadline, Long collectionId) {
+    public ResponseEntity<Map<String, String>> addPhase(Double goal, String description, String deadline, Long collectionId, LocalDateTime till) {
         Optional<Collection> optionalCollection = collectionRepository.findCollectionById(collectionId);
         if (optionalCollection.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Collection with provided ID not found"));
         }
         Collection collection = optionalCollection.get();
-        CollectionPhase newPhase = new CollectionPhase(goal, description, collection);
+        CollectionPhase newPhase = new CollectionPhase(goal, description, collection, till);
         Poll poll = new Poll(PollState.NOT_ACTIVATED);
         repository.save(newPhase);
 
@@ -58,14 +57,14 @@ public class CollectionPhaseService {
         poll.setStartDate(LocalDate.parse(deadline));
         pollRepository.save(poll);
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Phase added"));
     }
 
-    public ResponseEntity<CollectionPhase> updatePhase(Long id, String baseDescription) {
+    public ResponseEntity<Map<String, String>> updatePhase(Long id, String baseDescription) {
         Optional<CollectionPhase> optionalPhase= repository.findPhaseById(id);
         if (optionalPhase.isEmpty())
         {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase with provided ID not found"));
         }
         CollectionPhase collectionPhase = optionalPhase.get();
 
@@ -73,20 +72,19 @@ public class CollectionPhaseService {
             collectionPhase.setDescription(baseDescription);
         }
         repository.save(collectionPhase);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Phase updated"));
     }
 
-    public ResponseEntity<Collection> deletePhase(Long id) {
+    public ResponseEntity<Map<String, String>> deletePhase(Long id) {
         Optional<CollectionPhase> optionalPhase= repository.findPhaseById(id);
         if (optionalPhase.isEmpty())
         {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase with provided ID not found"));
         }
         CollectionPhase collectionPhase = optionalPhase.get();
 
         repository.delete(collectionPhase);
-
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Phase deleted"));
     }
 
     public ResponseEntity<User> getCollectionFounder(Long phaseId){
@@ -95,9 +93,8 @@ public class CollectionPhaseService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Set<CollUserRelation> relations = phase.get().getCollection().getCollUserRelations();
-        List<CollUserRelation> list = relations.stream().toList();
-        for (CollUserRelation collUserRelation : list) {
+        List<CollUserRelation> relations = phase.get().getCollection().getCollUserRelations();
+        for (CollUserRelation collUserRelation : relations) {
             if (collUserRelation.getType() == CollUserType.FOUNDER) {
                 return ResponseEntity.status(HttpStatus.OK).body(collUserRelation.getUser());
             }
