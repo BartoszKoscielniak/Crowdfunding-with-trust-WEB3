@@ -39,8 +39,10 @@ contract Funds {
 
     function depositFunds(address _receiver, uint256 _amount, uint256 _collectionId) external payable{
 
-        require(msg.sender != _receiver,    "You cannot deposit funds to own collection");
-        require(_amount > 0,                "Incorrect amount");
+        require(msg.sender != _receiver,                        "You cannot deposit funds to own collection");
+        require(_amount > 0,                                    "Incorrect amount");
+        require(fundsDonated[_collectionId].isFraud != true,    "Cannot deposit funds, collection status: fraud");
+        require(fundsDonated[_collectionId].isPollEnded != true,"Cannot deposit funds to ended collection");
 
         if(fundsDonated[_collectionId].receiver == address(0x0)){
             fundsDonated[_collectionId].receiver = _receiver;

@@ -36,25 +36,36 @@ public class FundsController {
         return fundsService.sendFundsToDonators(collectionId, transactionIdList);
     }
 
-    @PutMapping(path = "/setcollectionfraud")
+    @PutMapping(path = "/collectionfraud")
     public ResponseEntity<Map<String, String>> setCollectionFraud(
             @RequestParam Long collectionId) {
         return fundsService.setCollectionFraud(collectionId);
     }
 
-    @PutMapping(path = "/setcollectionpollend")
+    @PutMapping(path = "/collectionpollend")
     public ResponseEntity<Map<String, String>> setCollectionPollEnd(
             @RequestParam Long collectionId) {
         return fundsService.setCollectionPollEnd(collectionId);
     }
+    @GetMapping(path = "/collectionfraud")
+    public ResponseEntity<Map<String, String>> isCollectionFraud(
+            @RequestParam Long collectionId) {
+        return fundsService.isFraud(collectionId);
+    }
+
+    @GetMapping(path = "/collectionpollend")
+    public ResponseEntity<Map<String, String>> isCollectionPollEnd(
+            @RequestParam Long collectionId) {
+        return fundsService.isPollEnded(collectionId);
+    }
 
     @GetMapping(path = "/transactionhistory")
-    public ResponseEntity<List> getTransactionHistory() {
+    public ResponseEntity<Map<String, String>> getTransactionHistory() {
         return fundsService.getTransactionHistory();
     }
 
     @GetMapping(path = "/collectionfunds")
-    public ResponseEntity<List> getDonatedFunds(
+    public ResponseEntity<Map<String, String>> getDonatedFunds(
             @RequestParam Long collectionId) {
         return fundsService.getDonatedFunds(collectionId);
     }
