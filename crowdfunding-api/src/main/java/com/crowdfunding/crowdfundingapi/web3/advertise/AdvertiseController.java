@@ -2,6 +2,7 @@ package com.crowdfunding.crowdfundingapi.web3.advertise;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.web3j.tuples.generated.Tuple3;
 
@@ -32,7 +33,12 @@ public class AdvertiseController {
     }
 
     @GetMapping(path = "/types")
-    public ResponseEntity<List<Tuple3<String, BigInteger, BigInteger>>> getTypes() {
+    public ResponseEntity<Map<String, String>> getTypes() {
         return service.getAdvertiseTypes();
+    }
+
+    @GetMapping(path = "/history")
+    public ResponseEntity<Map<String, String>> getHistory() {
+        return service.getHistory();
     }
 }

@@ -1,8 +1,9 @@
 package com.crowdfunding.crowdfundingapi.config.security;
 
 import com.crowdfunding.crowdfundingapi.config.PasswordConfig;
+import com.crowdfunding.crowdfundingapi.user.UserPermissions;
+import com.crowdfunding.crowdfundingapi.user.UserRole;
 import com.crowdfunding.crowdfundingapi.user.UserService;
-import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
