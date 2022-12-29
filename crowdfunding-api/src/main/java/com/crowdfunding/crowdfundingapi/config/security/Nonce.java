@@ -3,8 +3,8 @@ package com.crowdfunding.crowdfundingapi.config.security;
 import com.crowdfunding.crowdfundingapi.user.User;
 import com.crowdfunding.crowdfundingapi.user.UserService;
 import lombok.AllArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseEntity;
 import org.web3j.crypto.*;
 import org.web3j.utils.Numeric;
 
@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Optional;
+import java.util.Map;
 
 @AllArgsConstructor
 @Configuration
@@ -35,8 +35,8 @@ public class Nonce {
         userService.updateUser(user);
     }
 
-    public boolean verifySignature(String publicAddress, String password, String signature) throws NoSuchAlgorithmException {//TODO:????
-        String nonce = getNonce(publicAddress, password).get();
+    public boolean verifySignature(String publicAddress, String password, String signature) throws NoSuchAlgorithmException {//TODO:opisac
+        String nonce = getNonce(publicAddress, password).getBody().get("result");
 
         byte[] signatureBytes = Numeric.hexStringToByteArray(signature);
         byte[] r = Arrays.copyOfRange(signatureBytes, 0, 32);
@@ -57,7 +57,7 @@ public class Nonce {
         return false;
     }
 
-    public Optional<String> getNonce(String publicAddress, String password){
+    public ResponseEntity<Map<String, String>> getNonce(String publicAddress, String password){
         return userService.getUsersNonce(publicAddress, password);
     }
 }

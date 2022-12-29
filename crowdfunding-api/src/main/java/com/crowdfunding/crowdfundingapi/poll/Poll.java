@@ -16,7 +16,7 @@ import java.util.Set;
 @Getter
 @Setter
 public class Poll {
-//TODO: dodaj do wspierajacych przy tworzeniu transakcji
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

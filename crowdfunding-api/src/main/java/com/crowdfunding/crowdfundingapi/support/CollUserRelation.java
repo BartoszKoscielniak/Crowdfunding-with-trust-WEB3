@@ -2,6 +2,7 @@ package com.crowdfunding.crowdfundingapi.support;
 
 import com.crowdfunding.crowdfundingapi.collection.Collection;
 import com.crowdfunding.crowdfundingapi.user.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,12 +22,12 @@ public class CollUserRelation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
 
-    @JsonIgnore
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "collection_id")
     private Collection collectionRelation;
@@ -52,6 +53,4 @@ public class CollUserRelation {
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
-
-
 }
