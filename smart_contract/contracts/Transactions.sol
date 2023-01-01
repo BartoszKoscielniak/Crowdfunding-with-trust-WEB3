@@ -8,7 +8,7 @@ contract Transactions {
     event Transfer(address sender, address receiver, uint256 amount, 
                     string message, uint256 timestamp, string keyword);
 
-    struct TransferStruct {//obiekt
+    struct TransferStruct {//konstruktor
         address sender;
         address receiver;
         uint256 amount;
@@ -17,9 +17,9 @@ contract Transactions {
         string keyword;
     }
 
-    TransferStruct[] transactions;//tablica transakcji
+    TransferStruct[] transactions;//tablica z transakcjami transakcji
 
-    function addToBlockchain(address payable receiver, uint amount, string memory message, string memory keyword) public {//(payable address, , wiadomosc przechowyuwana w pamieci transakcji)
+    function addToBlockchain(address payable receiver, uint amount, string memory message, string memory keyword) public {
         transactionsCount += 1;
         transactions.push(TransferStruct(
             msg.sender,
