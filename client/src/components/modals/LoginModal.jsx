@@ -4,12 +4,13 @@ import { Input } from '..';
 import { useRef } from 'react';
 
 const Modal = ({ open, close, openRegistration }) => {
-    const { PerformLogin, login, handleChange, accessError, setAccessError } = useContext(AccessContext);
+    const { PerformLogin, login, password, handleChange, accessError, setAccessError, setAccessSuccess } = useContext(AccessContext);
     const ref = useRef();
 
     const clickOutside = (e) => {            
         if(ref.current && e.target && !ref.current.contains(e.target)){
             setAccessError(null)
+            setAccessSuccess(null)
             close();
         }
     };
@@ -39,6 +40,7 @@ const Modal = ({ open, close, openRegistration }) => {
                 className='hover:text-slate-400 text-white'
                 onClick={() => {
                         setAccessError(null)
+                        setAccessSuccess(null)
                         openRegistration();
                         close();
                     }
@@ -47,13 +49,14 @@ const Modal = ({ open, close, openRegistration }) => {
                     Not a user yet? Register now!
                 </button>     
                 {accessError && (
-                    <p className='text-red-600 animate-pulse text-md'>{accessError}</p>
+                    <p className='font-sans text-red-600 animate-pulse text-md'>{accessError}</p>
                 )}
             </div>
             <div >
                 <button 
                 onClick={() => {
                     close();
+                    setAccessSuccess(null)
                     setAccessError(null)
                 }}
                 className="w-1/3 inline-block border rounded-xl p-2 m-1 float-right hover:text-slate-400"
@@ -65,8 +68,13 @@ const Modal = ({ open, close, openRegistration }) => {
                 <button
                     type="button"
                     onClick={() => {
-                        PerformLogin();
-                        setAccessError(null)
+                        if(login === '' || password === ''){
+                            setAccessError("All fields must be filled!")
+                        }else {
+                            PerformLogin();
+                            setAccessError(null)
+                            setAccessSuccess(null)
+                        }
                     }}
                     className="w-1/3 inline-block border rounded-xl p-2 m-1 float-right hover:text-slate-400"
                 >
