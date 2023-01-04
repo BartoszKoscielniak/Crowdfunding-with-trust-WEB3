@@ -16,11 +16,12 @@ const sessionStorageState = (key, receivedValue) => {
 }
 
 export const AccessProvider = ({children}) => {
-
+    const URL = 'http://localhost:8080';
     const [login, setLogin]                     = sessionStorageState('login', "");
     const [password, setPassword]               = useState("");
     const [registerData, setRegisterData]       = useState({nameInput: '', surnameInput: '', emailInput: '', phoneInput: '', keyInput: '', passwordInput: ''})
     const [accessError, setAccessError]         = useState(null);
+    const [accessSuccess, setAccessSuccess]     = useState(null)
     const [authenticated, setAuthenticated]     = sessionStorageState('authenticated', false);
 
     const handleChange = (e, name) => {
@@ -56,7 +57,6 @@ export const AccessProvider = ({children}) => {
             if(!ethereum) return alert("Please install Metamask");
             SignNonce(login, password).then((nonceResponse) => {
                 try {
-                    if(login === "" || password === "") throw Error("All fields must be filled!")
                     if(nonceResponse['error'] !== undefined) {
                         throw Error(nonceResponse['error'])
                     }
@@ -64,7 +64,7 @@ export const AccessProvider = ({children}) => {
                     const provider = new ethers.providers.Web3Provider(ethereum);                        
                     const signature = (provider.getSigner().signMessage(nonceResponse['result'])).then((response) => response).then((data) => {return data});
                     signature.then((b) =>{
-                    fetch('http://localhost:8080/login', {
+                    fetch(`${URL}/login`, {
                         method: 'POST',
                         body: JSON.stringify({
                             "publicaddress": login,
@@ -80,7 +80,7 @@ export const AccessProvider = ({children}) => {
                             if (response.status === 200){
                                 setAuthenticated(true);
                             }else {
-                                setAccessError("Invalid signature!");
+                                setAccessError("Invalid signature! Switch account in Metamask.");
                             }
                         })
                         .catch(err => {
@@ -102,7 +102,31 @@ export const AccessProvider = ({children}) => {
         setAuthenticated(false);
     }
 
-
+    const PerformRegistration = () => {
+        const {nameInput, surnameInput, emailInput, phoneInput, keyInput, passwordInput} = registerData;
+        try {
+            fetch(`${URL}/api/user/register?name=${nameInput}&surname=${surnameInput}&privateKey=${keyInput}&password=${passwordInput}&email=${emailInput}&phoneNumber=${phoneInput}`, {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json;',
+                    'Access-Control-Allow-Origin': "*"
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data['error'] === undefined){
+                    setAccessSuccess(data['result'])
+                }else{
+                    throw Error(data['error'])
+                }
+            })
+            .catch(err => {
+                setAccessError(err.message);
+            });
+        } catch (error) {console.log(error.message)
+            setAccessError(error.message);
+        }
+    }
 
     useEffect(() => {
 
@@ -119,12 +143,13 @@ export const AccessProvider = ({children}) => {
             setAccessError,
             authenticated,
             Logout,
-            PerformRegistration
+            PerformRegistration,
+            registerData,
+            accessSuccess,
+            setAccessSuccess
             }}
             >
             {children}
         </AccessContext.Provider>
     );
 };
-
-
