@@ -1,97 +1,77 @@
 import React, { useContext } from "react";
-import { SiEthereum } from "react-icons/si";
-import { BsInfoCircle } from "react-icons/bs";
-import { shortenAddress } from "../../utils/shortenAddress";
-import { TransactionContext } from "../../context/TransactionContext";
-import { Loader } from "./";
+import { Card } from '../index'
+import { BsMouse } from "react-icons/bs";
 
-const companyCommonStyles = "min-h-[70px] sm:px-0 px-2 sm:min-w-[120px] flex justify-center items-center border-[0.5px] border-gray-400 text-sm font-light text-white";
-
-const Input = ({ placeholder, name, type, value, handleChange }) => (
-    <input
-      placeholder={placeholder}
-      type={type}
-      step="0.0001"
-      value={value}
-      onChange={(e) => handleChange(e, name)}
-      className="my-2 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-sm white-glassmorphism"
-    />
-  );
 
 const Welcome = () => {
-    const { connectWallet, currentAccount, formData, sendTransaction, handleChange, isLoading} = useContext(TransactionContext);
 
-    //console.log(value);
+  return (
 
-    const handleSubmit = (e) => {
-        const { addressTo, amount, keyword, message } = formData;
-
-        e.preventDefault();
-
-        if (!addressTo || !amount || !keyword || !message) return;
-
-        sendTransaction();
-    }
-
-    return (
-
-        <div className="flex w-full justify-center items-center">
-        <div className="flex mf:flex-row flex-col items-start justify-between md:p-20 py-12 px-4">
-          <div className="flex flex-1 justify-start items-start flex-col mf:mr-10">
-            <h1 className="flex w-full justify-center text-white text-lg">
-              Welcome to Crowdfunding with trust
-              </h1>
-            <h1 className="flex w-full justify-center text-white text-7xl text-gradient text-center py-5">
-              Where we care <br/>about Your commitment.
-            </h1>
-            <p className="flex w-full justify-center text-white text-lg">
-              Explore the crypto world while supporting startups and charity collections.
-            </p>
+    <div>
+      <div className="absolute mf:flex-row md:p-20 py-12 px-4 top-1/2 -translate-y-1/2">
+        <div className="mf:mr-10">
+          <h1 className="font-sans flex w-full justify-start text-white text-3xl">
+            Welcome to Crowdfunding with trust
+          </h1>
+          <h1 className="font-sans flex w-full justify-start text-white text-7xl py-5">
+            Where we care <br />about Your confidence.
+          </h1>
+          <p className="font-sans flex w-full justify-start text-white text-3xl">
+            Explore the crypto world while supporting startups.
+          </p>
+        </div>
+      </div>
+      <div className="absolute bottom-10 right-1/2 -translate-x-1/2 animate">
+        <BsMouse fontSize={35} className="text-white" />
+      </div>
+      <div className="absolute flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-40 align-center px-20 -bottom-[90%]">
+        <div className="inline-table pb-36">
+          <div className="w-1/2 table-cell pr-1">
+            <Card
+              color={'bg-pink-700'}
+              title={'Low commission'}
+              text={'At as lowest level as 0.1% of deposited amount. Charity collection are not affected by commission!'}
+            />
           </div>
-  
-          <div className="flex flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-10">
-            <div className="p-3 flex justify-end items-start flex-col rounded-xl h-40 sm:w-72 w-full my-5 eth-card .white-glassmorphism ">
-              <div className="flex justify-between flex-col w-full h-full">
-                <div className="flex justify-between items-start">
-                  <div className="w-10 h-10 rounded-full border-2 border-white flex justify-center items-center">
-                    <SiEthereum fontSize={21} color="#fff" />
-                  </div>
-                  <BsInfoCircle fontSize={17} color="#fff" />
-                </div>
-                <div>
-                  <p className="text-white font-light text-sm">
-                    {shortenAddress(currentAccount)}
-                  </p>
-                  <p className="text-white font-semibold text-lg mt-1">
-                    Your wallet
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-5 sm:w-96 w-full flex flex-col justify-start items-center blue-glassmorphism">
-              <Input placeholder="Address To" name="addressTo" type="text" handleChange={handleChange} />
-              <Input placeholder="Amount (ETH)" name="amount" type="number" handleChange={handleChange} />
-              <Input placeholder="Keyword (Gif)" name="keyword" type="text" handleChange={handleChange} />
-              <Input placeholder="Enter Message" name="message" type="text" handleChange={handleChange} />
-  
-              <div className="h-[1px] w-full bg-gray-400 my-2" />
-  
-              {isLoading
-                ? <Loader />
-                : (
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    className="text-white w-full mt-2 border-[1px] p-2 border-[#3d4f7c] hover:bg-[#3d4f7c] rounded-full cursor-pointer"
-                  >
-                    Send now
-                  </button>
-                )}
-            </div>
+          <div className="w-1/2 table-cell pl-1">
+            <Card
+              color={'bg-teal-500'}
+              title={'Protected funds'}
+              text={'Your funds are stored in escrow, preventing startup collection owner from stealing Your crypto without fulfilling collection assumptions.'}
+            />
+          </div>
+        </div>
+        <div className="inline-table pb-36">
+          <div className="w-2/3 table-cell pr-1">
+            <Card
+              color={'bg-cyan-700'}
+              title={'Security & Data Backup'}
+              text={'Blockchain do not forget! Even in case of service disaster, blockchain will store Your funds without any loss.'}
+            />
+          </div>
+          <div className="w-1/3 table-cell pl-1">
+            <Card
+              color={'bg-red-900'}
+              title={'Charity & Startups'}
+              text={'We support both types to meet all of Your demands.'}
+            />
+          </div>
+        </div>
+        <Card
+              color={'bg-indigo-800	'}
+              title={'Public contracts'}
+              text={'Means You can check contract code on blockchain and see how We works!'}
+            />        
+        <div className=" w-full flex md:justify-center justify-between items-center flex-col pt-4 px-4">
+          <div className="sm:w-[90%] w-full h-[0.25px] bg-gray-400 mt-5 " />
+          <div className="sm:w-[90%] w-full flex justify-between items-center mt-3">
+            <p className="text-white text-left text-xs">@Crowdfunding with trust</p>
+            <p className="text-white text-right text-xs">All rights reserved</p>
           </div>
         </div>
       </div>
-    );
+    </div>
+  );
 }
 
 export default Welcome;
