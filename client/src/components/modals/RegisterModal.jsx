@@ -30,7 +30,7 @@ const Modal = ({ open, close }) => {
     }, [close])
     
     return open ? (
-        <div className='w-1/4 bg-indigo-900 shadow-lg shadow-indigo-900/50 fixed top-1/2 left-1/2 p-4 rounded-3xl -translate-x-1/2 -translate-y-1/2' ref={ref}>
+        <div className='w-1/4 bg-indigo-900 shadow-lg shadow-indigo-900/50 fixed top-1/2 left-1/2 p-4 rounded-3xl -translate-x-1/2 -translate-y-1/2 z-10' ref={ref}>
             <p className="font-sans text-2xl antialiased p-1 text-white">
                 Register now!
             </p>

@@ -4,13 +4,10 @@ module.exports = {
   ],
   theme: {
     extend: {
-
       keyframes: {
         flashGradient: {
           '0%': { opacity: '0.3' },
-
           '70%': { opacity: '0' },
-
           '100%': { opacity: '0.3' },
         },
         rotation: {
@@ -20,9 +17,7 @@ module.exports = {
         },
         flashGradientv2: {
           '0%': { opacity: '0' },
-
           '70%': { opacity: '0.4' },
-
           '100%': { opacity: '0' },
         },
         rotationv2: {
@@ -33,12 +28,10 @@ module.exports = {
       },
       animation: {
         'flashGradient': 'flashGradient 10s linear infinite',
-        'rotation': 'rotation 25s linear infinite',
+        'rotation': 'rotation 30s linear infinite',
         'flashGradientv2': 'flashGradientv2 6s linear infinite',
-        'rotationv2': 'rotationv2 30s linear infinite',
+        'rotationv2': 'rotationv2 32s linear infinite',
       },
-
-
     },
   },
   plugins: [],
