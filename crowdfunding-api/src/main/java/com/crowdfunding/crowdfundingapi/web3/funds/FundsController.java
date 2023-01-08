@@ -18,9 +18,9 @@ public class FundsController {
 
     @PostMapping(path = "/depositfunds")
     public ResponseEntity<Map<String, String>> depositFunds(
-            @RequestParam Long collectionId,
+            @RequestParam Long phaseId,
             @RequestParam Double amount) {
-        return fundsService.depositFunds(collectionId, amount);
+        return fundsService.depositFunds(phaseId, amount);
     }
 
     @PostMapping(path = "/sendfundstoowner")

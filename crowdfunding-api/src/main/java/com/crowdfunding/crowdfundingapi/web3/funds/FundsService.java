@@ -1,7 +1,10 @@
 package com.crowdfunding.crowdfundingapi.web3.funds;
 
 import com.crowdfunding.crowdfundingapi.collection.Collection;
+import com.crowdfunding.crowdfundingapi.collection.CollectionRepository;
 import com.crowdfunding.crowdfundingapi.collection.CollectionService;
+import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhase;
+import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhaseRepository;
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhaseService;
 import com.crowdfunding.crowdfundingapi.config.PreparedResponse;
 import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
@@ -37,6 +40,7 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @AllArgsConstructor
@@ -51,6 +55,8 @@ public class FundsService{
     private final RelationRepository relationRepository;
     private final static String CONTRACT_NAME = "Funds";
     private final CommissionService commissionService;
+    private final CollectionPhaseRepository collectionPhaseRepository;
+    private final CollectionRepository collectionRepository;
 
     private Funds loadFundsContract( ) throws Exception {
         Optional<Web3> fundsContract = repository.findContractByName(CONTRACT_NAME);
@@ -81,21 +87,21 @@ public class FundsService{
         return contract;
     }
 
-    public ResponseEntity<Map<String, String>> depositFunds(Long collectionId, Double amount) {
+    public ResponseEntity<Map<String, String>> depositFunds(Long phaseId, Double amount) {
         try {
-            Collection collection = collectionService.getCollection(collectionId).getBody();
-            if (collection == null){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Collection not found"));
+            CollectionPhase collectionPhase = collectionPhaseService.getPhase(phaseId).getBody();
+            if (collectionPhase == null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase not found"));
             }
 
             if (amount <= 0) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect amount"));
             }
 
-            Long phaseId = collection.getCollectionPhase().get(0).getId();
+            Collection collection = collectionPhase.getCollection();
             String receiverAddress = Objects.requireNonNull(collectionPhaseService.getCollectionFounder(phaseId).getBody()).getPublicAddress();
             BigInteger convertedAmount = Convert.toWei(String.valueOf(amount), Convert.Unit.ETHER).toBigInteger();
-            BigInteger commission = commissionService.getCommissionAmountBigInteger(amount, collection.getCollectionType());
+            BigInteger commission = commissionService.getCommissionAmountBigInteger(amount, collectionPhase.getCollection().getCollectionType());
             User user = userService.getUserFromAuthentication();
             Funds contract = loadFundsContract();
 
@@ -111,7 +117,7 @@ public class FundsService{
                     "depositFunds",
                     Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(receiverAddress),
                             new org.web3j.abi.datatypes.generated.Uint256(convertedAmount),
-                            new org.web3j.abi.datatypes.generated.Uint256(BigInteger.valueOf(collectionId))),
+                            new org.web3j.abi.datatypes.generated.Uint256(BigInteger.valueOf(collection.getId()))),
                     List.<TypeReference<?>>of()
             );
 
@@ -126,9 +132,20 @@ public class FundsService{
                 }
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse(WordUtils.capitalize(response.getBody().get("error"))));
             }
+            collectionPhase.setActualFunds(collectionPhase.getActualFunds() + amount);
+            collectionPhaseRepository.save(collectionPhase);
+            collection.setActualFunds(collection.getActualFunds() + amount);
+            collectionRepository.save(collection);
             List<CollUserRelation> relations = collection.getCollUserRelations();
             CollUserRelation collUserRelation = new CollUserRelation(user, collection, CollUserType.SUSTAINER);
-            if (relations.contains(collUserRelation)){
+            AtomicBoolean assigned = new AtomicBoolean(false);
+            relations.forEach(relation -> {
+                if (relation.getType() == collUserRelation.getType() && relation.getUser() == collUserRelation.getUser()
+                        && relation.getCollectionRelation() == collUserRelation.getCollectionRelation()){
+                    assigned.set(true);
+                }
+            });
+            if (assigned.get()){
                 return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
             }
             relationRepository.save(collUserRelation);
