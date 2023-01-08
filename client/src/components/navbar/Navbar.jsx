@@ -10,7 +10,7 @@ const NavbarItem = ({ item, classProps}) => {
     const [isShown, setIsShown] = useState(false);
 
     return (
-        <li className={`mx-4 cursor-pointer display: flex justify-center font-sans text-xl antialiased  ${classProps}`} onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
+        <li className={`z-10 mx-4 cursor-pointer display: flex justify-center font-sans text-xl antialiased  ${classProps}`} onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
             <Link to={item[0].toLowerCase().replace(/\s/g, '')}>{item[0]}</Link>   
             {isShown && (
                 <DropdownMenu content={item[1]}/>
@@ -19,7 +19,7 @@ const NavbarItem = ({ item, classProps}) => {
     );
 }
 
-const Navbar = () => {
+const Navbar = ({style}) => {
     const [toggleMenu, setToggleMenu] = useState(false); 
     const { login, authenticated, Logout } = useContext(AccessContext);
     const [isLoginOpen, setModalOpen] = useState(() => {
@@ -41,7 +41,7 @@ const Navbar = () => {
     )}
     
     return (
-        <nav className="w-full flex md:justify-center justify-between items-center p-6 bg-transparent">
+        <nav className={`w-full flex md:justify-center justify-between items-center p-6 z-10 ${style}`}>
             <div className="md:flex-[0.5] flex-initial justify-center items-center">
             </div>
             <ul className="w-full flex md:justify-center text-white md:flex list-none flex-row justify-between items-center flex-initail">
@@ -50,7 +50,7 @@ const Navbar = () => {
                         <p>Crowdfunding</p>
                     ) : (
                     <div>
-                        <p className='font-sans text-2xl antialiased animate-pulse'>Hi, ${login.slice(0, 5)}...${address.slice(login - 4)}</p>
+                        <p className='font-sans text-2xl antialiased animate-pulse'>Hi, {login.slice(0, 5)}...{login.slice(login.length - 4)}</p>
                     </div>
                     )}
                 </li>
@@ -114,7 +114,7 @@ const DropdownMenu = ({content}) => {
     if (Array.isArray(content) && content.length > 0)
     {
         return (
-            <div className='position: absolute bg-transparent  bg-opacity-90 mt-5'>
+            <div className='z-10 position: absolute bg-transparent  bg-opacity-90 mt-5'>
                 <div className='my-4 p-8 shadow-2xl rounded-xl bg-zinc-800 opacity-96'>
                     {content.map((item, index) => (
                         <DropdownMenuItem key={item + index}  item={item}/>
@@ -127,7 +127,7 @@ const DropdownMenu = ({content}) => {
 
 const DropdownMenuItem = ({item}) => {
     return (
-        <div className='py-3 hover:text-slate-400 opacity-100'>
+        <div className='z-10 py-3 hover:text-slate-400 opacity-100'>
             <Link to={item.toLowerCase().replace(/\s/g, '')}>{item}</Link> 
         </div>
     )
