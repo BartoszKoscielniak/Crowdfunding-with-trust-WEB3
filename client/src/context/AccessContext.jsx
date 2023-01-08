@@ -24,6 +24,7 @@ export const AccessProvider = ({children}) => {
     const [accessError, setAccessError]         = useState(null);
     const [accessSuccess, setAccessSuccess]     = useState(null)
     const [authenticated, setAuthenticated]     = sessionStorageState('authenticated', false);
+    const [bearerToken, setBearerToken]         = sessionStorageState('authToken', null);
 
     const handleChange = (e, name) => {
         if(name == 'loginInput'){
@@ -56,42 +57,51 @@ export const AccessProvider = ({children}) => {
     const PerformLogin = async () => {
         try {
             if(!ethereum) return alert("Please install Metamask");
-            SignNonce(login, password).then((nonceResponse) => {
-                try {
-                    if(nonceResponse['error'] !== undefined) {
-                        throw Error(nonceResponse['error'])
-                    }
-                    
-                    const provider = new ethers.providers.Web3Provider(ethereum);                        
-                    const signature = (provider.getSigner().signMessage(nonceResponse['result'])).then((response) => response).then((data) => {return data});
-                    signature.then((b) =>{
-                    fetch(`${URL}/login`, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            "publicaddress": login,
-                            "password": password,
-                            "signature": b
-                        }),
-                        headers: {
-                            'Content-type': 'application/json; charset=UTF-8',
-                            'Access-Control-Allow-Origin': "*"
-                        },
-                        })
-                        .then(response => {
-                            if (response.status === 200){
-                                setAuthenticated(true);
-                            }else {
-                                setAccessError("Invalid signature! Switch account in Metamask.");
+            const accounts = ethereum.request({method: 'eth_accounts'});
+            accounts.then((c) => {
+                if(c.length === 0){
+                    setAccessError("Login to account in Metamask!")
+                }else {
+                    SignNonce(login, password).then((nonceResponse) => {
+                        try {
+                            if(nonceResponse['error'] !== undefined) {
+                                throw Error(nonceResponse['error'])
                             }
-                        })
-                        .catch(err => {
-                            setAccessError(err.message);
-                        });
-                    }); 
-                } catch (error) {
-                    setAccessError(error.message)
+        
+                            const provider = new ethers.providers.Web3Provider(ethereum);                        
+                            const signature = (provider.getSigner().signMessage(nonceResponse['result'])).then((response) => response).then((data) => {return data});
+                            signature.then((b) =>{
+                            fetch(`${URL}/login`, {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    "publicaddress": login,
+                                    "password": password,
+                                    "signature": b
+                                }),
+                                headers: {
+                                    'Content-type': 'application/json; charset=UTF-8',
+                                    'Access-Control-Allow-Origin': "*"
+                                },
+                                })
+                                .then(response => {
+                                    if (response.status === 200){
+                                        setAuthenticated(true);
+                                    }else {
+                                        setAccessError("Invalid signature! Switch account in Metamask.");
+                                    }
+                                    setBearerToken(response.headers.get('Authorization'))
+                                })
+                                .catch(err => {
+                                    setAccessError(err.message);
+                                });
+                            }); 
+                        } catch (error) {
+                            setAccessError(error.message)
+                        }
+                    });
                 }
-            });
+            })
+
         } catch (error) {
             setAccessError(error.message)
         }
@@ -100,6 +110,7 @@ export const AccessProvider = ({children}) => {
     const Logout = () => {
         //setLogin("");
         setPassword("");
+        setBearerToken(null);
         setAuthenticated(false);
     }
 
@@ -147,7 +158,8 @@ export const AccessProvider = ({children}) => {
             PerformRegistration,
             registerData,
             accessSuccess,
-            setAccessSuccess
+            setAccessSuccess,
+            bearerToken
             }}
             >
             {children}
