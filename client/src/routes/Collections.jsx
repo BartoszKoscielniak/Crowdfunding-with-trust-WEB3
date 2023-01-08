@@ -1,12 +1,22 @@
-import { Navbar } from "../components/homepage";
-import { TransactionProvider } from '../context/TransactionContext';
+import { Navbar, Background, CollectionsView } from "../components";
+import { AccessProvider } from '../context/AccessContext';
+import { CollectionProvider } from '../context/CollectionContext';
+import { Parallax, ParallaxLayer } from "@react-spring/parallax";
 
 const Collections = () => {
     
     return (
-        <TransactionProvider>
-        <Navbar />
-        </TransactionProvider>
+        <AccessProvider>
+            <CollectionProvider>
+
+                    {/* <Background/> */}
+
+
+                    <Navbar style = {'bg-neutral-800'}/>
+                    <CollectionsView/>
+
+            </CollectionProvider>
+        </AccessProvider>
     );
 }
 
