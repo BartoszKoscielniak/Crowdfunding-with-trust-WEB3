@@ -21,47 +21,49 @@ const Welcome = () => {
           </p>
         </div>
       </div>
-      <div className="absolute bottom-10 right-1/2 -translate-x-1/2 animate">
+      <div className="absolute bottom-10 right-1/2 -translate-x-1/2 animate-bounce">
         <BsMouse fontSize={35} className="text-white" />
       </div>
       <div className="absolute flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-40 align-center px-20 -bottom-[90%]">
-        <div className="inline-table pb-36">
+        <div className="inline-table pb-30">
           <div className="w-1/2 table-cell pr-1">
             <Card
-              color={'bg-pink-700'}
+              color={'bg-pink-900'}
               title={'Low commission'}
               text={'At as lowest level as 0.1% of deposited amount. Charity collection are not affected by commission!'}
             />
           </div>
           <div className="w-1/2 table-cell pl-1">
             <Card
-              color={'bg-teal-500'}
+              color={'bg-teal-800'}
               title={'Protected funds'}
               text={'Your funds are stored in escrow, preventing startup collection owner from stealing Your crypto without fulfilling collection assumptions.'}
             />
           </div>
         </div>
-        <div className="inline-table pb-36">
+        <div className="inline-table pb-30">
           <div className="w-2/3 table-cell pr-1">
             <Card
-              color={'bg-cyan-700'}
+              color={'bg-green-900'}
               title={'Security & Data Backup'}
               text={'Blockchain do not forget! Even in case of service disaster, blockchain will store Your funds without any loss.'}
             />
           </div>
           <div className="w-1/3 table-cell pl-1">
             <Card
-              color={'bg-red-900'}
+              color={'bg-indigo-900'}
               title={'Charity & Startups'}
               text={'We support both types to meet all of Your demands.'}
             />
           </div>
         </div>
+        <div className="w-3/5">
         <Card
               color={'bg-indigo-800	'}
               title={'Public contracts'}
               text={'Means You can check contract code on blockchain and see how We works!'}
-            />        
+            />    
+        </div>      
         <div className=" w-full flex md:justify-center justify-between items-center flex-col pt-4 px-4">
           <div className="sm:w-[90%] w-full h-[0.25px] bg-gray-400 mt-5 " />
           <div className="sm:w-[90%] w-full flex justify-between items-center mt-3">
