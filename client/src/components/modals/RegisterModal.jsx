@@ -7,6 +7,7 @@ const Modal = ({ open, close }) => {
     const { handleChangeRegister, accessError, setAccessError, PerformRegistration, registerData, accessSuccess, setAccessSuccess } = useContext(AccessContext);
     const ref = useRef();
     const {nameInput, surnameInput, emailInput, phoneInput, keyInput, passwordInput} = registerData
+    
     const clickOutside = (e) => {            
         if(ref.current && e.target && !ref.current.contains(e.target)){
             setAccessError(null)

@@ -6,10 +6,10 @@ export const AccessContext = React.createContext();
 const { ethereum } = window;
 
 const sessionStorageState = (key, receivedValue) => {
-    const [value, setValue] = useState(JSON.parse(localStorage.getItem(key)) ?? receivedValue);
+    const [value, setValue] = useState(JSON.parse(sessionStorage.getItem(key)) ?? receivedValue);
 
     useEffect(() => {
-      localStorage.setItem(key, JSON.stringify(value));
+        sessionStorage.setItem(key, JSON.stringify(value));
     }, [value, key]);
     
     return [value, setValue];

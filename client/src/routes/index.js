@@ -4,3 +4,5 @@ export { default as Collections } from './Collections';
 export { default as Earn } from './Earn';
 export { default as Funds } from './Funds';
 export { default as ErrorPage } from './error-page';
+export { default as AddCollection } from './AddCollection';
+export { default as UsersCollections } from './UsersCollections';

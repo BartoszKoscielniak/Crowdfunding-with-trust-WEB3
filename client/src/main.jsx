@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import { App, ErrorPage, Account, Collections, Funds, Earn } from './routes';
+import { App, ErrorPage, Account, Collections, Funds, Earn, AddCollection, UsersCollections } from './routes';
 
 import "./index.css";
 
@@ -19,6 +19,16 @@ const router = createBrowserRouter([
   {
     path: "/collections",
     element: <Collections />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/collections/addcollections",
+    element: <AddCollection />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/collections/mycollections",
+    element: <UsersCollections />,
     errorElement: <ErrorPage />,
   },
   {

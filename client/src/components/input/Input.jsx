@@ -1,4 +1,4 @@
-const Input = ({ placeholder, name, type, value, handleChange, checked }) => (
+const Input = ({ placeholder, name, type, value, handleChange, checked, additionalStyling }) => (
     <input
       placeholder = {placeholder}
       type = {type}
@@ -6,7 +6,7 @@ const Input = ({ placeholder, name, type, value, handleChange, checked }) => (
       value = {value}
       onChange = {(e) => handleChange(e, name)}
       checked = {checked}
-      className = "my-2 w-full rounded-xl p-2 outline-none bg-transparent text-white border text-md"
+      className = {`my-2 w-full rounded-xl p-2 outline-none bg-transparent text-white border text-md required ${additionalStyling}`}
     />
 );
 
