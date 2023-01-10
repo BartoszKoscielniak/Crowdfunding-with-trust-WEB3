@@ -10,10 +10,10 @@ const NavbarItem = ({ item, classProps}) => {
     const [isShown, setIsShown] = useState(false);
 
     return (
-        <li className={`z-10 mx-4 cursor-pointer display: flex justify-center font-sans text-xl antialiased  ${classProps}`} onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
-            <Link to={item[0].toLowerCase().replace(/\s/g, '')}>{item[0]}</Link>   
+        <li className={`z-10 mx-4 cursor-pointer display: flex justify-center font-sans text-xl antialiased   ${classProps}`} onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
+            <Link className='hover:text-slate-400' to={'/' + item[0].toLowerCase().replace(/\s/g, '')}>{item[0]}</Link>   
             {isShown && (
-                <DropdownMenu content={item[1]}/>
+                <DropdownMenu content={item[1]} mainRoute={item[0]}/>
             )}
         </li>
     );
@@ -110,14 +110,14 @@ const Navbar = ({style}) => {
     );
 }
 
-const DropdownMenu = ({content}) => {
+const DropdownMenu = ({content, mainRoute}) => {
     if (Array.isArray(content) && content.length > 0)
     {
         return (
             <div className='z-10 position: absolute bg-transparent  bg-opacity-90 mt-5'>
                 <div className='my-4 p-8 shadow-2xl rounded-xl bg-zinc-800 opacity-96'>
                     {content.map((item, index) => (
-                        <DropdownMenuItem key={item + index}  item={item}/>
+                        <DropdownMenuItem key={item + index}  name={item} route={'/' + mainRoute.toLowerCase().replace(/\s/g, '') + '/' + item.toLowerCase().replace(/\s/g, '')}/>
                     ))}
                 </div>
             </div>
@@ -125,10 +125,10 @@ const DropdownMenu = ({content}) => {
     }
 }
 
-const DropdownMenuItem = ({item}) => {
+const DropdownMenuItem = ({name, route}) => {
     return (
         <div className='z-10 py-3 hover:text-slate-400 opacity-100'>
-            <Link to={item.toLowerCase().replace(/\s/g, '')}>{item}</Link> 
+            <Link to={route}>{name}</Link> 
         </div>
     )
 }
