@@ -12,7 +12,7 @@ const CollectionsView = () => {
   const getCollectionCards = () => {
     let array = [];
     Object.keys(collections).map((key) => {
-      array.push(<li key={collections[key]['collectionName']}><CollectionCard arrayId={key} title={collections[key]['collectionName']} description={collections[key]['baseDescription']} goal={collections[key]['goal']} type={collections[key]['collectionType']} promo = {collections[key]['promoted']} actualFunds = {collections[key]['actualFunds'].toFixed(4)} /></li>);
+      array.push(<li key={collections[key]['collectionName']}><CollectionCard arrayId={key} title={collections[key]['collectionName']} onClickFunction = {true} description={collections[key]['baseDescription']} goal={collections[key]['goal']} type={collections[key]['collectionType']} promo = {collections[key]['promoted']} actualFunds = {collections[key]['actualFunds'].toFixed(4)} /></li>);
     });
     return array;
   }

@@ -1,8 +1,10 @@
 import { useState, useContext } from "react";
 import { CollectionModal } from "..";
+import { CollectionContext } from "../../context/CollectionContext";
 
-const CollectionCard = ({ arrayId, title, description, goal, type, promo, actualFunds}) => {
+const CollectionCard = ({ arrayId, title, description, goal, type, promo, actualFunds, onClickFunction}) => {
     const [modalOpen, setModalOpen] = useState(false)
+    const { collections, collectionError, collectionSuccess, setCollectionError, DepositFunds, openedCollectionModal, setOpenedCollectionModal } = useContext(CollectionContext);
 
     let style = 'my-5 w-full h-[400px] bg-indigo-400 rounded-xl opacity-60 hover:opacity-100 drop-shadow-xl backdrop-blur-3xl transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-600 duration-300'
     if(promo){
@@ -15,7 +17,7 @@ const CollectionCard = ({ arrayId, title, description, goal, type, promo, actual
             {title !== '' ? (
                 <div 
                 className={`${style}`} 
-                onClick={() => {setModalOpen(true)}}
+                onClick={() => {setModalOpen(onClickFunction); setOpenedCollectionModal(arrayId)}}
                 >
                     <div className="w-full p-5 antialiased">
                         <div>
