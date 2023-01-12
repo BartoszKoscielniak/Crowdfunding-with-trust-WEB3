@@ -3,6 +3,7 @@ package com.crowdfunding.crowdfundingapi.poll.vote;
 import com.crowdfunding.crowdfundingapi.poll.Poll;
 import com.crowdfunding.crowdfundingapi.user.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,11 +25,12 @@ public class Vote {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonBackReference
+    @JsonManagedReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "poll_id")
+    @JsonBackReference
     private Poll poll;
 
     public Vote(VoteResult voteResult, Poll poll, User user) {
