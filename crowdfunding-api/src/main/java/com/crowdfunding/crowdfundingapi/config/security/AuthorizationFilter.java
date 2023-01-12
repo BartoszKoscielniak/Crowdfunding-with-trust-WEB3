@@ -14,12 +14,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -60,7 +59,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }catch (JwtException e){
-            throw new IllegalStateException(String.format("Token %s cannot be trusted", token));
+            throw new IllegalStateException("Token " + token + " is not valid");
         }
         filterChain.doFilter(request, response);
     }
