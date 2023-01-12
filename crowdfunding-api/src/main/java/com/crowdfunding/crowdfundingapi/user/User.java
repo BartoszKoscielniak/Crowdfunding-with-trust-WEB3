@@ -2,6 +2,7 @@ package com.crowdfunding.crowdfundingapi.user;
 
 import com.crowdfunding.crowdfundingapi.poll.vote.Vote;
 import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
@@ -49,38 +50,13 @@ public class User implements UserDetails {
     @JsonManagedReference
     private Set<CollUserRelation> collUserRelations;
 
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private Set<Vote> pools;
+    @JsonBackReference
+    private Set<Vote> votes;
 
     @Enumerated
     private UserRole userRole;
-    public User( ) {
-
-    }
-
-    public User(String publicAddress, String password, String nonce) {
-        this.publicAddress = publicAddress;
-        this.password = password;
-        this.nonce = nonce;
-        this.isAccountNonExpired = true;
-        this.isCredentialsNonExpired = true;
-        this.isEnabled = true;
-        this.isAccountNonLocked = true;
-        this.userRole = UserRole.USER;
-    }
-
-    public User(String publicAddress, String password, String nonce, UserRole userRole, boolean isAccountNonExpired, boolean isCredentialsNonExpired, boolean isEnabled, boolean isAccountNonLocked) {
-        this.publicAddress = publicAddress;
-        this.password = password;
-        this.nonce = nonce;
-        this.isAccountNonExpired = isAccountNonExpired;
-        this.isCredentialsNonExpired = isCredentialsNonExpired;
-        this.isEnabled = isEnabled;
-        this.isAccountNonLocked = isAccountNonLocked;
-        this.userRole = userRole;
-    }
+    public User( ) { }
 
     public User(String publicAddress, String name, String lastname, String email, String phoneNumber, byte[] privateKey, String password, String nonce, UserRole userRole) {
         this.publicAddress = publicAddress;
