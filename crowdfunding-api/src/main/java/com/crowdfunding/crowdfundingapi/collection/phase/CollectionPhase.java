@@ -21,10 +21,18 @@ public class CollectionPhase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "phase_id", nullable = false)
     private Long id;
+    @Column(nullable = false)
     private Double goal;
-    private String description;
+    @Column(nullable = false)
 
+    private Double actualFunds;
+    @Column(nullable = false)
+    private String description;
+    @Column(nullable = false)
+    private String phaseName;
+    @Column(nullable = false)
     private LocalDateTime till;
+    private String proofOfEvidence;
 
     @JsonIgnore
     @ManyToOne
@@ -35,17 +43,13 @@ public class CollectionPhase {
     @OneToOne(mappedBy = "collectionPhase")
     private Poll poll;
 
-    public CollectionPhase(Double goal, String description, Collection collection, Poll poll) {
+    public CollectionPhase(Double goal, String description, String phaseName, Collection collection, LocalDateTime till, String proofOfEvidence) {
         this.goal = goal;
+        this.phaseName = phaseName;
         this.description = description;
         this.collection = collection;
-        this.poll = poll;
-    }
-
-    public CollectionPhase(Double goal, String description, Collection collection, LocalDateTime till) {
-        this.goal = goal;
-        this.description = description;
-        this.collection = collection;
+        this.actualFunds = 0.0;
         this.till = till;
+        this.proofOfEvidence = proofOfEvidence;
     }
 }

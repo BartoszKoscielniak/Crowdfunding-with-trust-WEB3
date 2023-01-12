@@ -29,11 +29,13 @@ public class CollectionPhaseController {
     public ResponseEntity<Map<String, String>> addPhase(
             @RequestParam Double goal,
             @RequestParam String description,
+            @RequestParam String name,
             @RequestParam String deadline,
             @RequestParam Long collectionId,
-            @RequestParam LocalDateTime till
+            @RequestParam LocalDateTime till,
+            @RequestParam String proofofevidence
             ){
-        return service.addPhase(goal, description, deadline, collectionId, till);
+        return service.addPhase(goal, name, description, deadline, collectionId, till, proofofevidence);
     }
 
     @PutMapping(path = "/{id}")
