@@ -7,6 +7,9 @@ import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhase;
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhaseRepository;
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhaseService;
 import com.crowdfunding.crowdfundingapi.config.PreparedResponse;
+import com.crowdfunding.crowdfundingapi.poll.Poll;
+import com.crowdfunding.crowdfundingapi.poll.PollRepository;
+import com.crowdfunding.crowdfundingapi.poll.PollState;
 import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
 import com.crowdfunding.crowdfundingapi.support.CollUserType;
 import com.crowdfunding.crowdfundingapi.support.RelationRepository;
@@ -38,7 +41,11 @@ import org.web3j.tx.response.TransactionReceiptProcessor;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -57,6 +64,7 @@ public class FundsService{
     private final CommissionService commissionService;
     private final CollectionPhaseRepository collectionPhaseRepository;
     private final CollectionRepository collectionRepository;
+    private final PollRepository pollRepository;
 
     private Funds loadFundsContract( ) throws Exception {
         Optional<Web3> fundsContract = repository.findContractByName(CONTRACT_NAME);
@@ -87,22 +95,48 @@ public class FundsService{
         return contract;
     }
 
+    public static class TransactionStruct {
+        public String sender;
+        public String receiver;
+        public String phaseName;
+        public BigDecimal amount;
+        public String date;
+        public TransactionStruct(String sender, String receiver, String phaseName, BigDecimal amount, String date) {
+            this.sender = sender;
+            this.receiver = receiver;
+            this.phaseName = phaseName;
+            this.amount = amount;
+            this.date = date;
+        }
+    }
+
     public ResponseEntity<Map<String, String>> depositFunds(Long phaseId, Double amount) {
         try {
             CollectionPhase collectionPhase = collectionPhaseService.getPhase(phaseId).getBody();
             if (collectionPhase == null){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase not found"));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase not found!"));
+            }
+
+            ResponseEntity<User> founder = collectionPhaseService.getCollectionFounder(phaseId);
+            User user = userService.getUserFromAuthentication();
+            if (founder.getStatusCode() == HttpStatus.OK){
+                if (founder.getBody().getPublicAddress().equals(user.getPublicAddress())) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Cannot deposit funds to own collection!"));
+                }
+            }
+
+            if (collectionPhase.getTill().isBefore(LocalDateTime.now())){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Phase has ended!"));
             }
 
             if (amount <= 0) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect amount"));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect amount."));
             }
 
             Collection collection = collectionPhase.getCollection();
             String receiverAddress = Objects.requireNonNull(collectionPhaseService.getCollectionFounder(phaseId).getBody()).getPublicAddress();
             BigInteger convertedAmount = Convert.toWei(String.valueOf(amount), Convert.Unit.ETHER).toBigInteger();
             BigInteger commission = commissionService.getCommissionAmountBigInteger(amount, collectionPhase.getCollection().getCollectionType());
-            User user = userService.getUserFromAuthentication();
             Funds contract = loadFundsContract();
 
             TransactionReceiptProcessor receipt = new PollingTransactionReceiptProcessor(web3j, TransactionManager.DEFAULT_POLLING_FREQUENCY, TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH);
@@ -132,16 +166,25 @@ public class FundsService{
                 }
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse(WordUtils.capitalize(response.getBody().get("error"))));
             }
+
+            Optional<Poll> poll = pollRepository.findPollByPhaseId(phaseId);
+            if (poll.isEmpty()){
+                pollRepository.save(new Poll(PollState.NOT_ACTIVATED, collectionPhase, collectionPhase.getTill()));
+            }
+
             collectionPhase.setActualFunds(collectionPhase.getActualFunds() + amount);
             collectionPhaseRepository.save(collectionPhase);
+
             collection.setActualFunds(collection.getActualFunds() + amount);
             collectionRepository.save(collection);
+
             List<CollUserRelation> relations = collection.getCollUserRelations();
-            CollUserRelation collUserRelation = new CollUserRelation(user, collection, CollUserType.SUSTAINER);
+            CollUserRelation collUserRelation = new CollUserRelation(user, collection, collectionPhase, CollUserType.SUSTAINER);
             AtomicBoolean assigned = new AtomicBoolean(false);
             relations.forEach(relation -> {
                 if (relation.getType() == collUserRelation.getType() && relation.getUser() == collUserRelation.getUser()
-                        && relation.getCollectionRelation() == collUserRelation.getCollectionRelation()){
+                        && relation.getCollectionRelation() == collUserRelation.getCollectionRelation() && relation.getPhase() != null
+                        && relation.getPhase() == collUserRelation.getPhase()){
                     assigned.set(true);
                 }
             });
@@ -149,6 +192,10 @@ public class FundsService{
                 return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
             }
             relationRepository.save(collUserRelation);
+            if (poll.isPresent()) {
+                poll.get().setAllowedUsersCount(poll.get().getAllowedUsersCount() + 1);
+                pollRepository.save(poll.get());
+            }
             return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new PreparedResponse().getFailureResponse(e.getMessage()));
@@ -189,11 +236,47 @@ public class FundsService{
         }
     }
 
-    public ResponseEntity<Map<String, String>> getTransactionHistory() {
+    public ResponseEntity<List> getTransactionHistory() {
         try {
+            User authUser = userService.getUserFromAuthentication();
             Funds contract = loadFundsContract();
+            List transactions = contract.getTransactionHiostory().send();
+            List<FundsService.TransactionStruct> formattedData = new ArrayList<>();
+            if (transactions.size() > 0){
+                for (Object object : transactions) {
+                    Class<?> struct = object.getClass();
+                    Field senderField = struct.getField("sender");
+                    Object senderValue = senderField.get(object);
+                    if (!authUser.getPublicAddress().toLowerCase().equals(senderValue.toString().toLowerCase())){
+                        continue;
+                    }
+                    Field receiverField = struct.getField("receiver");
+                    Object receiverValue = receiverField.get(object);
+                    Field phaseIdField = struct.getField("_phaseId");
+                    Object phaseIdValue = phaseIdField.get(object);
+                    Field amountField = struct.getField("amount");
+                    Object amountValue = amountField.get(object);
+                    Field timestampField = struct.getField("timestamp");
+                    Object timestampValue = timestampField.get(object);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(contract.getTransactionHiostory().send().toString()));
+                    ResponseEntity<List<CollectionPhase>> phaseResponse = collectionPhaseService.getCollectionPhases(Long.valueOf(phaseIdValue.toString()));
+                    String phaseName = "";
+                    if (phaseResponse.getStatusCode() == HttpStatus.OK){
+                        phaseName = phaseResponse.getBody().get(0).getCollection().getCollectionName() + " - " + phaseResponse.getBody().get(0).getPhaseName();
+                    }
+                    LocalDateTime time = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneOffset.UTC);//TODO: strefa czasowa
+                    BigDecimal parsedValue = Convert.fromWei(String.valueOf(amountValue), Convert.Unit.ETHER);
+
+                    formattedData.add(new FundsService.TransactionStruct(
+                            senderValue.toString(),
+                            receiverValue.toString(),
+                            phaseName,
+                            parsedValue,
+                            time.toString()
+                    ));
+                }
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(formattedData);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }

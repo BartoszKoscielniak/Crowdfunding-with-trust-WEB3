@@ -60,7 +60,7 @@ public class FundsController {
     }
 
     @GetMapping(path = "/transactionhistory")
-    public ResponseEntity<Map<String, String>> getTransactionHistory() {
+    public ResponseEntity<List> getTransactionHistory() {
         return fundsService.getTransactionHistory();
     }
 
