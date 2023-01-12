@@ -20,10 +20,16 @@ public class CollectionController {
         return service.getCollection(id);
     }
 
+    @GetMapping(path = "/owned")
+    public ResponseEntity<List<Collection>> getOwnedCollections(){
+        return service.getOwnedCollection();
+    }
+
     @GetMapping()
     public ResponseEntity<List<Collection>> getAllCollections(
-            @RequestParam(required = false) CollectionType type){
-        return service.getAllCollections(type);
+            @RequestParam(required = false) CollectionType type,
+            @RequestParam(required = false) String name){
+        return service.getAllCollections(type, name);
     }
 
     @GetMapping(path = "/type")
@@ -34,10 +40,34 @@ public class CollectionController {
 
     @PostMapping
     public ResponseEntity<Map<String, String>> addCollection(
-            @RequestParam Double goal,
             @RequestParam String description,
-            @RequestParam CollectionType type){
-        return service.addCollection(goal, description, type);
+            @RequestParam String name,
+            @RequestParam CollectionType type,
+            @RequestParam String phase1name,
+            @RequestParam String phase1description,
+            @RequestParam String phase1till,
+            @RequestParam Double phase1goal,
+            @RequestParam(required = false) String phase1proofOfEvidence,
+            @RequestParam(required = false) String phase2name,
+            @RequestParam(required = false) String phase2description,
+            @RequestParam(required = false) String phase2till,
+            @RequestParam(required = false) Double phase2goal,
+            @RequestParam(required = false) String phase2proofOfEvidence,
+            @RequestParam(required = false) String phase3name,
+            @RequestParam(required = false) String phase3description,
+            @RequestParam(required = false) String phase3till,
+            @RequestParam(required = false) Double phase3goal,
+            @RequestParam(required = false) String phase3proofOfEvidence,
+            @RequestParam(required = false) String phase4name,
+            @RequestParam(required = false) String phase4description,
+            @RequestParam(required = false) String phase4till,
+            @RequestParam(required = false) Double phase4goal,
+            @RequestParam(required = false) String phase4proofOfEvidence){
+        return service.addCollection(name, description, type,
+                phase1name, phase1description, phase1goal,phase1till, phase1proofOfEvidence,
+                phase2name, phase2description, phase2goal,phase2till, phase2proofOfEvidence,
+                phase3name, phase3description, phase3goal,phase3till, phase3proofOfEvidence,
+                phase4name, phase4description, phase4goal,phase4till, phase4proofOfEvidence);
     }
 
     @PutMapping(path = "/{id}")

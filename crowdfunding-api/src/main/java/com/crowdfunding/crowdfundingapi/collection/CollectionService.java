@@ -1,6 +1,7 @@
 package com.crowdfunding.crowdfundingapi.collection;
 
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhase;
+import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhaseRepository;
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhaseService;
 import com.crowdfunding.crowdfundingapi.config.PreparedResponse;
 import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
@@ -9,11 +10,13 @@ import com.crowdfunding.crowdfundingapi.support.RelationRepository;
 import com.crowdfunding.crowdfundingapi.user.User;
 import com.crowdfunding.crowdfundingapi.user.UserService;
 import lombok.AllArgsConstructor;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -22,6 +25,7 @@ import java.util.*;
 public class CollectionService {
 
     private final CollectionRepository repository;
+    private final CollectionPhaseRepository phaseRepository;
     private final UserService userService;
     private final RelationRepository relationRepository;
     private final CollectionPhaseService phaseService;
@@ -36,16 +40,24 @@ public class CollectionService {
         return ResponseEntity.status(HttpStatus.OK).body(optionalCollection.get());
     }
 
-    public ResponseEntity<List<Collection>> getAllCollections(CollectionType type) {
+    public ResponseEntity<List<Collection>> getAllCollections(CollectionType type, String name) {
         List<Collection> optionalCollection = repository.findAll();
         checkPromoExpiration(optionalCollection);
-        if (optionalCollection.isEmpty()){
+
+        List<Collection> publishedCollections = new ArrayList<>();
+        optionalCollection.forEach(collection -> {
+            if (collection.getState() == State.PUBLISHED){
+                publishedCollections.add(collection);
+            }
+        });
+
+        if (publishedCollections.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        if (type != null){
-            List<Collection> response = new ArrayList<>();
-            optionalCollection.stream().forEach(collection -> {
+        List<Collection> response = new ArrayList<>();
+        if (type != null && name == null){
+            publishedCollections.stream().forEach(collection -> {
                 if (collection.getCollectionType() == type){
                     response.add(collection);
                 }
@@ -53,7 +65,25 @@ public class CollectionService {
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(optionalCollection);
+        if (name != null && type == null){
+            publishedCollections.stream().forEach(collection -> {
+                if (collection.getCollectionName().toLowerCase().contains(name)){
+                    response.add(collection);
+                }
+            });
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }
+
+        if (name != null && type != null){
+            publishedCollections.stream().forEach(collection -> {
+                if (collection.getCollectionName().toLowerCase().contains(name) && collection.getCollectionType() == type){
+                    response.add(collection);
+                }
+            });
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(publishedCollections);
     }
 
     private void checkPromoExpiration(List<Collection> collectionsList){
@@ -65,21 +95,115 @@ public class CollectionService {
         });
     }
 
-    public ResponseEntity<Map<String, String>> addCollection(Double goal, String description, CollectionType type) {
+    public ResponseEntity<Map<String, String>> addCollection(String name, String description, CollectionType type,
+                                 String phase1name, String phase1description, Double phase1goal, String phase1till, String phase1poe,
+                                 String phase2name, String phase2description, Double phase2goal, String phase2till, String phase2poe,
+                                 String phase3name, String phase3description, Double phase3goal, String phase3till, String phase3poe,
+                                 String phase4name, String phase4description, Double phase4goal, String phase4till, String phase4poe) {//TODO: jak jest blad to usunacsukces i odwrotnie
         User user = userService.getUserFromAuthentication();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        Optional<Collection> collectionsWithName = repository.findCollectionByName(name);
 
-        if (goal <= 0.5){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect collection goal"));
+        if (collectionsWithName.isPresent()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Collection with provided name already exist!"));
         }
 
-        if (description.length() < 650){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Description is too short. Minimum is 650 characters"));
+        if (description.length() < 100 || description.length() > 255){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Description should have at least 100-255 characters!"));
         }
 
-        Collection collection = new Collection(goal, description, type, new CollUserRelation(user, CollUserType.FOUNDER));
+        if (name.length() < 10 || name.length() > 45){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Name should have at least 10-45 characters!"));
+        }
+
+        double collectionGoal = 0.0;
+        phase2goal = phase2name.length() != 0 ? phase2goal : 0;
+        phase3goal = phase3name.length() != 0 ? phase3goal : 0;
+        phase4goal = phase4name.length() != 0 ? phase4goal : 0;
+        collectionGoal = phase1goal + phase2goal + phase3goal + phase4goal;
+
+        if (phase1description.length() < 100 || phase1description.length() > 255){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Phase description should have at least 100-255 characters!"));
+        }
+
+        if (phase1name.length() < 10 || phase1name.length() > 45){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Phase name should have at least 10-45 characters!"));
+        }
+
+        if (!LocalDateTime.parse(phase1till + " 23:59", formatter).isAfter(LocalDateTime.now())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Cannot use date from past"));
+        }
+
+        if (phase1goal < 0.5){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect collection goal. Minimum is 0.5 ETH per phase."));
+        }
+
+        UrlValidator validator = new UrlValidator();
+        if (type == CollectionType.STARTUP && !validator.isValid(phase1poe)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("URL is not valid"));
+        }
+
+        Collection collection = new Collection(name, collectionGoal, description, type, new CollUserRelation(user, CollUserType.FOUNDER));
+        Optional<CollectionPhase> optionalPhase2 = Optional.empty();
+        Optional<CollectionPhase> optionalPhase3 = Optional.empty();
+        Optional<CollectionPhase> optionalPhase4 = Optional.empty();
+
+        if (phase2name.length() != 0 && phase2goal != 0 && phase2description.length() != 0 && phase2till.length() != 0 && phase2poe.length() != 0){
+            ResponseEntity<Map<String, String>> validateResult = validatePhase(phase2name, phase2description, phase2goal, phase2till, phase1till, formatter, phase2poe);
+            if (validateResult.getStatusCode() == HttpStatus.BAD_REQUEST){
+                return validateResult;
+            }
+            optionalPhase2 = Optional.of(new CollectionPhase(phase2goal, phase2description, phase2name, collection, LocalDateTime.parse(phase2till + " 23:59", formatter), phase2poe));
+        }
+
+        if (phase3name.length() != 0 && phase3goal != 0 && phase3description.length() != 0 && phase3till.length() != 0 && phase3poe.length() != 0){
+            ResponseEntity<Map<String, String>> validateResult = validatePhase(phase3name, phase3description, phase3goal, phase3till, phase2till, formatter, phase3poe);
+            if (validateResult.getStatusCode() == HttpStatus.BAD_REQUEST){
+                return validateResult;
+            }
+            optionalPhase3 = Optional.of(new CollectionPhase(phase3goal, phase3description, phase3name, collection, LocalDateTime.parse(phase3till + " 23:59", formatter), phase3poe));
+        }
+
+        if (phase4name.length() != 0 && phase4goal != 0 && phase4description.length() != 0 && phase4till.length() != 0 && phase4poe.length() != 0){
+            ResponseEntity<Map<String, String>> validateResult = validatePhase(phase4name, phase4description, phase4goal, phase4till, phase3till, formatter, phase4poe);
+            if (validateResult.getStatusCode() == HttpStatus.BAD_REQUEST){
+                return validateResult;
+            }
+            optionalPhase4 = Optional.of(new CollectionPhase(phase4goal, phase4description, phase4name, collection, LocalDateTime.parse(phase4till + " 23:59", formatter), phase4poe));
+        }
+
         repository.save(collection);
+        phaseRepository.save(new CollectionPhase(phase1goal, phase1description, phase1name, collection, LocalDateTime.parse(phase1till + " 23:59", formatter), phase1poe));
+        optionalPhase2.ifPresent(phaseRepository::save);
+        optionalPhase3.ifPresent(phaseRepository::save);
+        optionalPhase4.ifPresent(phaseRepository::save);
 
         return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Collection added"));
+    }
+
+    public ResponseEntity<Map<String, String>> validatePhase(String phaseName, String phaseDescription, Double goal, String till, String previousPhaseDeadline, DateTimeFormatter formatter, String poe){
+        if (phaseDescription.length() < 100 || phaseDescription.length() > 255){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Phase description should have at least 100-255 characters!"));
+        }
+
+        if (phaseName.length() < 10 || phaseName.length() > 45){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Phase name should have at least 10-45 characters!"));
+        }
+
+        if (goal < 0.5){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect collection goal. Minimum is 0.5 ETH per phase."));
+        }
+
+        if (!LocalDateTime.parse(till + " 23:59", formatter).isAfter(LocalDateTime.parse(previousPhaseDeadline + " 23:59", formatter))){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Each phase deadline have to be after previous!"));
+        }
+
+        UrlValidator validator = new UrlValidator();
+        if (!validator.isValid(poe)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("URL is not valid"));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     public ResponseEntity<Map<String, String>> updateCollection(Long id, CollectionType collectionType, String baseDescription) {
@@ -166,5 +290,11 @@ public class CollectionService {
         collection.setState(State.PUBLISHED);
         repository.save(collection);
         return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Collection published"));
+    }
+
+    public ResponseEntity<List<Collection>> getOwnedCollection( ) {
+        User authUser = userService.getUserFromAuthentication();
+        List<Collection> ownedCollection = relationRepository.findCollectionsByRelation(CollUserType.FOUNDER, authUser.getPublicAddress());
+        return ResponseEntity.status(HttpStatus.OK).body(ownedCollection);
     }
 }
