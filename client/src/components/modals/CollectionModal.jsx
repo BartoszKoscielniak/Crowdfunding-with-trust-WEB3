@@ -6,7 +6,7 @@ import { Input } from '..';
 import { useRef } from 'react';
 
 const Modal = ({ open, close, collectionId }) => {
-    const { collections, collectionError, collectionSuccess, setCollectionError, DepositFunds, openedCollectionModal, setOpenedCollectionModal } = useContext(CollectionContext);
+    const { collections, collectionError, collectionSuccess, setCollectionError, setCollectionSuccess, DepositFunds, openedCollectionModal, setOpenedCollectionModal } = useContext(CollectionContext);
     const { authenticated, bearerToken } = useContext(AccessContext);
     const [amount, setAmount] = useState(0.0001)
     const [loadingSpinner, setLoadingSpinner] = useState(false)
@@ -45,7 +45,6 @@ const Modal = ({ open, close, collectionId }) => {
         document.addEventListener("click", clickOutside, true);
         if (collections !== null && collections[collectionId]['collectionPhase'][0] !== undefined) {
             setRadioselected(collections[collectionId]['collectionPhase'][0]['id'])
-            setOpenedCollectionModal(collections[collectionId])
         }
         return () => {
             document.removeEventListener("click", clickOutside, true);
@@ -69,7 +68,7 @@ const Modal = ({ open, close, collectionId }) => {
                     <div className='bottom-1 absolute w-full'>
                         <Input id="amountInput" placeholder="Amount" name="amountInput" type="number" value={amount} handleChange={handleChange} />
                         <button
-                            onClick={() => { sendFunds(radioselected); setLoadingSpinner(true) }}
+                            onClick={() => { sendFunds(radioselected); setLoadingSpinner(true); setCollectionSuccess(null); setCollectionError(null) }}
                             className="text-white text-xl p-2 w-full rounded-lg bg-indigo-600 transition ease-in-out delay-50 hover:scale-105 hover:bg-indigo-400 duration-200"
                         >
                             {loadingSpinner && collectionError === null && collectionSuccess === null ? (
@@ -85,9 +84,11 @@ const Modal = ({ open, close, collectionId }) => {
                         Object.keys(collections[collectionId]['collectionPhase']).map((key) => {
                             return <div key={key}>
                                 <div className='font-sans text-2xl antialiased'>
-                                    <div className='inline-block pr-3'><Input id="phaseInput" name={collections[collectionId]['collectionPhase'][key]['id']} type="radio" checked={isSelected(collections[collectionId]['collectionPhase'][key]['id'])} handleChange={handleRadioChange} /> </div>
+                                    <div className='inline-block pr-3'>
+                                        <Input id="phaseInput" name={collections[collectionId]['collectionPhase'][key]['id']} type="radio" checked={isSelected(collections[collectionId]['collectionPhase'][key]['id'])} handleChange={handleRadioChange} /> 
+                                    </div>
                                     <p className='underline inline-block'>{collections[collectionId]['collectionPhase'][key]['phaseName']}</p>
-                                    <p className='inline-block float-right'>{collections[collectionId]['collectionPhase'][key]['actualFunds'].toFixed(4)}/{collections[collectionId]['collectionPhase'][key]['goal']}</p>
+                                    <p className='inline-block float-right'>{collections[collectionId]['collectionPhase'][key]['actualFunds'].toFixed(4)}/{collections[collectionId]['collectionPhase'][key]['goal']} ETH</p>
                                 </div><br />
                                 <div className='font-sans text-md antialiased'>
                                     <p>{collections[collectionId]['collectionPhase'][key]['description']}</p>
@@ -123,7 +124,7 @@ const Modal = ({ open, close, collectionId }) => {
                         Till: {collections[collectionId]['collectionPhase'][0]['till'].substring(0, collections[collectionId]['collectionPhase'][0]['till'].indexOf('T'))}
                     </p>
                     <button
-                        onClick={() => { sendFunds(collections[collectionId]['collectionPhase'][0]['id']); setLoadingSpinner(true) }}
+                        onClick={() => { sendFunds(collections[collectionId]['collectionPhase'][0]['id']); setLoadingSpinner(true); setCollectionSuccess(null); setCollectionError(null) }}
                         className="text-white text-xl p-2 w-full rounded-lg bg-indigo-600 transition ease-in-out delay-50 hover:scale-105 hover:bg-indigo-400 duration-200"
                     >
                         {loadingSpinner && collectionError === null && collectionSuccess === null ? (

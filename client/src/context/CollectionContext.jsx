@@ -1,29 +1,16 @@
-import React, {useEffect, useState} from "react";
-import { ethers } from 'ethers';
+import React, { useEffect, useState } from "react";
 
 export const CollectionContext = React.createContext();
 
-const { ethereum } = window;
+export const CollectionProvider = ({ children }) => {
 
-const sessionStorageState = (key, receivedValue) => {
-    const [value, setValue] = useState(JSON.parse(localStorage.getItem(key)) ?? receivedValue);
-
-    useEffect(() => {
-      localStorage.setItem(key, JSON.stringify(value));
-    }, [value, key]);
-    
-    return [value, setValue];
-}
-
-export const CollectionProvider = ({children}) => {
-    
     const URL = 'http://localhost:8080';
-    //const [login, setLogin]                             = sessionStorageState('login', "");
-    const [registerData, setRegisterData] = useState({ nameInput: '', surnameInput: '', emailInput: '', phoneInput: '', keyInput: '', passwordInput: '' })
-    //const [authenticated, setAuthenticated]             = sessionStorageState('authenticated', false);
-    const [collections, setCollections] = useState(null)
-    const [collectionError, setCollectionError] = useState(null)
-    const [collectionSuccess, setCollectionSuccess] = useState(null)
+    //const [login, setLogin]                               = sessionStorageState('login', "");
+    const [registerData, setRegisterData]                   = useState({ nameInput: '', surnameInput: '', emailInput: '', phoneInput: '', keyInput: '', passwordInput: '' })
+    //const [authenticated, setAuthenticated]               = sessionStorageState('authenticated', false);
+    const [collections, setCollections]                     = useState(null)
+    const [collectionError, setCollectionError]             = useState(null)
+    const [collectionSuccess, setCollectionSuccess]         = useState(null)
     const [openedCollectionModal, setOpenedCollectionModal] = useState(null)
 
     const handleChangeRegister = (e, name) => {
@@ -86,16 +73,16 @@ export const CollectionProvider = ({children}) => {
 
     const AddCollection = async (collectionData, type, authToken) => {
         const { collectionNameInput, collectionDescriptionInput,
-            phase1NameInput, phase1DescriptionInput, phase1GoalInput, phase1TillInput,
-            phase2NameInput, phase2DescriptionInput, phase2GoalInput, phase2TillInput,
-            phase3NameInput, phase3DescriptionInput, phase3GoalInput, phase3TillInput,
-            phase4NameInput, phase4DescriptionInput, phase4GoalInput, phase4TillInput } = collectionData
+            phase1NameInput, phase1DescriptionInput, phase1GoalInput, phase1TillInput, phase1PoeInput,
+            phase2NameInput, phase2DescriptionInput, phase2GoalInput, phase2TillInput, phase2PoeInput,
+            phase3NameInput, phase3DescriptionInput, phase3GoalInput, phase3TillInput, phase3PoeInput,
+            phase4NameInput, phase4DescriptionInput, phase4GoalInput, phase4TillInput, phase4PoeInput } = collectionData
 
         if (collectionNameInput === null || collectionDescriptionInput === null || phase1NameInput === null ||
             phase1DescriptionInput === null || phase1GoalInput === null || phase1TillInput === null) {
             setCollectionError("Fill in all required fileds!")
         } else {
-            return await fetch(`${URL}/api/collection?description=${collectionDescriptionInput}&name=${collectionNameInput}&type=${type}&phase1name=${phase1NameInput}&phase1description=${phase1DescriptionInput}&phase1till=${phase1TillInput}&phase1goal=${phase1GoalInput}&phase2name=${phase2NameInput}&phase2description=${phase2DescriptionInput}&phase2till=${phase2TillInput}&phase2goal=${phase2GoalInput}&phase3name=${phase3NameInput}&phase3description=${phase3DescriptionInput}&phase3till=${phase3TillInput}&phase3goal=${phase3GoalInput}&phase4name=${phase4NameInput}&phase4description=${phase4DescriptionInput}&phase4till=${phase4TillInput}&phase4goal=${phase4GoalInput}`, {
+            return await fetch(`${URL}/api/collection?description=${collectionDescriptionInput}&name=${collectionNameInput}&type=${type}&phase1name=${phase1NameInput}&phase1description=${phase1DescriptionInput}&phase1till=${phase1TillInput}&phase1goal=${phase1GoalInput}&phase2name=${phase2NameInput}&phase2description=${phase2DescriptionInput}&phase2till=${phase2TillInput}&phase2goal=${phase2GoalInput}&phase3name=${phase3NameInput}&phase3description=${phase3DescriptionInput}&phase3till=${phase3TillInput}&phase3goal=${phase3GoalInput}&phase4name=${phase4NameInput}&phase4description=${phase4DescriptionInput}&phase4till=${phase4TillInput}&phase4goal=${phase4GoalInput}&phase1proofOfEvidence=${phase1PoeInput}&phase2proofOfEvidence=${phase2PoeInput}&phase3proofOfEvidence=${phase3PoeInput}&phase4proofOfEvidence=${phase4PoeInput}`, {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8',

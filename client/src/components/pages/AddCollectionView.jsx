@@ -9,10 +9,10 @@ const CollectionsView = () => {
     const { authenticated, bearerToken } = useContext(AccessContext);
     const [collectionData, setCollectionData] = useState({
         collectionNameInput: '', collectionDescriptionInput: '',
-        phase1NameInput: '', phase1DescriptionInput: '', phase1GoalInput: 0.5, phase1TillInput: '',
-        phase2NameInput: '', phase2DescriptionInput: '', phase2GoalInput: 0.5, phase2TillInput: '',
-        phase3NameInput: '', phase3DescriptionInput: '', phase3GoalInput: 0.5, phase3TillInput: '',
-        phase4NameInput: '', phase4DescriptionInput: '', phase4GoalInput: 0.5, phase4TillInput: ''
+        phase1NameInput: '', phase1DescriptionInput: '', phase1GoalInput: 0.5, phase1TillInput: '', phase1PoeInput: '',
+        phase2NameInput: '', phase2DescriptionInput: '', phase2GoalInput: 0.5, phase2TillInput: '', phase2PoeInput: '',
+        phase3NameInput: '', phase3DescriptionInput: '', phase3GoalInput: 0.5, phase3TillInput: '', phase3PoeInput: '',
+        phase4NameInput: '', phase4DescriptionInput: '', phase4GoalInput: 0.5, phase4TillInput: '', phase4PoeInput: ''
     })
     const [radioselected, setRadioselected] = useState("CHARITY")
     const [loadingSpinner, setLoadingSpinner] = useState(false)
@@ -23,7 +23,8 @@ const CollectionsView = () => {
             setCollectionData((prevState) => ({ ...prevState, [name]: e.target.value }));
         } else if ((name === 'collectionDescriptionInput' || name === 'phase1DescriptionInput' || name === 'phase2DescriptionInput' || name === 'phase3DescriptionInput' || name === 'phase4DescriptionInput') && e.target.value.length <= 255) {
             setCollectionData((prevState) => ({ ...prevState, [name]: e.target.value }));
-        } else if (name === 'phase1TillInput' || name === 'phase2TillInput' || name === 'phase3TillInput' || name === 'phase4TillInput') {
+        } else if (name === 'phase1TillInput' || name === 'phase2TillInput' || name === 'phase3TillInput' || name === 'phase4TillInput' ||
+                    name === 'phase1PoeInput' || name === 'phase2PoeInput' || name === 'phase3PoeInput' || name === 'phase4PoeInput') {
             setCollectionData((prevState) => ({ ...prevState, [name]: e.target.value }));
         } else if ((name === 'phase1GoalInput' || name === 'phase2GoalInput' || name === 'phase3GoalInput' || name === 'phase4GoalInput') && e.target.value > 0.5) {
             setCollectionData((prevState) => ({ ...prevState, [name]: e.target.value }));
@@ -62,7 +63,12 @@ const CollectionsView = () => {
                             <p className="float-right absolute right-1 top-1/2">{collectionData['collectionNameInput'] !== null && (collectionData['collectionNameInput'].length)}</p>
                         </div>
                         <div className="relative">
-                            <TextArea placeholder="Description(100-255 characters)" name="collectionDescriptionInput" type="text" value={collectionData['collectionDescriptionInput']} handleChange={handleChange} additionalStyling={"h-[270px]"} />
+                            {radioselected == "CHARITY" ? (
+                                <TextArea placeholder="Description(100-255 characters)" name="collectionDescriptionInput" type="text" value={collectionData['collectionDescriptionInput']} handleChange={handleChange} additionalStyling={"h-[272px]"} />
+                            ) : (
+                                <TextArea placeholder="Description(100-255 characters)" name="collectionDescriptionInput" type="text" value={collectionData['collectionDescriptionInput']} handleChange={handleChange} additionalStyling={"h-[330px]"} />
+                            )
+                            }
                             <p className="float-right absolute right-1 bottom-4">{collectionData['collectionDescriptionInput'] !== null && (collectionData['collectionDescriptionInput'].length)}</p>
                         </div>
                         <div className="rounded-xl p-2 outline-none bg-transparent text-white border my-2">
@@ -76,7 +82,7 @@ const CollectionsView = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="text-white text-lg overflow-auto max-h-[470px] pr-2">
+                    <div className="text-white text-lg overflow-auto max-h-[530px] pr-2">
                         {radioselected == "CHARITY" ? (
                             <div>
                                 <h1 className="text-center text-3xl font-sans">Phase</h1>
@@ -104,6 +110,7 @@ const CollectionsView = () => {
                                         <p className="float-right absolute right-1 bottom-4">{collectionData['phase1DescriptionInput'] !== null && (collectionData['phase1DescriptionInput'].length)}</p>
                                     </div>
                                     <Input placeholder="Goal" name="phase1GoalInput" type="number" value={collectionData['phase1GoalInput']} handleChange={handleChange} />
+                                    <Input placeholder="Link to evidences" name="phase1PoeInput" type="text" value={collectionData['phase1PoeInput']} handleChange={handleChange} />
                                     <Input placeholder="Till" name="phase1TillInput" type="date" handleChange={handleChange} />
                                 </div>
                                 <div>
@@ -117,6 +124,7 @@ const CollectionsView = () => {
                                         <p className="float-right absolute right-1 bottom-4">{collectionData['phase2DescriptionInput'] !== null && (collectionData['phase2DescriptionInput'].length)}</p>
                                     </div>
                                     <Input placeholder="Goal" name="phase2GoalInput" type="number" value={collectionData['phase2GoalInput']} handleChange={handleChange} />
+                                    <Input placeholder="Link to evidences" name="phase2PoeInput" type="text" value={collectionData['phase2PoeInput']} handleChange={handleChange} />
                                     <Input placeholder="Till" name="phase2TillInput" type="date" handleChange={handleChange} />
                                 </div>
                                 <div>
@@ -130,6 +138,7 @@ const CollectionsView = () => {
                                         <p className="float-right absolute right-1 bottom-4">{collectionData['phase3DescriptionInput'] !== null && (collectionData['phase3DescriptionInput'].length)}</p>
                                     </div>
                                     <Input placeholder="Goal" name="phase3GoalInput" type="number" value={collectionData['phase3GoalInput']} handleChange={handleChange} />
+                                    <Input placeholder="Link to evidences" name="phase3PoeInput" type="text" value={collectionData['phase3PoeInput']} handleChange={handleChange} />
                                     <Input placeholder="Till" name="phase3TillInput" type="date" handleChange={handleChange} />
                                 </div>
                                 <div>
@@ -143,6 +152,7 @@ const CollectionsView = () => {
                                         <p className="float-right absolute right-1 bottom-4">{collectionData['phase4DescriptionInput'] !== null && (collectionData['phase4DescriptionInput'].length)}</p>
                                     </div>
                                     <Input placeholder="Goal" name="phase4GoalInput" type="number" value={collectionData['phase4GoalInput']} handleChange={handleChange} />
+                                    <Input placeholder="Link to evidences" name="phase4PoeInput" type="text" value={collectionData['phase4PoeInput']} handleChange={handleChange} />
                                     <Input placeholder="Till" name="phase4TillInput" type="date" handleChange={handleChange} />
                                 </div>
                             </div>
@@ -157,7 +167,7 @@ const CollectionsView = () => {
                         {loadingSpinner && collectionError === null && collectionSuccess === null ? (
                             <AiOutlineLoading3Quarters fontSize={30} className="text-white inline-block animate-spin" />
                         ) : (
-                            <p>Support!</p>
+                            <p>Add Collection!</p>
                         )}
                     </button>
                 </div>
