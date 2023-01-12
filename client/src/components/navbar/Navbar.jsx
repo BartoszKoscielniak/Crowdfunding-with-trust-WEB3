@@ -31,8 +31,7 @@ const Navbar = ({style}) => {
     const routingArray = [
         ["Your account", []],
         ["Collections", ['Add collections', 'My collections']],
-        ["Funds", ['Deposit', 'History']],
-        ["Earn", ['Profits']],
+        ["Polls", ['History']],
         ["About us", []]
     ];
 

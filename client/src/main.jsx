@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import { App, ErrorPage, Account, Collections, Funds, Earn, AddCollection, UsersCollections } from './routes';
+import { App, ErrorPage, Account, Collections, Earn, AddCollection, UsersCollections, Polls, PollsHistory } from './routes';
 
 import "./index.css";
 
@@ -19,6 +19,11 @@ const router = createBrowserRouter([
   {
     path: "/collections",
     element: <Collections />,
+    errorElement: <ErrorPage />
+  },
+  {
+    path: "/polls",
+    element: <Polls />,
     errorElement: <ErrorPage />,
   },
   {
@@ -32,10 +37,9 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
-    path: "/funds",
-    element: <Funds />,
+    path: "/polls/history",
+    element: <PollsHistory />,
     errorElement: <ErrorPage />,
-    
   },
   {
     path: "/earn",

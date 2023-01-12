@@ -1,7 +1,6 @@
 export { default as Navbar } from './navbar/Navbar';
 export { default as Welcome } from './pages/Welcome';
 export { default as Background } from './background/Background';
-export { default as Foreground } from './pages/Foreground';
 export { default as CollectionsView } from './pages/CollectionsView';
 export { default as LoginModal } from './modals/LoginModal';
 export { default as Input } from './input/Input';
@@ -15,3 +14,6 @@ export { default as SuccessAlert } from './alerts/SuccessAlert';
 export { default as CollectionModal } from './modals/CollectionModal';
 export { default as AddCollectionView } from './pages/AddCollectionView';
 export { default as UsersCollections } from './pages/UsersCollections';
+export { default as PollsView } from './pages/PollsView';
+export { default as PollsViewHistory } from './pages/PollsViewHistory';
+export { default as AccountView } from './pages/AccountView';

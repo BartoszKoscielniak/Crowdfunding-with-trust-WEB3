@@ -7,7 +7,7 @@ const  SuccessAlert = ({text, close}) => {
             <div className="p-3 text-white ">
                 <AiOutlineCloseCircle fontSize={21} className="text-white float-right -top-1/2 cursor-pointer" onClick={close}/>
                 <GiConfirmed fontSize={21} className="text-white inline-block float-left -top-1/2" />
-                <p className="inline-block text-lg pr-1 align-middle">{text}</p>
+                <div className="inline-block text-lg pr-1 align-middle">{text}</div>
             </div>
         </div>
     );
