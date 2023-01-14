@@ -3,22 +3,24 @@ import { CollectionContext } from '../../context/CollectionContext';
 import { AccessContext } from '../../context/AccessContext';
 import { PollContext } from "../../context/PollsContext";
 import { CollectionCard, ErrorAlert, SuccessAlert, Pagination, Input } from '..'
+import { Navigate } from "react-router-dom";
 
 const CollectionsView = () => {
   const { polls, pollError, Pollsuccess, setPollError, setPollsuccess, GetAccessiblePolls, Vote } = useContext(PollContext);
-  const { authenticated, bearerToken, login } = useContext(AccessContext);
+  const { authenticated, bearerToken, login, setAccessError } = useContext(AccessContext);
   const [loadingSpinner, setLoadingSpinner]   = useState(false)
   
   useEffect(() => {
     if (!authenticated) {
       setPollError("You have to be logged in!")
+      setAccessError("You have to be logged in!")
     } else {
       GetAccessiblePolls(bearerToken)
     }
   }, [])
 
   return (
-    <div>
+    <div>{!authenticated ? (<Navigate replace to="/" />) : (
       <div className="bg-neutral-800 w-full absolute mf:flex-row md:px-20 md:py-28 px-4 h-full">
         {/* <h1 className="text-white text-3xl px-4 pb-2">Ongoing polls</h1> */}
         <div className='mx-2 text-white text-md px-2 max-h-[520px] overflow-auto border rounded-xl p-3 drop-shadow-2xl'>
@@ -33,7 +35,7 @@ const CollectionsView = () => {
                         <div className='font-sans text-md antialiased text-xl'>
                             <p>Votes: {polls[key]['votes'].length} / {polls[key]['allowedUsersCount']}</p>
                             <p>Starts: {polls[key]['startDate'].substring(0, polls[key]['startDate'].indexOf('T'))} - {polls[key]['endDate'].substring(0, polls[key]['endDate'].indexOf('T'))}</p>
-                            <p>Proof of evidence: <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io`} target='_blank' rel='noopener noreferrer'>Evidences</a></p><br />
+                            <p>Proof of evidence: <a className='underline-offset-1 inline-block underline' href={polls[key]['collectionPhase']['proofOfEvidence']} target='_blank' rel='noopener noreferrer'>Evidences</a></p><br />
                             
                             { polls[key]['state'] === 'IN_PROCESS' && (
                               <div>
@@ -75,6 +77,8 @@ const CollectionsView = () => {
           <SuccessAlert text={Pollsuccess} close={() => { setPollsuccess(null) }} />
         )}
       </div>
+    )}
+
     </div>
   );
 }

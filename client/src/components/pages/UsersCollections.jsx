@@ -3,15 +3,17 @@ import { CollectionContext } from '../../context/CollectionContext';
 import { AccessContext } from '../../context/AccessContext';
 import { PollContext } from "../../context/PollsContext";
 import { CollectionCard, ErrorAlert, SuccessAlert, Pagination } from '../../components'
+import { Navigate } from "react-router-dom";
 
 const CollectionsView = () => {
   const { GetUsersCollections, collections, collectionError, collectionSuccess, setCollectionError, setCollectionSuccess, openedCollectionModal } = useContext(CollectionContext);
   const { polls, pollError, Pollsuccess, setPollError, setPollsuccess, GetOwnedPolls } = useContext(PollContext);
-  const { authenticated, bearerToken } = useContext(AccessContext);
+  const { authenticated, bearerToken, setAccessError } = useContext(AccessContext);
 
   useEffect(() => {
     if (!authenticated) {
       setCollectionError("You have to be logged in!")
+      setAccessError("You have to be logged in!")
     } else {
       GetUsersCollections(bearerToken)
     }
@@ -26,7 +28,7 @@ const CollectionsView = () => {
   }
 
   return (
-    <div>
+    <div>{!authenticated ? (<Navigate replace to="/" />) : (
       <div className="bg-neutral-800 w-full absolute mf:flex-row md:px-20 md:py-28 px-4 ">
         <div className="">{/* relative grid gap-3 grid-cols-2 grid-rows-1 */}
           <div className="overflow-y-auto px-16 h-[960px] w-1/2 float-left">
@@ -140,6 +142,7 @@ const CollectionsView = () => {
           <SuccessAlert text={Pollsuccess} close={() => { setPollsuccess(null) }} />
         )}
       </div>
+    )}
     </div>
   );
 }

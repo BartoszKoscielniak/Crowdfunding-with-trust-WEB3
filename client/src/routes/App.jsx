@@ -5,7 +5,6 @@ import { AccessProvider } from "../context/AccessContext";
 const App = () => {
  
   return (
-    <AccessProvider>
       <Parallax pages={1.5}>
         <ParallaxLayer
             style={{
@@ -26,7 +25,6 @@ const App = () => {
           <Welcome/>
         </ParallaxLayer>
       </Parallax>
-  </AccessProvider>
   )
 }
 

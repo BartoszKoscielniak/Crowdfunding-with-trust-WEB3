@@ -7,7 +7,6 @@ import { Parallax, ParallaxLayer } from "@react-spring/parallax";
 const Collections = () => {
     
     return (
-        <AccessProvider>
             <CollectionProvider>
                 <PollProvider>
                     
@@ -18,7 +17,6 @@ const Collections = () => {
                     <CollectionsView/>
                 </PollProvider>
             </CollectionProvider>
-        </AccessProvider>
     );
 }
 

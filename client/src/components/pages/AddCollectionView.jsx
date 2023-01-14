@@ -3,10 +3,11 @@ import { CollectionContext } from '../../context/CollectionContext';
 import { AccessContext } from '../../context/AccessContext';
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { ErrorAlert, SuccessAlert, Input, TextArea } from '../../components'
+import { Navigate } from "react-router-dom";
 
 const CollectionsView = () => {
     const { collectionError, collectionSuccess, setCollectionError, setCollectionSuccess, AddCollection } = useContext(CollectionContext);
-    const { authenticated, bearerToken } = useContext(AccessContext);
+    const { authenticated, bearerToken, setAccessError } = useContext(AccessContext);
     const [collectionData, setCollectionData] = useState({
         collectionNameInput: '', collectionDescriptionInput: '',
         phase1NameInput: '', phase1DescriptionInput: '', phase1GoalInput: 0.5, phase1TillInput: '', phase1PoeInput: '',
@@ -48,12 +49,15 @@ const CollectionsView = () => {
     }
 
     useEffect(() => {
-
+        if (!authenticated) {
+            setCollectionError("You have to be logged in!")
+            setAccessError("You have to be logged in!")
+        }
     }, [])
 
 
     return (
-        <div>
+        <div>{!authenticated ? (<Navigate replace to="/" />) : (
             <div className="bg-neutral-800 w-full absolute mf:flex-row md:px-20 md:py-28 px-4 h-[1000px]">
                 <div className="grid gap-5 grid-cols-2 grid-rows-1 pl-2">
                     <div className="text-white text-lg">
@@ -185,6 +189,7 @@ const CollectionsView = () => {
                     <SuccessAlert text={collectionSuccess} close={() => { setCollectionSuccess(null); setLoadingSpinner(false); }} />
                 )}
             </div>
+        )}
         </div>
     );
 }

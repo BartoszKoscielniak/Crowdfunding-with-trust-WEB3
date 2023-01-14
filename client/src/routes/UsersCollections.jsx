@@ -6,7 +6,6 @@ import { PollProvider } from "../context/PollsContext";
 const Collections = () => {
     
     return (
-        <AccessProvider>
             <PollProvider>
             <CollectionProvider>
 
@@ -15,7 +14,6 @@ const Collections = () => {
 
             </CollectionProvider>
             </PollProvider>
-        </AccessProvider>
     );
 }
 

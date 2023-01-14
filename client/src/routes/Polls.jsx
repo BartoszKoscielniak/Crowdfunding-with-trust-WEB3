@@ -5,12 +5,10 @@ import { PollProvider } from "../context/PollsContext";
 const Polls = () => {
     
     return (
-        <AccessProvider>
             <PollProvider>
                 <Navbar style = {'bg-neutral-800'}/>
                 <PollsView/>
             </PollProvider>
-        </AccessProvider>
     );
 }
 

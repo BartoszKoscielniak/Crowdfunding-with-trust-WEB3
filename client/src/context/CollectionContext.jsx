@@ -1,23 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { AccessContext } from "./AccessContext";
 
 export const CollectionContext = React.createContext();
 
 export const CollectionProvider = ({ children }) => {
 
     const URL = 'http://localhost:8080';
-    //const [login, setLogin]                               = sessionStorageState('login', "");
     const [registerData, setRegisterData]                   = useState({ nameInput: '', surnameInput: '', emailInput: '', phoneInput: '', keyInput: '', passwordInput: '' })
-    //const [authenticated, setAuthenticated]               = sessionStorageState('authenticated', false);
     const [collections, setCollections]                     = useState(null)
-    const [collectionError, setCollectionError]             = useState(null)
-    const [collectionSuccess, setCollectionSuccess]         = useState(null)
+    const [collectionError, setCollectionErrorState]             = useState(null)
+    const [collectionSuccess, setCollectionSuccessState]         = useState(null)
     const [openedCollectionModal, setOpenedCollectionModal] = useState(null)
+    const [supportedFraudPhases, setSupportedFraudPhases]   = useState(null);
+    const [ownedSuccessPhases, setOwnedSuccessPhases]       = useState(null)
+    const { setAuthenticated, setAccessError }              = useContext(AccessContext);
+
+    const setCollectionError = (msg) => {
+        setCollectionSuccessState(null)
+        setCollectionErrorState(msg)
+    }
+
+    const setCollectionSuccess = (msg) => {
+        setCollectionSuccessState(msg)
+        setCollectionErrorState(null)
+    }
 
     const handleChangeRegister = (e, name) => {
         setRegisterData((prevState) => ({ ...prevState, [name]: e.target.value }));
     }
 
-    const GetAllCollections = async (searchQuery, type) => {
+    const GetAllCollections = async (authToken, searchQuery, type) => {
         let apiCall = '/api/collection'
         if (searchQuery !== undefined && type === undefined) {
             apiCall += '?name=' + searchQuery;
@@ -35,10 +47,18 @@ export const CollectionProvider = ({ children }) => {
             method: 'GET',
             headers: {
                 'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*"
+                'Access-Control-Allow-Origin': "*",
+                'Authorization': authToken
             },
         })
-            .then(response => response.json())
+            .then(response => {
+                if(response.status === 403){
+                    setAccessError("Access denied. Please log in again.")
+                    setAuthenticated(false)
+                }else{
+                    return response.json()
+                }
+            })
             .then(data => {
                 setCollections(data);
             })
@@ -48,7 +68,6 @@ export const CollectionProvider = ({ children }) => {
     }
 
     const DepositFunds = async (phaseId, amount, authToken) => {
-
         return await fetch(`${URL}/api/web3/fund/depositfunds?phaseId=${phaseId}&amount=${amount}`, {
             method: 'POST',
             headers: {
@@ -57,7 +76,14 @@ export const CollectionProvider = ({ children }) => {
                 'Authorization': authToken
             },
         })
-            .then(response => response.json())
+            .then(response => {
+                if(response.status === 403){
+                    setAccessError("Access denied. Please log in again.")
+                    setAuthenticated(false)
+                }else{
+                    return response.json()
+                }
+            })
             .then(data => {
                 if (data['error'] !== undefined) {
                     setCollectionError(data['error'])
@@ -90,7 +116,14 @@ export const CollectionProvider = ({ children }) => {
                     'Authorization': authToken
                 }
             })
-                .then(response => response.json())
+                .then(response => {
+                    if(response.status === 403){
+                        setAccessError("Access denied. Please log in again.")
+                        setAuthenticated(false)
+                    }else{
+                        return response.json()
+                    }
+                })
                 .then(data => {
                     if (data['error'] !== undefined) {
                         setCollectionSuccess(null)
@@ -115,12 +148,69 @@ export const CollectionProvider = ({ children }) => {
                 'Authorization': authToken
             },
         })
-            .then(response => response.json())
+            .then(response => {
+                if(response.status === 403){
+                    setAccessError("Access denied. Please log in again.")
+                    setAuthenticated(false)
+                }else{
+                    return response.json()
+                }
+            })
             .then(data => {
                 setCollections(data);
             })
             .catch(err => {
                 setCollectionError("Failed to fetch collections. Try again later!")
+            });
+    }
+
+    const GetSupportedPhases = async (authToken) => {
+        return await fetch(`${URL}/api/phase/collectionphases/sustainer/NEGATIVE`, {
+            method: 'GET',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+                'Access-Control-Allow-Origin': "*",
+                'Authorization': authToken
+            },
+        })
+            .then(response => {
+                if(response.status === 403){
+                    setAccessError("Access denied. Please log in again.")
+                    setAuthenticated(false)
+                }else{
+                    return response.json()
+                }
+            })
+            .then(data => {
+                setSupportedFraudPhases(data);
+            })
+            .catch(err => {
+                setCollectionError("Failed to fetch phases. Try again later!")
+            });
+    }
+
+    const GetOwnedPhases = async (authToken) => {
+        return await fetch(`${URL}/api/phase/collectionphases/founder/POSITIVE`, {
+            method: 'GET',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+                'Access-Control-Allow-Origin': "*",
+                'Authorization': authToken
+            },
+        })
+            .then(response => {
+                if(response.status === 403){
+                    setAccessError("Access denied. Please log in again.")
+                    setAuthenticated(false)
+                }else{
+                    return response.json()
+                }
+            })
+            .then(data => {
+                setOwnedSuccessPhases(data);
+            })
+            .catch(err => {
+                setCollectionError("Failed to fetch phases. Try again later!")
             });
     }
 
@@ -140,7 +230,13 @@ export const CollectionProvider = ({ children }) => {
             AddCollection,
             GetUsersCollections,
             openedCollectionModal,
-            setOpenedCollectionModal
+            setOpenedCollectionModal,
+            GetOwnedPhases, 
+            GetSupportedPhases,
+            supportedFraudPhases,
+            ownedSuccessPhases,
+            setSupportedFraudPhases,
+            setOwnedSuccessPhases
         }}
         >
             {children}

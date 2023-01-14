@@ -1,12 +1,14 @@
 import React, { useContext } from "react";
 import { Card } from '../index'
 import { BsMouse } from "react-icons/bs";
+import { AccessContext } from "../../context/AccessContext";
+import { ErrorAlert} from '../../components'
 
 
 const Welcome = () => {
+  const { accessError, setAccessError } = useContext(AccessContext);
 
   return (
-
     <div>
       <div className="absolute mf:flex-row md:p-20 py-12 px-4 top-1/2 -translate-y-1/2">
         <div className="mf:mr-10">
@@ -24,7 +26,7 @@ const Welcome = () => {
       <div className="absolute bottom-10 right-1/2 -translate-x-1/2 animate-bounce">
         <BsMouse fontSize={35} className="text-white" />
       </div>
-      <div className="absolute flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-40 align-center px-20 -bottom-[90%]">
+      <section id="aboutus" className="absolute flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-40 align-center px-20 -bottom-[90%]">
         <div className="inline-table pb-30">
           <div className="w-1/2 table-cell pr-1">
             <Card
@@ -63,7 +65,10 @@ const Welcome = () => {
               title={'Public contracts'}
               text={'Means You can check contract code on blockchain and see how We works!'}
             />    
-        </div>      
+        </div>  
+{/*         {accessError !== null && (          
+          <ErrorAlert text={accessError} close={() => { setAccessError(null); }} />
+        )} */}
         <div className=" w-full flex md:justify-center justify-between items-center flex-col pt-4 px-4">
           <div className="sm:w-[90%] w-full h-[0.25px] bg-gray-400 mt-5 " />
           <div className="sm:w-[90%] w-full flex justify-between items-center mt-3">
@@ -71,7 +76,7 @@ const Welcome = () => {
             <p className="text-white text-right text-xs">All rights reserved</p>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

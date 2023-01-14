@@ -36,8 +36,8 @@ const Modal = ({ open, close }) => {
                 Register now!
             </p>
             <div className='pb-2'>
-                <Input placeholder="Name(Optional)" name="nameInput" type="text" handleChange={handleChangeRegister}/>    
-                <Input placeholder="Surname(Optional)" name="surnameInput" type="text"  handleChange={handleChangeRegister}/>    
+                <Input placeholder="Name" name="nameInput" type="text" handleChange={handleChangeRegister}/>    
+                <Input placeholder="Surname" name="surnameInput" type="text"  handleChange={handleChangeRegister}/>    
                 <Input placeholder="E-mail" name="emailInput" type="text"  handleChange={handleChangeRegister}/> 
                 <Input placeholder="Phone Number" name="phoneInput" type="text"  handleChange={handleChangeRegister}/> 
                 <Input placeholder="Private Key" name="keyInput" type="text"  handleChange={handleChangeRegister}/> 
@@ -65,7 +65,7 @@ const Modal = ({ open, close }) => {
                 <button
                     type="button"
                     onClick={() => {
-                        if (emailInput === '' || phoneInput === '' || keyInput === '' || passwordInput === '') {
+                        if (emailInput === '' || phoneInput === '' || keyInput === '' || passwordInput === '' || nameInput === '' || surnameInput === '') {
                             setAccessError("All fields must be filled!")
                         }else{
                             setAccessError(null);

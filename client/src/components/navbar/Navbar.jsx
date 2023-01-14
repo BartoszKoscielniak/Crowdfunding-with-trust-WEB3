@@ -22,11 +22,7 @@ const NavbarItem = ({ item, classProps}) => {
 const Navbar = ({style}) => {
     const [toggleMenu, setToggleMenu] = useState(false); 
     const { login, authenticated, Logout } = useContext(AccessContext);
-    const [isLoginOpen, setModalOpen] = useState(() => {
-        if(authenticated) {
-            false
-        }
-    });
+    const [isLoginOpen, setModalOpen] = useState(!authenticated);
     const [isRegistrationOpen, setRegistrationOpen] = useState(false)
     const routingArray = [
         ["Your account", []],

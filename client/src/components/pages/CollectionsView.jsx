@@ -1,12 +1,20 @@
 import { useContext, useEffect, useState } from "react";
 import { CollectionContext } from '../../context/CollectionContext';
+import { AccessContext } from '../../context/AccessContext';
 import { CollectionCard, ErrorAlert, SuccessAlert, Pagination } from '../../components'
+import { Navigate } from "react-router-dom";
 
 const CollectionsView = () => {
   const { GetAllCollections, collections, collectionError, collectionSuccess, setCollectionError, setCollectionSuccess } = useContext(CollectionContext);
+  const { authenticated, bearerToken, setAccessError } = useContext(AccessContext);
 
   useEffect(() => {
-    GetAllCollections()
+    if (!authenticated) {
+      setCollectionError("You have to be logged in!")
+      setAccessError("You have to be logged in!")
+    } else {
+      GetAllCollections(bearerToken)
+    }
   }, [])
 
   const getCollectionCards = () => {
@@ -18,7 +26,8 @@ const CollectionsView = () => {
   }
 
   return (
-    <div>
+    <div>{!authenticated ? 
+    (<Navigate replace to="/" />) : (
       <div className="bg-neutral-800 w-full absolute mf:flex-row md:px-20 md:py-28 px-4 ">
           {collections !== null ? (
             <div>
@@ -49,7 +58,9 @@ const CollectionsView = () => {
           {collectionSuccess !== null && (
             <SuccessAlert text={collectionSuccess} close = {() => {setCollectionSuccess(null)}}/>
           )}
-      </div>        
+      </div>    
+    )}
+    
     </div>
   );
 }

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { AccessContext } from "./AccessContext";
 
 export const PollContext = React.createContext();
 
@@ -16,9 +17,19 @@ export const PollProvider = ({ children }) => {
 
     const URL = 'http://localhost:8080';
     const [polls, setPolls]                     = useState(null)
-    const [pollError, setPollError]             = useState(null)
-    const [Pollsuccess, setPollsuccess]         = useState(null)
-    const [authenticated, setAuthenticated]     = sessionStorageState('authenticated', false);
+    const [pollError, setPollErrorState]             = useState(null)
+    const [Pollsuccess, setPollsuccessState]         = useState(null)
+    const { setAuthenticated, setAccessError }  = useContext(AccessContext);
+
+    const setPollError = (msg) => {
+        setPollsuccessState(null)
+        setPollErrorState(msg)
+    }
+
+    const setPollsuccess = (msg) => {
+        setPollsuccessState(msg)
+        setPollErrorState(null)
+    }
 
     const handleChangeRegister = (e, name) => {
         setRegisterData((prevState) => ({ ...prevState, [name]: e.target.value }));
@@ -34,7 +45,14 @@ export const PollProvider = ({ children }) => {
                     'Authorization': authToken
                 },
             })
-            .then(response => response.json())
+            .then(response => {
+                if(response.status === 403){
+                    setAccessError("Access denied. Please log in again.")
+                    setAuthenticated(false)
+                }else{
+                    return response.json()
+                }
+            })
             .then(data => {
                 setPolls(data);
             })
@@ -53,7 +71,14 @@ export const PollProvider = ({ children }) => {
                 'Authorization': authToken
             },
         })
-        .then(response => response.json())
+        .then(response => {
+            if(response.status === 403){
+                setAccessError("Access denied. Please log in again.")
+                setAuthenticated(false)
+            }else{
+                return response.json()
+            }
+        })
         .then(data => {
             setPolls(data);
         })
@@ -71,7 +96,14 @@ export const PollProvider = ({ children }) => {
                 'Authorization': authToken
             },
         })
-            .then(response => response.json())
+            .then(response => {
+                if(response.status === 403){
+                    setAccessError("Access denied. Please log in again.")
+                    setAuthenticated(false)
+                }else{
+                    return response.json()
+                }
+            })
             .then(data => {
                 if (data['error'] !== undefined) {
                     setPollError(data['error'])
@@ -94,7 +126,14 @@ export const PollProvider = ({ children }) => {
                 'Authorization': authToken
             },
         })
-        .then(response => response.json())
+        .then(response => {
+            if(response.status === 403){
+                setAccessError("Access denied. Please log in again.")
+                setAuthenticated(false)
+            }else{
+                return response.json()
+            }
+        })
         .then(data => {
             setPolls(data);
         })
