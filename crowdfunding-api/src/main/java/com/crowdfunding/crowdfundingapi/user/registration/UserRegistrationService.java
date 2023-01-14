@@ -34,6 +34,11 @@ public class UserRegistrationService {
             if (privateKey.length() != 64){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Invalid private key!"));
             }
+
+            if (name.length() < 3 || lastname.length() < 3){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Each details should have at least length of 3."));
+            }
+
             Credentials credentials = Credentials.create(privateKey);
             String publicAddress = credentials.getAddress().toLowerCase();
             email = email.toLowerCase();

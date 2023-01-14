@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,7 +21,7 @@ public class CommissionController {
     }
 
     @GetMapping(path = "/history")
-    public ResponseEntity<Map<String, String>> getHistory() {
+    public ResponseEntity<List<CommissionService.TransactionStruct>> getHistory() {
         return service.getHistory();
     }
 

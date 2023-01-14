@@ -9,12 +9,12 @@ import com.crowdfunding.crowdfundingapi.poll.PollState;
 import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
 import com.crowdfunding.crowdfundingapi.support.CollUserType;
 import com.crowdfunding.crowdfundingapi.user.User;
+import com.crowdfunding.crowdfundingapi.user.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -24,8 +24,8 @@ public class CollectionPhaseService {
 
     private final CollectionPhaseRepository repository;
     private final CollectionRepository collectionRepository;
-
     private final PollRepository pollRepository;
+    private final UserService userService;
 
     public ResponseEntity<CollectionPhase> getPhase(Long id) {
         Optional<CollectionPhase> optionalCollection = repository.findPhaseById(id);
@@ -100,5 +100,19 @@ public class CollectionPhaseService {
             }
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    public ResponseEntity<List<CollectionPhase>> getSupportedPhases(PollState state) {
+        User authUser = userService.getUserFromAuthentication();
+        List<CollectionPhase> phases = repository.findSupportedPhasesByState(authUser.getId(), state, CollUserType.SUSTAINER);
+
+        return ResponseEntity.status(HttpStatus.OK).body(phases);
+    }
+
+    public ResponseEntity<List<CollectionPhase>> getOwnedPhases(PollState state) {
+        User authUser = userService.getUserFromAuthentication();
+        List<CollectionPhase> phases = repository.findOwnedPhasesByState(authUser.getId(), state, CollUserType.FOUNDER);
+
+        return ResponseEntity.status(HttpStatus.OK).body(phases);
     }
 }

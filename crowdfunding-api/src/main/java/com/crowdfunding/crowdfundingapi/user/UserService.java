@@ -111,4 +111,21 @@ public class UserService implements UserDetailsService {
         Optional<User> user = userRepository.findUserByPublicAddress(authUser.getPublicAddress());
         return ResponseEntity.status(HttpStatus.OK).body(user.get());
     }
+
+    public ResponseEntity<Map<String, String>> changeDetails(String name, String lastname) {
+        User userAuth = getUserFromAuthentication();
+        if (name.length() < 3 || lastname.length() < 3){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Each details should have at least length of 3."));
+        }
+
+        if (name.equals(userAuth.getName()) || lastname.equals(userAuth.getLastname())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Details are the same!"));
+        }
+
+        User user = userRepository.findUserById(userAuth.getId()).get();
+        user.setName(name);
+        user.setLastname(lastname);
+        userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Details changed"));
+    }
 }

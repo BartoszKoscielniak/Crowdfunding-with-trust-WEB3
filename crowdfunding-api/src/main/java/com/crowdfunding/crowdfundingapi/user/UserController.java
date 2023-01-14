@@ -61,9 +61,16 @@ public class UserController {
     }
 
     @PutMapping(path = "/password")
-    public ResponseEntity<Map<String, String>> updateCollection(
+    public ResponseEntity<Map<String, String>> changePassword(
             @RequestParam String oldPassword,
             @RequestParam String newPassword){
         return userService.changePassword(oldPassword, newPassword);
+    }
+
+    @PutMapping(path = "/details")
+    public ResponseEntity<Map<String, String>> changeDetails(
+            @RequestParam String name,
+            @RequestParam String lastname){
+        return userService.changeDetails(name, lastname);
     }
 }

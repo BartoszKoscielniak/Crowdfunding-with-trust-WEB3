@@ -9,13 +9,10 @@ import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
 import com.crowdfunding.crowdfundingapi.support.CollUserType;
 import com.crowdfunding.crowdfundingapi.support.RelationRepository;
 import com.crowdfunding.crowdfundingapi.user.User;
-import com.crowdfunding.crowdfundingapi.user.UserRepository;
 import com.crowdfunding.crowdfundingapi.user.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -64,7 +61,6 @@ public class VoteService {
         }
 
         repository.save(new Vote(result, phase.getPoll(), user));
-        pollService.setPollResult(phase.getPoll());
         return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Vote added."));
     }
 }

@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.crowdfunding.crowdfundingapi.user.UserRole.ADMIN;
 import static com.crowdfunding.crowdfundingapi.user.UserRole.USER;
 
 @Configuration
@@ -66,7 +67,7 @@ public class UserConfig {
                     new byte[] {73, 22, 126, -115, -58, -48, 20, 47, -17, 2, 16, 72, 22, -104, 22, 37, -49, -10, 89, -84, -89, 102, 63, 58, -29, 56, 11, -111, -62, -124, -93, 123, -5, 72, -76, -19, -67, 63, 3, -60, -25, -69, -60, 120, -6, 40, 72, -40, -85, -33, 22, 42, -53, 114, 35, 118, 31, -89, -94, -15, 43, 55, 32, -105, -93, -62, 7, 16, 52, 77, -37, -8, 49, -116, -41, 86, 51, 35, -56, -21},
                     passwordConfig.passwordEncoder().encode("dc188d2d24b0735c1301bbecc4c6f4212289c456084f329a77e2c7da8fd9076d"),
                     nonce.generateNonce(),
-                    USER
+                    ADMIN
             );
 
             repository.saveAll(
@@ -197,12 +198,6 @@ public class UserConfig {
             relationRepository.saveAll(
                     List.of(relation1)
             );
-
-            Poll poll1 = new Poll(PollState.NOT_ACTIVATED);
-            Poll poll2 = new Poll(PollState.NOT_ACTIVATED);
-            Poll poll3 = new Poll(PollState.NOT_ACTIVATED);
-            Poll poll4 = new Poll(PollState.NOT_ACTIVATED);
-            Poll poll5 = new Poll(PollState.NOT_ACTIVATED);
 
             CollectionPhase phase1 = new CollectionPhase(
                     5.5,
@@ -364,6 +359,17 @@ public class UserConfig {
 
             relationRepository.save(new CollUserRelation(Bartosz, testCollection1, phase1, CollUserType.SUSTAINER));
             relationRepository.save(new CollUserRelation(Bartosz, testCollection1, phase2, CollUserType.SUSTAINER));
+            relationRepository.save(new CollUserRelation(Bartosz, testCollection3, phase14, CollUserType.SUSTAINER));
+
+            Poll poll1 = new Poll(PollState.NOT_ACTIVATED);
+            Poll poll2 = new Poll(PollState.NOT_ACTIVATED);
+            Poll poll3 = new Poll(PollState.NOT_ACTIVATED);
+            Poll poll4 = new Poll(PollState.NOT_ACTIVATED);
+            Poll poll5 = new Poll(PollState.NOT_ACTIVATED);
+            Poll poll6 = new Poll(PollState.NOT_ACTIVATED);
+            Poll poll7 = new Poll(PollState.NOT_ACTIVATED);
+            Poll poll8 = new Poll(PollState.NOT_ACTIVATED);
+            Poll poll9 = new Poll(PollState.NOT_ACTIVATED);
 
             poll1.setCollectionPhase(phase1);
             poll2.setCollectionPhase(phase2);
@@ -381,15 +387,33 @@ public class UserConfig {
             poll2.setStartDate(LocalDateTime.now());
             poll1.setStartDate(LocalDateTime.now());
             poll1.setState(PollState.IN_PROCESS);
+            poll2.setState(PollState.NEGATIVE);
+
+            poll6.setCollectionPhase(phase13);
+            poll6.setState(PollState.NEGATIVE);
+            poll7.setCollectionPhase(phase12);
+            poll7.setState(PollState.POSITIVE);
+            poll8.setCollectionPhase(phase11);
+            poll8.setState(PollState.POSITIVE);
+            poll9.setCollectionPhase(phase14);
+            poll9.setState(PollState.POSITIVE);
+            poll6.setStartDate(LocalDateTime.now());
+            poll7.setStartDate(LocalDateTime.now());
+            poll8.setStartDate(LocalDateTime.now());
+            poll9.setStartDate(LocalDateTime.now());
+            poll6.setEndDate(LocalDateTime.now().plusDays(1));
+            poll7.setEndDate(LocalDateTime.now().plusDays(1));
+            poll8.setEndDate(LocalDateTime.now().plusDays(1));
+            poll9.setEndDate(LocalDateTime.now().plusDays(1));
             pollRepository.saveAll(
-                    List.of(poll1, poll2, poll3, poll4, poll5)
+                    List.of(poll1, poll2, poll3, poll4, poll5, poll6, poll7, poll8, poll9)
             );
 
             voteRepository.save(new Vote(VoteResult.ACCEPTED, poll1, Bartosz));
 
             Web3 web31 = new Web3("Funds"       , "0x4c8fd932918ab2d546dfa6c8094f3712150e72a6");
             Web3 web32 = new Web3("Commission"  , "0x2ddf9ed285d762736917747694ed036851dfeaf4");
-            Web3 web33 = new Web3("Advertise"   , "0x6052d96c8778eec6ea9961b21b491dba044abe7d");
+            Web3 web33 = new Web3("Advertise"   , "0x13a42739c1d18b49cd818aa8c4d6247a7f383487");
 
             web3Repository.saveAll(
                     List.of(  web31, web32, web33 )

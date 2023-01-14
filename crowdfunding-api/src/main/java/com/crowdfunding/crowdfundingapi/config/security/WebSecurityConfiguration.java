@@ -51,7 +51,7 @@ public class WebSecurityConfiguration {
                 .addFilterAfter(new AuthorizationFilter(), AuthenticationFilter.class)
                 .authenticationManager(authenticationManager)
                 .authorizeRequests()
-                .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/api/user/nonce", "/api/user/register", "/api/collection").permitAll()
+                .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/api/user/nonce", "/api/user/register").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

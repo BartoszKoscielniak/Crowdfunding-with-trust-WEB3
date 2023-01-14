@@ -3,9 +3,7 @@ package com.crowdfunding.crowdfundingapi.web3.funds;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.web3j.abi.datatypes.Type;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -25,48 +23,47 @@ public class FundsController {
 
     @PostMapping(path = "/sendfundstoowner")
     public ResponseEntity<Map<String, String>> sendFundsToOwner(
-            @RequestParam Long collectionId) {
-        return fundsService.sendFundsToOwner(collectionId);
+            @RequestParam Long phaseId) {
+        return fundsService.sendFundsToOwner(phaseId);
     }
 
     @PostMapping(path = "/sendfundstodonators")
     public ResponseEntity<Map<String, String>> sendFundsToDonators(
-            @RequestParam Long collectionId,
-            @RequestParam List<Long> transactionIdList) {
-        return fundsService.sendFundsToDonators(collectionId, transactionIdList);
+            @RequestParam Long phaseId) {
+        return fundsService.sendFundsToDonators(phaseId);
     }
 
     @PutMapping(path = "/collectionfraud")
     public ResponseEntity<Map<String, String>> setCollectionFraud(
-            @RequestParam Long collectionId) {
-        return fundsService.setCollectionFraud(collectionId);
+            @RequestParam Long phaseId) {
+        return fundsService.setCollectionFraud(phaseId);
     }
 
     @PutMapping(path = "/collectionpollend")
     public ResponseEntity<Map<String, String>> setCollectionPollEnd(
-            @RequestParam Long collectionId) {
-        return fundsService.setCollectionPollEnd(collectionId);
+            @RequestParam Long phaseId) {
+        return fundsService.setCollectionPollEnd(phaseId);
     }
     @GetMapping(path = "/collectionfraud")
     public ResponseEntity<Map<String, String>> isCollectionFraud(
-            @RequestParam Long collectionId) {
-        return fundsService.isFraud(collectionId);
+            @RequestParam Long phaseId) {
+        return fundsService.isFraud(phaseId);
     }
 
     @GetMapping(path = "/collectionpollend")
     public ResponseEntity<Map<String, String>> isCollectionPollEnd(
-            @RequestParam Long collectionId) {
-        return fundsService.isPollEnded(collectionId);
+            @RequestParam Long phaseId) {
+        return fundsService.isPollEnded(phaseId);
     }
 
     @GetMapping(path = "/transactionhistory")
-    public ResponseEntity<List> getTransactionHistory() {
-        return fundsService.getTransactionHistory();
+    public ResponseEntity<List<FundsService.TransactionStruct>> getTransactionHistory() {
+        return fundsService.getTransactionHistory(false);
     }
 
     @GetMapping(path = "/collectionfunds")
     public ResponseEntity<Map<String, String>> getDonatedFunds(
-            @RequestParam Long collectionId) {
-        return fundsService.getDonatedFunds(collectionId);
+            @RequestParam Long phaseId) {
+        return fundsService.getDonatedFunds(phaseId);
     }
 }

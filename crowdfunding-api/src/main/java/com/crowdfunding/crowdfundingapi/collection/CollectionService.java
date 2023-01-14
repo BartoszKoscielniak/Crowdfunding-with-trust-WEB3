@@ -41,7 +41,7 @@ public class CollectionService {
     }
 
     public ResponseEntity<List<Collection>> getAllCollections(CollectionType type, String name) {
-        List<Collection> optionalCollection = repository.findAll();
+        List<Collection> optionalCollection = repository.findAllByPromo();
         checkPromoExpiration(optionalCollection);
 
         List<Collection> publishedCollections = new ArrayList<>();

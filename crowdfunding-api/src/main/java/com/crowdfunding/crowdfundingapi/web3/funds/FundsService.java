@@ -98,15 +98,17 @@ public class FundsService{
     public static class TransactionStruct {
         public String sender;
         public String receiver;
+        public String phaseId;
         public String phaseName;
         public BigDecimal amount;
         public String date;
-        public TransactionStruct(String sender, String receiver, String phaseName, BigDecimal amount, String date) {
+        public TransactionStruct(String sender, String receiver, String phaseName, String phaseId, BigDecimal amount, String date) {
             this.sender = sender;
             this.receiver = receiver;
             this.phaseName = phaseName;
             this.amount = amount;
             this.date = date;
+            this.phaseId = phaseId;
         }
     }
 
@@ -236,60 +238,63 @@ public class FundsService{
         }
     }
 
-    public ResponseEntity<List> getTransactionHistory() {
+    public ResponseEntity<List<FundsService.TransactionStruct>> getTransactionHistory(Boolean allTransactions) {
         try {
             User authUser = userService.getUserFromAuthentication();
             Funds contract = loadFundsContract();
             List transactions = contract.getTransactionHiostory().send();
             List<FundsService.TransactionStruct> formattedData = new ArrayList<>();
-            if (transactions.size() > 0){
-                for (Object object : transactions) {
-                    Class<?> struct = object.getClass();
-                    Field senderField = struct.getField("sender");
-                    Object senderValue = senderField.get(object);
-                    if (!authUser.getPublicAddress().toLowerCase().equals(senderValue.toString().toLowerCase())){
-                        continue;
-                    }
-                    Field receiverField = struct.getField("receiver");
-                    Object receiverValue = receiverField.get(object);
-                    Field phaseIdField = struct.getField("_phaseId");
-                    Object phaseIdValue = phaseIdField.get(object);
-                    Field amountField = struct.getField("amount");
-                    Object amountValue = amountField.get(object);
-                    Field timestampField = struct.getField("timestamp");
-                    Object timestampValue = timestampField.get(object);
-
-                    ResponseEntity<List<CollectionPhase>> phaseResponse = collectionPhaseService.getCollectionPhases(Long.valueOf(phaseIdValue.toString()));
-                    String phaseName = "";
-                    if (phaseResponse.getStatusCode() == HttpStatus.OK){
-                        phaseName = phaseResponse.getBody().get(0).getCollection().getCollectionName() + " - " + phaseResponse.getBody().get(0).getPhaseName();
-                    }
-                    LocalDateTime time = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneOffset.UTC);//TODO: strefa czasowa
-                    BigDecimal parsedValue = Convert.fromWei(String.valueOf(amountValue), Convert.Unit.ETHER);
-
-                    formattedData.add(new FundsService.TransactionStruct(
-                            senderValue.toString(),
-                            receiverValue.toString(),
-                            phaseName,
-                            parsedValue,
-                            time.toString()
-                    ));
-                }
+            if (transactions.size() == 0){
+                return ResponseEntity.status(HttpStatus.OK).body(formattedData);
             }
+
+            for (Object object : transactions) {
+                Class<?> struct = object.getClass();
+                Field senderField = struct.getField("sender");
+                Object senderValue = senderField.get(object);
+                if (!authUser.getPublicAddress().equalsIgnoreCase(senderValue.toString()) && !allTransactions){
+                    continue;
+                }
+                Field receiverField = struct.getField("receiver");
+                Object receiverValue = receiverField.get(object);
+                Field phaseIdField = struct.getField("_phaseId");
+                Object phaseIdValue = phaseIdField.get(object);
+                Field amountField = struct.getField("amount");
+                Object amountValue = amountField.get(object);
+                Field timestampField = struct.getField("timestamp");
+                Object timestampValue = timestampField.get(object);
+
+                ResponseEntity<List<CollectionPhase>> phaseResponse = collectionPhaseService.getCollectionPhases(Long.valueOf(phaseIdValue.toString()));
+                String phaseName = "";
+                if (phaseResponse.getStatusCode() == HttpStatus.OK){
+                    phaseName = phaseResponse.getBody().get(0).getCollection().getCollectionName() + " - " + phaseResponse.getBody().get(0).getPhaseName();
+                }
+                LocalDateTime time = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneOffset.UTC);//TODO: strefa czasowa
+                BigDecimal parsedValue = Convert.fromWei(String.valueOf(amountValue), Convert.Unit.ETHER);
+
+                formattedData.add(new FundsService.TransactionStruct(
+                        senderValue.toString(),
+                        receiverValue.toString(),
+                        phaseName,
+                        phaseIdValue.toString(),
+                        parsedValue,
+                        time.toString()
+                ));
+        }
             return ResponseEntity.status(HttpStatus.OK).body(formattedData);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
     }
 
-    public ResponseEntity<Map<String, String>> sendFundsToOwner(Long collectionId) {
+    public ResponseEntity<Map<String, String>> sendFundsToOwner(Long phaseId) {
         try {
-            ResponseEntity<Collection> collection = collectionService.getCollection(collectionId);
+            ResponseEntity<Collection> collection = collectionService.getCollection(phaseId);
             if (collection.getStatusCode() == HttpStatus.NOT_FOUND){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase not found!"));
             }
             Funds contract = loadFundsContract();
-            TransactionReceipt response = contract.sendFundsToOwner(userService.getUserFromAuthentication().getPublicAddress(), BigInteger.valueOf(collectionId)).send();
+            TransactionReceipt response = contract.sendFundsToOwner(userService.getUserFromAuthentication().getPublicAddress(), BigInteger.valueOf(phaseId)).send();
             if (response.isStatusOK()){
                 return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Funds has been send"));
             }
@@ -299,9 +304,26 @@ public class FundsService{
         }
     }
 
-    public ResponseEntity<Map<String, String>> sendFundsToDonators(Long collectionId, List<Long> transactionsIdList) {
+    public ResponseEntity<Map<String, String>> sendFundsToDonators(Long phaseId) {
         try{
-            ResponseEntity<Collection> collection = collectionService.getCollection(collectionId);
+            ResponseEntity<List<FundsService.TransactionStruct>> transactions = getTransactionHistory(true);
+            if (transactions.getStatusCode() != HttpStatus.OK){
+                return ResponseEntity.status(transactions.getStatusCode()).build();
+            }
+            User authUser = userService.getUserFromAuthentication();
+
+            List<Long> transactionsIdList = new ArrayList<>();
+            for (int i = 0; i < transactions.getBody().size(); i++){
+                if (transactions.getBody().get(i).phaseId.equals(phaseId.toString()) && authUser.getPublicAddress().equals(transactions.getBody().get(i).sender)){
+                    transactionsIdList.add((long) i);
+                }
+            }
+
+            if (transactionsIdList.size() == 0){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("There is no transactions to phase"));
+            }
+
+            ResponseEntity<Collection> collection = collectionService.getCollection(phaseId);
             if (collection.getStatusCode() == HttpStatus.NOT_FOUND){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
@@ -316,7 +338,7 @@ public class FundsService{
                 transactionsList.add(BigInteger.valueOf(id));
             });
 
-            TransactionReceipt response = contract.sendFundsToDonators(userService.getUserFromAuthentication().getPublicAddress(), BigInteger.valueOf(collectionId), transactionsList).send();
+            TransactionReceipt response = contract.sendFundsToDonators(authUser.getPublicAddress(), BigInteger.valueOf(phaseId), transactionsList).send();
             if (response.isStatusOK()){
                 return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Collection poll ended"));
             }
