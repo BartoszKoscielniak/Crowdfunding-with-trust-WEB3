@@ -129,9 +129,9 @@ public class CollectionService {
             }
 
             double collectionGoal = 0.0;
-            phase2goal = phase2name.length() != 0 ? phase2goal : 0;
-            phase3goal = phase3name.length() != 0 ? phase3goal : 0;
-            phase4goal = phase4name.length() != 0 ? phase4goal : 0;
+            phase2goal = phase2goal != null ? phase2goal : 0;
+            phase3goal = phase3goal != null ? phase3goal : 0;
+            phase4goal = phase4goal != null ? phase4goal : 0;
             collectionGoal = phase1goal + phase2goal + phase3goal + phase4goal;
 
             if (phase1description.length() < 100 || phase1description.length() > 255){
@@ -172,7 +172,7 @@ public class CollectionService {
                 optionalPhase2 = Optional.of(new CollectionPhase(phase2goal, phase2description, phase2name, collection, LocalDateTime.parse(phase2till + " 23:59", formatter), phase2poe));
             }
 
-            if (phase3name.length() != 0 && phase3goal != 0 && phase3description.length() != 0 && phase3till.length() != 0 && phase3poe.length() != 0){
+            if (phase3name.length() != 0 && phase3goal != 0  && phase3description.length() != 0 && phase3till.length() != 0 && phase3poe.length() != 0){
                 ResponseEntity<Map<String, String>> validateResult = validatePhase(phase3name, phase3description, phase3goal, phase3till, phase2till, formatter, phase3poe);
                 if (validateResult.getStatusCode() == HttpStatus.BAD_REQUEST){
                     return validateResult;
