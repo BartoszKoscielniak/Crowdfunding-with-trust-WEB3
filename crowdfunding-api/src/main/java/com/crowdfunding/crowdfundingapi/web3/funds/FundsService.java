@@ -41,12 +41,12 @@ import org.web3j.tx.response.TransactionReceiptProcessor;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -67,11 +67,15 @@ public class FundsService{
     private final CollectionRepository collectionRepository;
     private final PollRepository pollRepository;
 
-    private Funds loadFundsContract( ) throws Exception {
-        Optional<Web3> fundsContract = repository.findContractByName(CONTRACT_NAME);
+    private ContractGasProvider getContractGasProvider() throws IOException {
         EthBlock.Block block = web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send().getBlock();
         BigInteger baseFeePerGas = Numeric.toBigInt(block.getBaseFeePerGas());
-        ContractGasProvider contractGasProvider = new StaticGasProvider(baseFeePerGas.multiply(BigInteger.valueOf(3)), DefaultGasProvider.GAS_LIMIT);
+        return new StaticGasProvider(baseFeePerGas.multiply(BigInteger.valueOf(3)), DefaultGasProvider.GAS_LIMIT);
+    }
+
+    private Funds loadFundsContract( ) throws Exception {
+        Optional<Web3> fundsContract = repository.findContractByName(CONTRACT_NAME);
+        ContractGasProvider contractGasProvider = getContractGasProvider();
         if (fundsContract.isEmpty()){
             String contractAddress = Funds.deploy(
                     web3j,
@@ -132,8 +136,8 @@ public class FundsService{
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Phase has ended!"));
             }
 
-            if (amount <= 0.0001) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Minimum deposit is 0.0001 ETH"));
+            if (amount < 0.005) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Minimum deposit is 0.005 ETH"));
             }
 
             Collection collection = collectionPhase.getCollection();
@@ -154,7 +158,7 @@ public class FundsService{
                     "depositFunds",
                     Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(receiverAddress),
                             new org.web3j.abi.datatypes.generated.Uint256(convertedAmount),
-                            new org.web3j.abi.datatypes.generated.Uint256(BigInteger.valueOf(collection.getId()))),
+                            new org.web3j.abi.datatypes.generated.Uint256(BigInteger.valueOf(phaseId))),
                     List.<TypeReference<?>>of()
             );
 
@@ -205,14 +209,22 @@ public class FundsService{
         }
     }
 
-    public ResponseEntity<Map<String, String>> setCollectionFraud(Long collectionId) {
+    public ResponseEntity<Map<String, String>> setPollFraud(Long phaseId) {
         try {
-            ResponseEntity<Collection> collection = collectionService.getCollection(collectionId);
-            if (collection.getStatusCode() == HttpStatus.NOT_FOUND){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            Optional<CollectionPhase> phase = collectionPhaseRepository.findPhaseById(phaseId);
+            if (phase.isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase not found!"));
             }
-            Funds contract = loadFundsContract();
-            TransactionReceipt response = contract.setFraud(BigInteger.valueOf(collectionId)).send();
+
+            ContractGasProvider contractGasProvider = getContractGasProvider();
+            Funds contract = Funds.load(
+                    repository.findContractByName(CONTRACT_NAME).get().getContractAddress(),
+                    web3j,
+                    web3Service.getCrowdfundingCredentials(),
+                    contractGasProvider
+            );
+
+            TransactionReceipt response = contract.setFraud(BigInteger.valueOf(phaseId)).send();
             if (response.isStatusOK()){
                 return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Collection setted as fraud"));
             }
@@ -222,14 +234,20 @@ public class FundsService{
         }
     }
 
-    public ResponseEntity<Map<String, String>> setCollectionPollEnd(Long collectionId) {
+    public ResponseEntity<Map<String, String>> setPollEnd(Long phaseId) {
         try {
-            ResponseEntity<Collection> collection = collectionService.getCollection(collectionId);
-            if (collection.getStatusCode() == HttpStatus.NOT_FOUND){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            Optional<CollectionPhase> phase = collectionPhaseRepository.findPhaseById(phaseId);
+            if (phase.isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase not found!"));
             }
-            Funds contract = loadFundsContract();
-            TransactionReceipt response = contract.setPollEnded(BigInteger.valueOf(collectionId)).send();
+            ContractGasProvider contractGasProvider = getContractGasProvider();
+            Funds contract = Funds.load(
+                    repository.findContractByName(CONTRACT_NAME).get().getContractAddress(),
+                    web3j,
+                    web3Service.getCrowdfundingCredentials(),
+                    contractGasProvider
+            );
+            TransactionReceipt response = contract.setPollEnded(BigInteger.valueOf(phaseId)).send();
             if (response.isStatusOK()){
                 return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Collection poll ended"));
             }
@@ -265,10 +283,10 @@ public class FundsService{
                 Field timestampField = struct.getField("timestamp");
                 Object timestampValue = timestampField.get(object);
 
-                ResponseEntity<List<CollectionPhase>> phaseResponse = collectionPhaseService.getCollectionPhases(Long.valueOf(phaseIdValue.toString()));
+                Optional<CollectionPhase> phaseResponse = collectionPhaseRepository.findPhaseById(Long.valueOf(phaseIdValue.toString()));
                 String phaseName = "";
-                if (phaseResponse.getStatusCode() == HttpStatus.OK){
-                    phaseName = phaseResponse.getBody().get(0).getCollection().getCollectionName() + " - " + phaseResponse.getBody().get(0).getPhaseName();
+                if (phaseResponse.isPresent()){
+                    phaseName = phaseResponse.get().getCollection().getCollectionName() + " - " + phaseResponse.get().getPhaseName();
                 }
                 LocalDateTime time = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneId.of("Europe/Warsaw").getRules().getOffset(LocalDateTime.now()));
                 BigDecimal parsedValue = Convert.fromWei(String.valueOf(amountValue), Convert.Unit.ETHER);
@@ -290,14 +308,21 @@ public class FundsService{
 
     public ResponseEntity<Map<String, String>> sendFundsToOwner(Long phaseId) {
         try {
-            ResponseEntity<Collection> collection = collectionService.getCollection(phaseId);
-            if (collection.getStatusCode() == HttpStatus.NOT_FOUND){
+            Optional<CollectionPhase> collection = collectionPhaseRepository.findPhaseById(phaseId);
+            if (collection.isEmpty()){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase not found!"));
             }
+
+            User user = collectionPhaseService.getCollectionFounder(phaseId).getBody();
+            User authUser = userService.getUserFromAuthentication();
+            if (!Objects.equals(user.getPublicAddress(), authUser.getPublicAddress())){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Only collection owner can withdraw funds!"));
+            }
+
             Funds contract = loadFundsContract();
-            TransactionReceipt response = contract.sendFundsToOwner(userService.getUserFromAuthentication().getPublicAddress(), BigInteger.valueOf(phaseId)).send();
+            TransactionReceipt response = contract.sendFundsToOwner(authUser.getPublicAddress(), BigInteger.valueOf(phaseId)).send();
             if (response.isStatusOK()){
-                return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Funds has been send"));
+                return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(response.getTransactionHash()));
             }
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new PreparedResponse().getFailureResponse(response.getStatus()));
         }catch (Exception e){
@@ -307,15 +332,21 @@ public class FundsService{
 
     public ResponseEntity<Map<String, String>> sendFundsToDonators(Long phaseId) {
         try{
+            Optional<CollectionPhase> phase = collectionPhaseRepository.findPhaseById(phaseId);
+            if (phase.isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase not found!"));
+            }
+
             ResponseEntity<List<FundsService.TransactionStruct>> transactions = getTransactionHistory(true);
-            if (transactions.getStatusCode() != HttpStatus.OK){
-                return ResponseEntity.status(transactions.getStatusCode()).build();
+            if (transactions.getStatusCode() != HttpStatus.OK || (transactions.hasBody() && transactions.getBody().size() == 0)){
+                return ResponseEntity.status(transactions.getStatusCode()).body(new PreparedResponse().getFailureResponse("No transactions found in history"));
             }
             User authUser = userService.getUserFromAuthentication();
 
             List<Long> transactionsIdList = new ArrayList<>();
             for (int i = 0; i < transactions.getBody().size(); i++){
-                if (transactions.getBody().get(i).phaseId.equals(phaseId.toString()) && authUser.getPublicAddress().equals(transactions.getBody().get(i).sender)){
+                if (transactions.getBody().get(i).phaseId.equals(phaseId.toString()) && authUser.getPublicAddress().equals(transactions.getBody().get(i).sender)
+                        && !Objects.equals(transactions.getBody().get(i).amount, BigDecimal.ZERO)){
                     transactionsIdList.add((long) i);
                 }
             }
@@ -324,15 +355,7 @@ public class FundsService{
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("There is no transactions to phase"));
             }
 
-            ResponseEntity<Collection> collection = collectionService.getCollection(phaseId);
-            if (collection.getStatusCode() == HttpStatus.NOT_FOUND){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
             Funds contract = loadFundsContract();
-
-            if (transactionsIdList.isEmpty()){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Provide transaction ID"));
-            }
 
             List<BigInteger> transactionsList = new ArrayList<>();
             transactionsIdList.forEach(id -> {
@@ -341,7 +364,7 @@ public class FundsService{
 
             TransactionReceipt response = contract.sendFundsToDonators(authUser.getPublicAddress(), BigInteger.valueOf(phaseId), transactionsList).send();
             if (response.isStatusOK()){
-                return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Collection poll ended"));
+                return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(response.getTransactionHash()));
             }
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new PreparedResponse().getFailureResponse(response.getStatus()));
         }catch (Exception e){
@@ -349,11 +372,22 @@ public class FundsService{
         }
     }
 
-    public ResponseEntity<Map<String, String>> getDonatedFunds(Long collectionId) {
+    public ResponseEntity<Map<String, String>> getDonatedFunds(Long phaseId) {
         try {
             Funds contract = loadFundsContract();
-            List<Tuple5<String, BigInteger, Boolean, Boolean, BigInteger>> response = Collections.singletonList(contract.fundsDonated(BigInteger.valueOf(collectionId)).send());
+            List<Tuple5<String, BigInteger, Boolean, Boolean, BigInteger>> response = Collections.singletonList(contract.fundsDonated(BigInteger.valueOf(phaseId)).send());
             return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(response.toString()));
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    private ResponseEntity<Tuple5<String, BigInteger, Boolean, Boolean, BigInteger>> getDonatedFundsState(Long phaseId) {
+        try {
+            Funds contract = loadFundsContract();
+            Tuple5<String, BigInteger, Boolean, Boolean, BigInteger> response = contract.fundsDonated(BigInteger.valueOf(phaseId)).send();
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch (Exception e){
             System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
@@ -401,7 +435,23 @@ public class FundsService{
         User authUser = userService.getUserFromAuthentication();
         List<CollectionPhase> phases = collectionPhaseRepository.findOwnedPhasesByState(authUser.getId(), PollState.POSITIVE, CollUserType.FOUNDER);
 
-        return phasesWithNotNullTransactions(phases);
+        List<CollectionPhase> response = new ArrayList<>();
+        ResponseEntity<List<FundsService.TransactionStruct>> transactionHistory = getTransactionHistory(true);
+        if (transactionHistory.getStatusCode() != HttpStatus.OK || (transactionHistory.hasBody() && transactionHistory.getBody().size() == 0)){
+            return ResponseEntity.status(transactionHistory.getStatusCode()).body(response);
+        }
+
+        phases.forEach(phase -> {
+            ResponseEntity<Tuple5<String, BigInteger, Boolean, Boolean, BigInteger>> fundsState = getDonatedFundsState(phase.getId());
+            if (fundsState.getStatusCode() == HttpStatus.OK){
+                if (!Objects.equals(fundsState.getBody().component2(), BigInteger.ZERO) && !Objects.equals(fundsState.getBody().component5(), BigInteger.ZERO)
+                        && Objects.equals(fundsState.getBody().component1(), authUser.getPublicAddress())){
+                    response.add(phase);
+                }
+            }
+        });
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     private ResponseEntity<List<CollectionPhase>> phasesWithNotNullTransactions(List<CollectionPhase> phases){

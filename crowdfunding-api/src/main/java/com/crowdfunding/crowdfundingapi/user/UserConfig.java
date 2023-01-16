@@ -65,16 +65,36 @@ public class UserConfig {
                     "crowdfundingceo@gmail.com".toLowerCase(),
                     "+48111222333",
                     new byte[] {73, 22, 126, -115, -58, -48, 20, 47, -17, 2, 16, 72, 22, -104, 22, 37, -49, -10, 89, -84, -89, 102, 63, 58, -29, 56, 11, -111, -62, -124, -93, 123, -5, 72, -76, -19, -67, 63, 3, -60, -25, -69, -60, 120, -6, 40, 72, -40, -85, -33, 22, 42, -53, 114, 35, 118, 31, -89, -94, -15, 43, 55, 32, -105, -93, -62, 7, 16, 52, 77, -37, -8, 49, -116, -41, 86, 51, 35, -56, -21},
-                    passwordConfig.passwordEncoder().encode("dc188d2d24b0735c1301bbecc4c6f4212289c456084f329a77e2c7da8fd9076d"),
+                    passwordConfig.passwordEncoder().encode("testAdminHaslo312!@"),
                     nonce.generateNonce(),
                     ADMIN
             );
 
-            repository.saveAll(
-                    List.of(Bartosz, Crowdfunding)
-            );
+            if (repository.findUserByPublicAddress(Bartosz.getPublicAddress()).isEmpty()){
+                repository.save(Bartosz);
+            }
 
-            Collection testCollection1 = new Collection(
+            if (repository.findUserByPublicAddress(Crowdfunding.getPublicAddress()).isEmpty()){
+                repository.save(Crowdfunding);
+            }
+
+/*            Web3 web3Funds = new Web3("Funds"       , "0x4c8fd932918ab2d546dfa6c8094f3712150e72a6");
+            Web3 web3Commission = new Web3("Commission"  , "0x2ddf9ed285d762736917747694ed036851dfeaf4");
+            Web3 web3Advertise = new Web3("Advertise"   , "0x13a42739c1d18b49cd818aa8c4d6247a7f383487");
+
+            if (web3Repository.findContractByName("Funds").isEmpty()){
+                web3Repository.save(web3Funds);
+            }
+
+            if (web3Repository.findContractByName("Commission").isEmpty()){
+                web3Repository.save(web3Commission);
+            }
+
+            if (web3Repository.findContractByName("Advertise").isEmpty()){
+                web3Repository.save(web3Advertise);
+            }*/
+
+/*            Collection testCollection1 = new Collection(
                     "AI Based Startup",
                     18.5,
                     "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
@@ -121,6 +141,7 @@ public class UserConfig {
                     CollectionType.CHARITY,
                     new CollUserRelation(Bartosz, CollUserType.FOUNDER)
             );
+            testCollection6.setPromoted(true);
             testCollection6.setPromoTo(LocalDateTime.now().plusDays(5));
             Collection testCollection7 = new Collection(
                     "UR Institute of Cosmology",
@@ -409,15 +430,8 @@ public class UserConfig {
                     List.of(poll1, poll2, poll3, poll4, poll5, poll6, poll7, poll8, poll9)
             );
 
-            voteRepository.save(new Vote(VoteResult.ACCEPTED, poll1, Bartosz));
+            voteRepository.save(new Vote(VoteResult.ACCEPTED, poll1, Bartosz));*/
 
-            Web3 web31 = new Web3("Funds"       , "0x4c8fd932918ab2d546dfa6c8094f3712150e72a6");
-            Web3 web32 = new Web3("Commission"  , "0x2ddf9ed285d762736917747694ed036851dfeaf4");
-            Web3 web33 = new Web3("Advertise"   , "0x13a42739c1d18b49cd818aa8c4d6247a7f383487");
-
-            web3Repository.saveAll(
-                    List.of(  web31, web32, web33 )
-            );
         };
     }
 }

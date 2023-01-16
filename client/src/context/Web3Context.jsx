@@ -211,7 +211,7 @@ export const Web3Provider = ({children}) => {
             if (data['error'] !== undefined) {
                 setWeb3Error(data['error'])
             } else {
-                setWeb3Success(data['result'])
+                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
             }
         })
         .catch(err => {
@@ -300,7 +300,7 @@ export const Web3Provider = ({children}) => {
             if (data['error'] !== undefined) {
                 setWeb3Error(data['error'])
             } else {
-                setWeb3Success(data['result'])
+                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
             }
         })
         .catch(err => {
@@ -415,9 +415,9 @@ export const Web3Provider = ({children}) => {
             })
             .then(data => {
                 if (data['error'] !== undefined) {
-                    setWeb3Error(<div><p className='inline-block'>Error! Check for details here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['error']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+                    setWeb3Error(data['error'])
                 } else {
-                    setWeb3Success(data['result'])
+                    setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
                     GetAdvertiseTypes(authToken)
                 }
             })

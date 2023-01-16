@@ -2,7 +2,6 @@ package com.crowdfunding.crowdfundingapi.collection;
 
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhase;
 import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +10,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,7 +45,7 @@ public class Collection {
     @Column(nullable = false)
     private List<CollUserRelation> collUserRelations;
 
-    @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Column(nullable = false)
     private List<CollectionPhase> collectionPhase;
 

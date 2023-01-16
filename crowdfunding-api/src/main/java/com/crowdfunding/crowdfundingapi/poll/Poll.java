@@ -29,7 +29,7 @@ public class Poll {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    @OneToMany(mappedBy = "poll")
+    @OneToMany(mappedBy = "poll", fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<Vote> votes;
 

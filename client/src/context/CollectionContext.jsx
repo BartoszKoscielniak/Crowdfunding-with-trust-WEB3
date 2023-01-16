@@ -86,7 +86,11 @@ export const CollectionProvider = ({ children }) => {
             })
             .then(data => {
                 if (data['error'] !== undefined) {
-                    setCollectionError(data['error'])
+                        if(data['error'] === 'replacement transaction underpriced' || data['error'] === 'nonce too low'){
+                            setCollectionError("Please wait until previous transaction is processed")
+                        }else {
+                            setCollectionError(data['error'])
+                        }
                 } else {
                     setCollectionSuccess(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
                     GetAllCollections(authToken)

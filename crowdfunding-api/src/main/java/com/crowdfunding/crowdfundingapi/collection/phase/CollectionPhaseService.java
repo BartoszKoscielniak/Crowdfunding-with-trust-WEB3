@@ -10,7 +10,6 @@ import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
 import com.crowdfunding.crowdfundingapi.support.CollUserType;
 import com.crowdfunding.crowdfundingapi.user.User;
 import com.crowdfunding.crowdfundingapi.user.UserService;
-import com.crowdfunding.crowdfundingapi.web3.funds.FundsService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

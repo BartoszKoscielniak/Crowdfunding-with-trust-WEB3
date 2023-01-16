@@ -302,7 +302,7 @@ const CollectionsView = () => {
                                                         <button
                                                         onClick={() => {
                                                             setClickedButton(supportedFraudPhases[key]['id'])
-                                                            SendFundsToDonators(bearerToken, ownedSuccessPhases[key]['id']);
+                                                            SendFundsToDonators(bearerToken, supportedFraudPhases[key]['id']);
                                                             setLoadingSpinner(true);
                                                         }}
                                                         className="text-white text-xl p-2 mx-1 mb-1 rounded-lg bg-green-700 transition ease-in-out delay-50 hover:scale-105 hover:bg-green-500 duration-200"

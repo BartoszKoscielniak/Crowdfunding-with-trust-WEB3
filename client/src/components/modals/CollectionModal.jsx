@@ -8,7 +8,7 @@ import { useRef } from 'react';
 const Modal = ({ open, close, collectionId }) => {
     const { collections, collectionError, collectionSuccess, setCollectionError, setCollectionSuccess, DepositFunds } = useContext(CollectionContext);
     const { authenticated, bearerToken } = useContext(AccessContext);
-    const [amount, setAmount] = useState(0.0001)
+    const [amount, setAmount] = useState(0.005)
     const [loadingSpinner, setLoadingSpinner] = useState(false)
     const [radioselected, setRadioselected] = useState(null)
     const ref = useRef();
@@ -25,7 +25,7 @@ const Modal = ({ open, close, collectionId }) => {
         if (ref.current && e.target && !ref.current.contains(e.target)) {
             close();
             setLoadingSpinner(false);
-            setAmount(0.0001);
+            setAmount(0.005);
         }
     };
 
@@ -53,7 +53,7 @@ const Modal = ({ open, close, collectionId }) => {
 
     return open && collections[collectionId]['collectionType'] === 'STARTUP' ? (
         <div className='w-3/4 bg-neutral-700 shadow-lg shadow-neutral-900/50 fixed top-1/2 left-1/2 p-4 rounded-3xl -translate-x-1/2 -translate-y-1/2 z-10' ref={ref}>
-            <AiOutlineCloseCircle fontSize={30} className="text-white inline-block right-2 absolute top-2 cursor-pointer" onClick={() => { close(); setLoadingSpinner(false); setAmount(0.0001); }} />
+            <AiOutlineCloseCircle fontSize={30} className="text-white inline-block right-2 absolute top-2 cursor-pointer" onClick={() => { close(); setLoadingSpinner(false); setAmount(0.005); }} />
             <div className='pr-7'>
                 <p className="font-sans text-2xl antialiased p-1 text-white inline-block">
                     {collections[collectionId]['collectionName']}
@@ -107,7 +107,7 @@ const Modal = ({ open, close, collectionId }) => {
         </div>
     ) : open && collections[collectionId]['collectionType'] === 'CHARITY' && (
         <div className='w-3/4 bg-neutral-700 shadow-lg shadow-indigo-900/50 fixed top-1/2 left-1/2 p-4 rounded-3xl -translate-x-1/2 -translate-y-1/2 z-10' ref={ref}>
-            <AiOutlineCloseCircle fontSize={30} className="text-white inline-block right-2 absolute top-2 cursor-pointer" onClick={() => { close(); setLoadingSpinner(false); setAmount(0.0001); }} />
+            <AiOutlineCloseCircle fontSize={30} className="text-white inline-block right-2 absolute top-2 cursor-pointer" onClick={() => { close(); setLoadingSpinner(false); setAmount(0.005); }} />
             <div className='pr-7'>
                 <p className="font-sans text-2xl antialiased p-1 text-white inline-block">
                     {collections[collectionId]['collectionName']}
@@ -117,8 +117,10 @@ const Modal = ({ open, close, collectionId }) => {
                 </p>
             </div>
             <div className='py-2 grid gap-5 grid-cols-2 grid-rows-1'>
-                <div className='text-white text-md px-2'>
-                    {collections[collectionId]['baseDescription']}
+                <div className='text-white text-md max-h-[275px] overflow-auto'>
+                    <p>{collections[collectionId]['baseDescription']}</p><br />
+                    <p className='font-sans text-2xl antialiased p-1'>{collections[collectionId]['collectionPhase'][0]['phaseName']}</p>
+                    <p>{collections[collectionId]['collectionPhase'][0]['description']}</p><br />
                 </div>
                 <div className='mx-2'>
                     <div className='relative w-full border-2 h-[55px] rounded-xl'>

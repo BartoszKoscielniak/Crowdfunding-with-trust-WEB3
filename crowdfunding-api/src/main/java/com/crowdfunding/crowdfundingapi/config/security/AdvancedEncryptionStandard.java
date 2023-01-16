@@ -14,7 +14,7 @@ import java.security.spec.KeySpec;
 
 @Component
 @AllArgsConstructor
-public class AdvancedEncryptionStandard {//TODO:opisac
+public class AdvancedEncryptionStandard {
 
     public static final int GCM_TAG_LENGTH = 16;
     private static final String ALGO = "AES/GCM/NoPadding";
