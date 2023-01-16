@@ -31,7 +31,7 @@ const CollectionCard = ({ arrayId, id, title, description, goal, type, promo, ac
                             </div>
                             <div className="text-lg text-white">
                                 <p>Collection Type: {type}</p> 
-                                <p>{actualFunds}/{goal} ETH</p>
+                                <p>{parseFloat(actualFunds).toFixed(2)}/{parseFloat(goal).toFixed(2)} ETH</p>
                                 <p className="mt-5 break-words">{description}</p>
                             </div>
                         </div>

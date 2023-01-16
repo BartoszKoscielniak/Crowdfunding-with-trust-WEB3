@@ -85,10 +85,10 @@ const CollectionsView = () => {
                     )}
                   </div>
                   <p className='text-2xl text-white mb-1'>
-                    Funds overall: {collections[openedCollectionModal]['actualFunds']} ETH
+                    Funds overall: {collections[openedCollectionModal]['actualFunds'].toFixed(2)} ETH
                   </p>
                   <div>
-                    {collections[openedCollectionModal]['state'] === 'PUBLISHED' ? (
+                    {collections[openedCollectionModal]['state'] === 'PUBLISHED' || collections[openedCollectionModal]['state'] === 'ENDED' ? (
                         <p className="text-2xl text-white mb-1">Published: {collections[openedCollectionModal]['state']}</p>
                     ) : (
                       <div className="mb-1">
@@ -127,7 +127,7 @@ const CollectionsView = () => {
                   </div>
                 </div>
                 <br />
-                {promoPanel && adTypes !== null && (
+                {promoPanel && adTypes !== null && adTypes.length !== 0 && (
                   <div>
                     <div className="hover:bg-neutral-700 p-2 rounded-xl hover:backdrop-blur-sm hover:drop-shadow-2xl duration-150">
                     {Object.keys(adTypes).map((key) => {
@@ -155,7 +155,12 @@ const CollectionsView = () => {
                     <br />
                   </div>
                 )}
-                <div className="hover:bg-neutral-700 p-2 rounded-xl hover:backdrop-blur-sm max-h-[250px] overflow-auto hover:drop-shadow-2xl duration-150">
+                {promoPanel && adTypes.length === 0 && (
+                  <div className="hover:bg-neutral-700 text-2xl p-2 rounded-xl hover:backdrop-blur-sm hover:drop-shadow-2xl duration-150">
+                    <p>We do not offer promotions now.</p>
+                  </div>
+                )}
+                <div className="hover:bg-neutral-700 p-2 rounded-xl hover:backdrop-blur-sm max-h-[270px] overflow-auto hover:drop-shadow-2xl duration-150">
                   {Object.keys(collections[openedCollectionModal]['collectionPhase']).map((key) => {
                     return <div key={key} className='break-words'>
                       <div className='font-sans text-2xl antialiased'>
@@ -179,7 +184,7 @@ const CollectionsView = () => {
                       Object.keys(polls).map((key) => {
                         return <div key={key}>
                           <div className='font-sans text-2xl antialiased'>
-                            <p className='underline inline-block'>Poll {parseInt(key) + 1}</p>
+                            <p className='underline inline-block'>{polls[key]['collectionPhase']['phaseName']} - Poll</p>
                             <p className='inline-block float-right'>{polls[key]['state']}</p>
                           </div><br />
                           <div className='font-sans text-md antialiased'>
