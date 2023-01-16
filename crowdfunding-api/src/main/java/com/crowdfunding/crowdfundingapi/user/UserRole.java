@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 import static com.crowdfunding.crowdfundingapi.user.UserPermissions.*;
 
 public enum UserRole {
-    USER(Sets.newHashSet(USER_CREATE, USER_DELETE, USER_READ, USER_UPDATE));
+    USER(Sets.newHashSet(USER_CREATE, USER_DELETE, USER_READ, USER_UPDATE)),
+    ADMIN(Sets.newHashSet(ADMIN_CREATE, ADMIN_DELETE, ADMIN_READ, ADMIN_UPDATE));
 
     private final Set<UserPermissions> permissions;
 

@@ -32,18 +32,23 @@ public class UserService implements UserDetailsService {
                 );
     }
 
-    public List<User> getAllUsers( ) {
-        return userRepository.findAll();
+    public ResponseEntity<List<User>> getAllUsers( ) {
+        return ResponseEntity.status(HttpStatus.OK).body(userRepository.findAll());
+    }
+
+    public ResponseEntity<User> getAuthUsers( ) {
+        User user = userRepository.findUserByPublicAddress(getUserFromAuthentication().getPublicAddress()).get();
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
     public ResponseEntity<Map<String, String>> getUsersNonce(String publicAddress, String password) {
         Optional<User> user = userRepository.findUserByPublicAddress(publicAddress);
         if (user.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("User with provided address not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("User with provided address not found!"));
         }
 
         if (!passwordConfig.passwordEncoder().matches(password ,user.get().getPassword())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect password"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect password!"));
         }
         return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(user.get().getNonce()));
     }
@@ -73,7 +78,7 @@ public class UserService implements UserDetailsService {
     public ResponseEntity<Map<String, String>> changePassword(String oldPassword, String newPassword) {
         User user = getUserFromAuthentication();
         if (!passwordConfig.passwordEncoder().matches(oldPassword ,user.getPassword())){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Incorrect password"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect old password."));
         }
 
         ResponseEntity<Map<String, String>> passwordValidationResult = passwordValidation(newPassword);
@@ -82,7 +87,7 @@ public class UserService implements UserDetailsService {
         }
         user.setPassword(passwordConfig.passwordEncoder().encode(newPassword));
         userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Password changed."));
     }
 
     public ResponseEntity<Map<String, String>> passwordValidation(String password){
@@ -99,5 +104,28 @@ public class UserService implements UserDetailsService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse(passwordValidator.getMessages(result).get(0)));
         }
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    public ResponseEntity<User> getMyInformation( ) {
+        User authUser = getUserFromAuthentication();
+        Optional<User> user = userRepository.findUserByPublicAddress(authUser.getPublicAddress());
+        return ResponseEntity.status(HttpStatus.OK).body(user.get());
+    }
+
+    public ResponseEntity<Map<String, String>> changeDetails(String name, String lastname) {
+        User userAuth = getUserFromAuthentication();
+        if (name.length() < 3 || lastname.length() < 3){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Each details should have at least length of 3."));
+        }
+
+        if (name.equals(userAuth.getName()) || lastname.equals(userAuth.getLastname())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Details are the same!"));
+        }
+
+        User user = userRepository.findUserById(userAuth.getId()).get();
+        user.setName(name);
+        user.setLastname(lastname);
+        userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Details changed"));
     }
 }

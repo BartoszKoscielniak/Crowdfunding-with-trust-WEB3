@@ -1,6 +1,5 @@
 package com.crowdfunding.crowdfundingapi.user;
 
-import com.crowdfunding.crowdfundingapi.collection.CollectionType;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,16 +12,39 @@ import java.util.Map;
 @AllArgsConstructor
 public class UserController {
     /*
-    *  TODO: moze vote history w solidity
     *  TODO: zapobieganie oszustwu przy glosowaniu, uzytkownik moze z innego adresu wplacac srodki zeby miec wiekszosc w glosowaniu
     *  TODO: ustawic dostepy do endpointow w security
-    *  TODO: moze KYC? trzeba ogranczyc dostep do apki zwiekszyc bezpieczenstwo
+    *  TODO: zahasuj/zakoduj signauter albo go usun'
+    *  TODO: umieszczanie w jsonie promowanej zbiorki najpeirw
+    *  TODO: sprawdzanie czy juz nie zakonczona zbiorka
+    *  TODO; kilka powiadomien na raz front
+    *  TODO: w properties zmiana ustawien
+    *  TODO: zrobic cos z 403 status
+    *  TODO: spradzenie czy fraud i wyslanie funduszy sprawdzenie glosowania itd zakonczenie zbiorki po glsoowaniu
+    *  TODO: jak zakoncza sie wszystkie fazy nie pozwalaj przegladac zbiorki
+    *  TODO: proof of evidence do phase coll
+    *  TODO: react router ograniczyc dostep bez lgoowania
+    *  TODO: wysylanie pliku z evidence
+    *  TODO: przerobic widok na ongoing polls
+    *  TODO: w aboutus wrzucic info o kotnraktach i adresy
+    *  TODO: zapisywanie na blockchainie fraud end itp
+    *  TODO: uruchomienie srpawdzenia wyniku glosowania
     */
     private final UserService userService;
 
     @GetMapping
-    public List<User> getAllUsers(){
+    public ResponseEntity<List<User>> getAllUsers(){
         return userService.getAllUsers();
+    }
+
+    @GetMapping(path = "/me")
+    public ResponseEntity<User> getMyInformation(){
+        return userService.getMyInformation();
+    }
+
+    @GetMapping(path = "/auth")
+    public ResponseEntity<User> getAuthUsers(){
+        return userService.getAuthUsers();
     }
 
     @GetMapping("/{id}")
@@ -39,9 +61,16 @@ public class UserController {
     }
 
     @PutMapping(path = "/password")
-    public ResponseEntity<Map<String, String>> updateCollection(
+    public ResponseEntity<Map<String, String>> changePassword(
             @RequestParam String oldPassword,
             @RequestParam String newPassword){
         return userService.changePassword(oldPassword, newPassword);
+    }
+
+    @PutMapping(path = "/details")
+    public ResponseEntity<Map<String, String>> changeDetails(
+            @RequestParam String name,
+            @RequestParam String lastname){
+        return userService.changeDetails(name, lastname);
     }
 }

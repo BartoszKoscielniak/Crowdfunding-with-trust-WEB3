@@ -22,11 +22,13 @@ import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -37,6 +39,20 @@ public class CommissionService {
     private final Web3Service web3Service;
     private final static String CONTRACT_NAME = "Commission";
     private final UserService userService;
+
+    public static class TransactionStruct {
+        public String sender;
+        public BigDecimal amount;
+        public String commissinon;
+        public String date;
+
+        public TransactionStruct(String sender, BigDecimal amount, String commissinon, String date) {
+            this.sender = sender;
+            this.amount = amount;
+            this.commissinon = commissinon;
+            this.date = date;
+        }
+    }
 
     private Commission loadFundsContract( ) throws Exception {
         Optional<Web3> fundsContract = repository.findContractByName(CONTRACT_NAME);
@@ -70,18 +86,48 @@ public class CommissionService {
     public ResponseEntity<Map<String, String>> getCommissionBalance() {
         try {
             Commission commission = loadFundsContract();
-            return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(String.valueOf(commission.getBalance().send())));
+            return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(String.valueOf(Convert.fromWei(String.valueOf(commission.getBalance().send()), Convert.Unit.ETHER))));
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new PreparedResponse().getFailureResponse(e.getMessage()));
         }
     }
 
-    public ResponseEntity<Map<String, String>> getHistory() {
+    public ResponseEntity<List<CommissionService.TransactionStruct>> getHistory() {
         try {
             Commission commission = loadFundsContract();
-            return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(String.valueOf(commission.getCommissionHistory().send())));
+
+            List commissionTransactions = commission.getCommissionHistory().send();
+            List<CommissionService.TransactionStruct> formattedData = new ArrayList<>();
+            if (commissionTransactions.size() == 0) {
+                return ResponseEntity.status(HttpStatus.OK).body(formattedData);
+            }
+
+            for (Object object : commissionTransactions) {
+                Class<?> struct = object.getClass();
+                Field senderField = struct.getField("sender");
+                Object senderValue = senderField.get(object);
+                Field amountField = struct.getField("amount");
+                Object amountValue = amountField.get(object);
+                Field commissionField = struct.getField("commission");
+                Object commissionValue = commissionField.get(object);
+                Field timestampField = struct.getField("timestamp");
+                Object timestampValue = timestampField.get(object);
+
+                LocalDateTime time = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneId.of("Europe/Warsaw").getRules().getOffset(LocalDateTime.now()));
+                BigDecimal parsedAmount = Convert.fromWei(String.valueOf(amountValue), Convert.Unit.ETHER);
+                BigDecimal parsedCommission = Convert.fromWei(String.valueOf(commissionValue), Convert.Unit.ETHER);
+
+                formattedData.add(new CommissionService.TransactionStruct(
+                        senderValue.toString(),
+                        parsedAmount,
+                        parsedCommission.toPlainString(),
+                        time.toString()
+                ));
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(formattedData);
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new PreparedResponse().getFailureResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
     }
 
@@ -89,8 +135,14 @@ public class CommissionService {
         TransactionReceipt receipt = null;
         try {
             Commission commission = loadFundsContract();
+
+            BigInteger minimalPayout = Convert.toWei("0.05", Convert.Unit.ETHER).toBigInteger();
+            if (commission.getBalance().send().compareTo(minimalPayout) < 0){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Minimum payout of 0.05 ETH is not reached"));
+            }
+
             receipt = commission.withdrawAll(userService.getUserFromAuthentication().getPublicAddress()).send();
-            return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(receipt.getStatus()));
+            return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(receipt.getTransactionHash()));
         } catch (Exception exception) {
             assert receipt != null;
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse(exception.getMessage()));

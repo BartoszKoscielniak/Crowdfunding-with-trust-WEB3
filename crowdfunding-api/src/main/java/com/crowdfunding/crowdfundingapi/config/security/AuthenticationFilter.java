@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -20,7 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.Date;
 
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpHeaders.*;
 
 @AllArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -63,10 +64,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .setSubject(authResult.getName())
                 .claim("authorities", authResult.getAuthorities())
                 .setIssuedAt(new Date())
-                .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusWeeks(1)))
+                .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(1)))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
 
+
+        response.addHeader(ACCESS_CONTROL_EXPOSE_HEADERS, "authorization");
         response.addHeader(AUTHORIZATION, "Bearer " + token);
     }
 }

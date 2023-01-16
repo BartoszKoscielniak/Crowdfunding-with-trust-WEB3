@@ -9,12 +9,13 @@ import com.crowdfunding.crowdfundingapi.poll.PollState;
 import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
 import com.crowdfunding.crowdfundingapi.support.CollUserType;
 import com.crowdfunding.crowdfundingapi.user.User;
+import com.crowdfunding.crowdfundingapi.user.UserService;
+import com.crowdfunding.crowdfundingapi.web3.funds.FundsService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -24,8 +25,8 @@ public class CollectionPhaseService {
 
     private final CollectionPhaseRepository repository;
     private final CollectionRepository collectionRepository;
-
     private final PollRepository pollRepository;
+    private final UserService userService;
 
     public ResponseEntity<CollectionPhase> getPhase(Long id) {
         Optional<CollectionPhase> optionalCollection = repository.findPhaseById(id);
@@ -43,18 +44,18 @@ public class CollectionPhaseService {
         return ResponseEntity.status(HttpStatus.OK).body(optionalCollection);
     }
 
-    public ResponseEntity<Map<String, String>> addPhase(Double goal, String description, String deadline, Long collectionId, LocalDateTime till) {
+    public ResponseEntity<Map<String, String>> addPhase(Double goal, String name, String description, String deadline, Long collectionId, LocalDateTime till, String poe) {
         Optional<Collection> optionalCollection = collectionRepository.findCollectionById(collectionId);
         if (optionalCollection.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Collection with provided ID not found"));
         }
         Collection collection = optionalCollection.get();
-        CollectionPhase newPhase = new CollectionPhase(goal, description, collection, till);
+        CollectionPhase newPhase = new CollectionPhase(goal, name, description, collection, till, poe);
         Poll poll = new Poll(PollState.NOT_ACTIVATED);
         repository.save(newPhase);
 
         poll.setCollectionPhase(newPhase);
-        poll.setStartDate(LocalDate.parse(deadline));
+        poll.setStartDate(LocalDateTime.parse(deadline));
         pollRepository.save(poll);
 
         return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Phase added"));

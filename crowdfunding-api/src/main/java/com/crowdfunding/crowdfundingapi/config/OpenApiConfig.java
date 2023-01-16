@@ -11,14 +11,14 @@ import static org.springframework.security.config.Elements.JWT;
 
 @Configuration
 @SecurityScheme(
-        name = "Bearer Auth", // can be set to anything
+        name = "Bearer Auth",
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = JWT
 )
 @OpenAPIDefinition(
         info = @Info(title = "Sample API", version = "v1"),
-        security = @SecurityRequirement(name = "Bearer Auth") // references the name defined in the line 3
+        security = @SecurityRequirement(name = "Bearer Auth")
 )
 class OpenApiConfig {
 

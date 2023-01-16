@@ -1,13 +1,9 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
-import {createBrowserRouter, RouterProvider, Route} from "react-router-dom";
-
-import App from './routes/App';
-import ErrorPage from './error-page';
-import Account from './routes/Account';
-import Collections from './routes/Collections';
-import Funds from './routes/Funds';
-import Earn from './routes/Earn';
+import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import { App, ErrorPage, Account, Collections, AddCollection, UsersCollections, Polls, PollsHistory } from './routes';
+import { Navigate } from "react-router-dom";
+import { AccessProvider } from "./context/AccessContext";
 
 import "./index.css";
 
@@ -18,25 +14,46 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
-    path: "/account",
-    element: <Account />
+    path: "/youraccount",
+    element: <Account />,
+    errorElement: <ErrorPage />,
   },
   {
     path: "/collections",
-    element: <Collections />
+    element: <Collections />,
+    errorElement: <ErrorPage />
   },
   {
-    path: "/funds",
-    element: <Funds />
+    path: "/polls",
+    element: <Polls />,
+    errorElement: <ErrorPage />,
   },
   {
-    path: "/earn",
-    element: <Earn />
+    path: "/collections/addcollections",
+    element: <AddCollection />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/collections/mycollections",
+    element: <UsersCollections />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/polls/history",
+    element: <PollsHistory />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/aboutus",
+    element: <Navigate to={{pathname: '/', hash: '#aboutus'}} />,
+    errorElement: <ErrorPage />,
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router}/>
+    <AccessProvider>
+      <RouterProvider router={router}/>
+    </AccessProvider>
   </React.StrictMode>
 );

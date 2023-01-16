@@ -1,6 +1,7 @@
 package com.crowdfunding.crowdfundingapi.support;
 
 import com.crowdfunding.crowdfundingapi.collection.Collection;
+import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhase;
 import com.crowdfunding.crowdfundingapi.user.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,6 +32,11 @@ public class CollUserRelation {
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "collection_id")
     private Collection collectionRelation;
+
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "phase_id")
+    private CollectionPhase phase = null;
     private CollUserType type;
 
     public CollUserRelation(User user, CollUserType type) {
@@ -41,6 +47,13 @@ public class CollUserRelation {
     public CollUserRelation(User user, Collection collectionRelation, CollUserType type) {
         this.user = user;
         this.collectionRelation = collectionRelation;
+        this.type = type;
+    }
+
+    public CollUserRelation(User user, Collection collectionRelation, CollectionPhase phase, CollUserType type) {
+        this.user = user;
+        this.collectionRelation = collectionRelation;
+        this.phase = phase;
         this.type = type;
     }
 
