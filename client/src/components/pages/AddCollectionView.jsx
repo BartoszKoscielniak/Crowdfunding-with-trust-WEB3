@@ -10,10 +10,10 @@ const CollectionsView = () => {
     const { authenticated, bearerToken, setAccessError } = useContext(AccessContext);
     const [collectionData, setCollectionData] = useState({
         collectionNameInput: '', collectionDescriptionInput: '',
-        phase1NameInput: '', phase1DescriptionInput: '', phase1GoalInput: 0.5, phase1TillInput: '', phase1PoeInput: '',
-        phase2NameInput: '', phase2DescriptionInput: '', phase2GoalInput: 0.5, phase2TillInput: '', phase2PoeInput: '',
-        phase3NameInput: '', phase3DescriptionInput: '', phase3GoalInput: 0.5, phase3TillInput: '', phase3PoeInput: '',
-        phase4NameInput: '', phase4DescriptionInput: '', phase4GoalInput: 0.5, phase4TillInput: '', phase4PoeInput: ''
+        phase1NameInput: '', phase1DescriptionInput: '', phase1GoalInput: '', phase1TillInput: '', phase1PoeInput: '',
+        phase2NameInput: '', phase2DescriptionInput: '', phase2GoalInput: '', phase2TillInput: '', phase2PoeInput: '',
+        phase3NameInput: '', phase3DescriptionInput: '', phase3GoalInput: '', phase3TillInput: '', phase3PoeInput: '',
+        phase4NameInput: '', phase4DescriptionInput: '', phase4GoalInput: '', phase4TillInput: '', phase4PoeInput: ''
     })
     const [radioselected, setRadioselected] = useState("CHARITY")
     const [loadingSpinner, setLoadingSpinner] = useState(false)
@@ -27,7 +27,7 @@ const CollectionsView = () => {
         } else if (name === 'phase1TillInput' || name === 'phase2TillInput' || name === 'phase3TillInput' || name === 'phase4TillInput' ||
                     name === 'phase1PoeInput' || name === 'phase2PoeInput' || name === 'phase3PoeInput' || name === 'phase4PoeInput') {
             setCollectionData((prevState) => ({ ...prevState, [name]: e.target.value }));
-        } else if ((name === 'phase1GoalInput' || name === 'phase2GoalInput' || name === 'phase3GoalInput' || name === 'phase4GoalInput') && e.target.value > 0.5) {
+        } else if ((name === 'phase1GoalInput' || name === 'phase2GoalInput' || name === 'phase3GoalInput' || name === 'phase4GoalInput')) {
             setCollectionData((prevState) => ({ ...prevState, [name]: e.target.value }));
         }
     }
@@ -37,6 +37,11 @@ const CollectionsView = () => {
     }
 
     const handleRadioChange = (e, name) => {
+        setCollectionData((prevState) => ({ ...prevState, ['phase1NameInput']: '' }));
+        setCollectionData((prevState) => ({ ...prevState, ['phase1DescriptionInput']: '' }));
+        setCollectionData((prevState) => ({ ...prevState, ['phase1GoalInput']: '' }));
+        setCollectionData((prevState) => ({ ...prevState, ['phase1TillInput']: '' }));
+        setCollectionData((prevState) => ({ ...prevState, ['phase1PoeInput']: '' }));
         setRadioselected(name)
     }
 
@@ -98,7 +103,7 @@ const CollectionsView = () => {
                                     <TextArea placeholder="Description(100-255 characters)" name="phase1DescriptionInput" type="text" handleChange={handleChange} additionalStyling={"h-[210px]"} />
                                     <p className="float-right absolute right-1 bottom-4">{collectionData['phase1DescriptionInput'] !== null && (collectionData['phase1DescriptionInput'].length)}</p>
                                 </div>
-                                <Input placeholder="Goal" name="phase1GoalInput" type="number" value={collectionData['phase1GoalInput']} handleChange={handleChange} />
+                                <Input placeholder="Goal(min 0.5 ETH)" name="phase1GoalInput" type="number" value={collectionData['phase1GoalInput']} handleChange={handleChange} />
                                 <Input placeholder="Till" name="phase1TillInput" type="date" handleChange={handleChange} />
                             </div>
                         ) : (
@@ -113,7 +118,7 @@ const CollectionsView = () => {
                                         <TextArea placeholder="Description(100-255 characters)" name="phase1DescriptionInput" type="text" handleChange={handleChange} additionalStyling={"h-[210px]"} />
                                         <p className="float-right absolute right-1 bottom-4">{collectionData['phase1DescriptionInput'] !== null && (collectionData['phase1DescriptionInput'].length)}</p>
                                     </div>
-                                    <Input placeholder="Goal" name="phase1GoalInput" type="number" value={collectionData['phase1GoalInput']} handleChange={handleChange} />
+                                    <Input placeholder="Goal(min 0.5 ETH)" name="phase1GoalInput" type="number" value={collectionData['phase1GoalInput']} handleChange={handleChange} />
                                     <Input placeholder="Link to evidences" name="phase1PoeInput" type="text" value={collectionData['phase1PoeInput']} handleChange={handleChange} />
                                     <Input placeholder="Till" name="phase1TillInput" type="date" handleChange={handleChange} />
                                 </div>
@@ -127,7 +132,7 @@ const CollectionsView = () => {
                                         <TextArea placeholder="Description(100-255 characters)" name="phase2DescriptionInput" type="text" handleChange={handleChange} additionalStyling={"h-[210px]"} />
                                         <p className="float-right absolute right-1 bottom-4">{collectionData['phase2DescriptionInput'] !== null && (collectionData['phase2DescriptionInput'].length)}</p>
                                     </div>
-                                    <Input placeholder="Goal" name="phase2GoalInput" type="number" value={collectionData['phase2GoalInput']} handleChange={handleChange} />
+                                    <Input placeholder="Goal(min 0.5 ETH)" name="phase2GoalInput" type="number" value={collectionData['phase2GoalInput']} handleChange={handleChange} />
                                     <Input placeholder="Link to evidences" name="phase2PoeInput" type="text" value={collectionData['phase2PoeInput']} handleChange={handleChange} />
                                     <Input placeholder="Till" name="phase2TillInput" type="date" handleChange={handleChange} />
                                 </div>
@@ -141,7 +146,7 @@ const CollectionsView = () => {
                                         <TextArea placeholder="Description(100-255 characters)" name="phase3DescriptionInput" type="text" handleChange={handleChange} additionalStyling={"h-[210px]"} />
                                         <p className="float-right absolute right-1 bottom-4">{collectionData['phase3DescriptionInput'] !== null && (collectionData['phase3DescriptionInput'].length)}</p>
                                     </div>
-                                    <Input placeholder="Goal" name="phase3GoalInput" type="number" value={collectionData['phase3GoalInput']} handleChange={handleChange} />
+                                    <Input placeholder="Goal(min 0.5 ETH)" name="phase3GoalInput" type="number" value={collectionData['phase3GoalInput']} handleChange={handleChange} />
                                     <Input placeholder="Link to evidences" name="phase3PoeInput" type="text" value={collectionData['phase3PoeInput']} handleChange={handleChange} />
                                     <Input placeholder="Till" name="phase3TillInput" type="date" handleChange={handleChange} />
                                 </div>
@@ -155,7 +160,7 @@ const CollectionsView = () => {
                                         <TextArea placeholder="Description(100-255 characters)" name="phase4DescriptionInput" type="text" handleChange={handleChange} additionalStyling={"h-[210px]"} />
                                         <p className="float-right absolute right-1 bottom-4">{collectionData['phase4DescriptionInput'] !== null && (collectionData['phase4DescriptionInput'].length)}</p>
                                     </div>
-                                    <Input placeholder="Goal" name="phase4GoalInput" type="number" value={collectionData['phase4GoalInput']} handleChange={handleChange} />
+                                    <Input placeholder="Goal(min 0.5 ETH)" name="phase4GoalInput" type="number" value={collectionData['phase4GoalInput']} handleChange={handleChange} />
                                     <Input placeholder="Link to evidences" name="phase4PoeInput" type="text" value={collectionData['phase4PoeInput']} handleChange={handleChange} />
                                     <Input placeholder="Till" name="phase4TillInput" type="date" handleChange={handleChange} />
                                 </div>
@@ -165,7 +170,9 @@ const CollectionsView = () => {
                 </div>
                 <div className="text-white my-2">
                     <button
-                        onClick={() => { setLoadingSpinner(true); addCollection() }}
+                        onClick={() => { 
+                            setLoadingSpinner(true); 
+                            addCollection() }}
                         className="text-white text-xl p-2 w-full rounded-lg bg-indigo-600 transition ease-in-out delay-50 hover:scale-105 hover:bg-indigo-400 duration-200"
                     >
                         {loadingSpinner && collectionError === null && collectionSuccess === null ? (

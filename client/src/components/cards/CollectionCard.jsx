@@ -11,9 +11,9 @@ const CollectionCard = ({ arrayId, id, title, description, goal, type, promo, ac
     const { bearerToken } = useContext(AccessContext);
 
 
-    let style = 'my-5 w-full h-[400px] bg-indigo-400 rounded-xl opacity-60 hover:opacity-100 drop-shadow-xl backdrop-blur-3xl transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-600 duration-300'
+    let style = 'my-5 w-full h-[400px] overflow-hidden bg-indigo-400 rounded-xl opacity-60 hover:opacity-100 drop-shadow-xl backdrop-blur-3xl transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-600 duration-300'
     if(promo){
-        style = 'my-5 w-full h-[400px] bg-violet-900 border-dashed border-2 border-yellow-400 rounded-xl opacity-60 hover:opacity-100 drop-shadow-xl backdrop-blur-3xl transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-600 duration-300'
+        style = 'my-5 w-full h-[400px] overflow-hidden bg-violet-900 border-dashed border-2 border-yellow-400 rounded-xl opacity-60 hover:opacity-100 drop-shadow-xl backdrop-blur-3xl transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-105 hover:bg-indigo-600 duration-300'
     }
 
     return (
@@ -25,14 +25,14 @@ const CollectionCard = ({ arrayId, id, title, description, goal, type, promo, ac
                 onClick={() => {setModalOpen(onClickFunction); GetPollById(bearerToken, id); setOpenedCollectionModal(null); setOpenedCollectionModal(arrayId); }}
                 >
                     <div className="w-full p-5 antialiased">
-                        <div>
+                        <div className="overflow-hidden">
                             <div className="mb-3 text-xl text-white">
-                                <h2>{title}</h2>
+                                <h2 className="break-words">{title}</h2>
                             </div>
                             <div className="text-lg text-white">
                                 <p>Collection Type: {type}</p> 
                                 <p>{actualFunds}/{goal} ETH</p>
-                                <p className="mt-5">{description}</p>
+                                <p className="mt-5 break-words">{description}</p>
                             </div>
                         </div>
                     </div>

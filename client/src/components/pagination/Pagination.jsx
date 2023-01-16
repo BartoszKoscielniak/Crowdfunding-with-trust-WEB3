@@ -30,6 +30,7 @@ const Pagination = ({items, collectionsPerPage, rows, cols}) => {
                      (items[key]['props']['children']['props']['type'].toLowerCase()).includes(e.target.value.toLowerCase())) toDisplay.push(items[key])
                 }
             })
+            setCurrentPage(1)
             setItemsDisplay(toDisplay)
         }else{
             setItemsDisplay(items)

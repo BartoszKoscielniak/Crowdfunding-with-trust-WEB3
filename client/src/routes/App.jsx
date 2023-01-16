@@ -1,11 +1,10 @@
 import { Navbar, Welcome, Background } from "../components";
 import { Parallax, ParallaxLayer } from '@react-spring/parallax';
-import { AccessProvider } from "../context/AccessContext";
 
 const App = () => {
  
   return (
-      <Parallax pages={1.5}>
+      <Parallax pages={1.6}>
         <ParallaxLayer
             style={{
               backgroundSize: 'cover',

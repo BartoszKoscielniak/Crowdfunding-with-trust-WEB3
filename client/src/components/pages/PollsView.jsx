@@ -22,7 +22,7 @@ const CollectionsView = () => {
   return (
     <div>{!authenticated ? (<Navigate replace to="/" />) : (
       <div className="bg-neutral-800 w-full absolute mf:flex-row md:px-20 md:py-28 px-4 h-full">
-        {/* <h1 className="text-white text-3xl px-4 pb-2">Ongoing polls</h1> */}
+        <h1 className="text-white text-3xl px-4 pb-2">Ongoing polls</h1>
         <div className='mx-2 text-white text-md px-2 max-h-[520px] overflow-auto border rounded-xl p-3 drop-shadow-2xl'>
             {
               polls !== null && polls.length !== 0 ? (

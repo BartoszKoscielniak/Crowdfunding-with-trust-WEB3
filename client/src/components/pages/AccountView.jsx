@@ -12,7 +12,8 @@ const CollectionsView = () => {
     const { accountError, setAccountError, accountSuccess, setAccountSuccess, userData, GetMyInformation, ChangePassword, ChangeDetails } = useContext(AccountContext);
     const { Web3Error, setWeb3Error, Web3Success, setWeb3Success, GetFundsTransactions, transactionData, transactionsQuantity, totalSpend,
             biggestDeposit, SendFundsToOwner, SendFundsToDonators, GetCommissionTransactions, commissionTransactions, commissionTransactinosQuantity,
-            totalCommissionSpend, commissionContractBalance, WithdrawCommission, adTypes, GetAdvertiseTypes, AddAdvertiseType, advertiseContractBalance, WithdrawAdvertiseFunds } = useContext(Web3Context);
+            totalCommissionSpend, commissionContractBalance, WithdrawCommission, adTypes, GetAdvertiseTypes, AddAdvertiseType, advertiseContractBalance, WithdrawAdvertiseFunds,
+            adTransactions, GetAdvertiseHistory, totalAdSpend, adTransactionsQuantity } = useContext(Web3Context);
 
     const { GetOwnedPhases, GetSupportedPhases, supportedFraudPhases, ownedSuccessPhases } = useContext(CollectionContext);
     const [loadingSpinner, setLoadingSpinner]           = useState(false)
@@ -26,9 +27,11 @@ const CollectionsView = () => {
     const [passwordData, setPasswordData]               = useState({ oldPassword: '', newPassword: '', repeatedNewPassword: '', nameInput: '', lastNameInput: '', adNameInput: '', adPriceInput: '', adDurationInput: '' })
     const [openFundsMenu, setOpenFundsMenu]             = useState(false)
     const [openAdminMenu, setAdminMenu]                 = useState(false)
+    const [advertiseHistory, setAdvertiseHistory]       = useState(false)
     const [changePasswordMode, setChangePasswordMode]   = useState(false)
     const [changeDetailsMode, setChangeDetailsMode]     = useState(false)
     const [newAdvertisePanel, setNewAdvertisePanel]     = useState(false)
+    const [clickedButton, setClickedButton]             = useState(null)
 
     const handleChange = (e, name) => {
         setPasswordData((prevState) => ({ ...prevState, [name]: e.target.value }));
@@ -60,6 +63,7 @@ const CollectionsView = () => {
                                     setCollectionInfo(false);
                                     setCommissionInfo(false);
                                     setStatsInfo(false);
+                                    setAdvertiseHistory(false);
                                 }}
                             >
                                 Account
@@ -82,6 +86,7 @@ const CollectionsView = () => {
                                     setCollectionInfo(false);
                                     setCommissionInfo(false);
                                     setStatsInfo(false);
+                                    setAdvertiseHistory(false);
                                     if(transactionData === null) GetFundsTransactions(bearerToken, login)
                                 }}
                                 >
@@ -95,8 +100,9 @@ const CollectionsView = () => {
                                     setCollectionInfo(true);
                                     setCommissionInfo(false);
                                     setStatsInfo(false);
-                                    GetSupportedPhases(bearerToken),
-                                    GetOwnedPhases(bearerToken)
+                                    setAdvertiseHistory(false);
+                                    if(supportedFraudPhases === null) GetSupportedPhases(bearerToken)
+                                    if(ownedSuccessPhases === null) GetOwnedPhases(bearerToken)
                                 }}
                                 >
                                 Collection Funds
@@ -123,6 +129,7 @@ const CollectionsView = () => {
                                     setCollectionInfo(false);
                                     setCommissionInfo(true);
                                     setStatsInfo(false);
+                                    setAdvertiseHistory(false);
                                     if(commissionTransactions === null) GetCommissionTransactions(bearerToken)
                                 }}
                                 >
@@ -136,10 +143,25 @@ const CollectionsView = () => {
                                     setCollectionInfo(false);
                                     setCommissionInfo(false)
                                     setStatsInfo(true);
-                                    GetAdvertiseTypes(bearerToken);
+                                    setAdvertiseHistory(false);
+                                    if(adTypes === null) GetAdvertiseTypes(bearerToken);
                                 }}
                                 >
-                                Advertise
+                                Add Advertise
+                                </button>
+                                <button
+                                className="bg-neutral-700 hover:bg-neutral-600 p-1 mt-1 rounded-xl hover:backdrop-blur-sm hover:drop-shadow-2xl duration-150 w-full"
+                                onClick={() => {
+                                    setAccountInfo(false);
+                                    setTransactionHistory(false);
+                                    setCollectionInfo(false);
+                                    setCommissionInfo(false)
+                                    setStatsInfo(false);
+                                    setAdvertiseHistory(true);
+                                    if(adTransactions === null) GetAdvertiseHistory(bearerToken);
+                                }}
+                                >
+                                Advertise History
                                 </button>
                                 </div>
                             )}
@@ -191,7 +213,7 @@ const CollectionsView = () => {
                                         )}
                                     </div>
                                     <h1 className="text-3xl pb-1 pt-5 block">Details</h1>
-                                    <p className="text-xl pb-3">Decide whether You want to share private informations </p>
+                                    <p className="text-xl pb-3">Change Your private informations </p>
                                     <div className="w-3/4 border-white border rounded-lg  bg-neutral-700 hover:bg-neutral-600 p-2 hover:backdrop-blur-sm hover:drop-shadow-2xl duration-150">
                                         <p className="py-4 inline-block">Name & Lastname: {userData['name']} {userData['lastname']}</p>
                                         <button
@@ -235,7 +257,7 @@ const CollectionsView = () => {
                                                 Object.keys(transactionData).map((key) => {
                                                     return <div key={key} className="hover:bg-neutral-700 p-2 rounded-xl hover:backdrop-blur-sm hover:drop-shadow-2xl duration-150">
                                                         <p>{transactionData[key]['phaseName']}</p>
-                                                        <p>Amount: {transactionData[key]['amount']} ETH</p>
+                                                        <p>Amount: {transactionData[key]['amount'].toFixed(4)} ETH</p>
                                                         <p>{transactionData[key]['date']}</p>
                                                     </div>
                                                 })
@@ -244,8 +266,8 @@ const CollectionsView = () => {
                                         <div className="absolute left-0 right-0 bottom-0 p-3 bg-neutral-800 w-full h-[80px]">
                                             <div className="grid gap-2 grid-cols-3 grid-rows-1 text-center">
                                                 <p className="inline-block mr-3">Transactions: <br /> {transactionsQuantity}</p>
-                                                <p className="inline-block mr-3">Total funds spend:<br /> {totalSpend} ETH</p>
-                                                <p className="inline-block mr-3">Biggest deposit: <br /> {biggestDeposit} ETH</p>
+                                                <p className="inline-block mr-3">Total funds spend:<br /> {totalSpend.toFixed(4)} ETH</p>
+                                                <p className="inline-block mr-3">Biggest deposit: <br /> {biggestDeposit.toFixed(4)} ETH</p>
                                             </div>
                                         </div>
                                     </div>
@@ -262,6 +284,9 @@ const CollectionsView = () => {
                                 supportedFraudPhases !== null && ownedSuccessPhases !== null ? (
                                     <div className="relative text-white text-xl max-h-[650px] h-[650px]">
                                         <div className="overflow-auto h-[650px]">
+                                            {supportedFraudPhases.length === 0 && ownedSuccessPhases.length === 0 && (
+                                                <h1 className="text-3xl absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2">No funds to be claimed</h1>
+                                            )}
                                             {supportedFraudPhases.length !== 0 && (
                                                 <h1 className="text-3xl">Claim back funds from supported phases</h1>
                                             )}
@@ -273,11 +298,20 @@ const CollectionsView = () => {
                                                         <p className='inline-block float-right'>Status: NEGATIVE</p>
                                                     </div><br />
                                                     <div className='font-sans text-md antialiased text-xl'>
+                                                        
                                                         <button
-                                                        onClick={() => SendFundsToDonators(bearerToken, ownedSuccessPhases[key]['id'])}
+                                                        onClick={() => {
+                                                            setClickedButton(supportedFraudPhases[key]['id'])
+                                                            SendFundsToDonators(bearerToken, ownedSuccessPhases[key]['id']);
+                                                            setLoadingSpinner(true);
+                                                        }}
                                                         className="text-white text-xl p-2 mx-1 mb-1 rounded-lg bg-green-700 transition ease-in-out delay-50 hover:scale-105 hover:bg-green-500 duration-200"
                                                         >
-                                                            Claim
+                                                        {loadingSpinner && Web3Error === null && Web3Success === null && clickedButton === supportedFraudPhases[key]['id'] ? (
+                                                            <AiOutlineLoading3Quarters fontSize={30} className="text-white inline-block animate-spin" />
+                                                        ) : (
+                                                            <p>Claim</p>
+                                                        )}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -295,10 +329,18 @@ const CollectionsView = () => {
                                                     </div><br />
                                                     <div className='font-sans text-md antialiased text-xl'>
                                                         <button
-                                                        onClick={() => SendFundsToOwner(bearerToken, ownedSuccessPhases[key]['id'])}
+                                                        onClick={() => {
+                                                            setClickedButton(ownedSuccessPhases[key]['id'])
+                                                            SendFundsToOwner(bearerToken, ownedSuccessPhases[key]['id'])
+                                                            setLoadingSpinner(true);
+                                                        }}
                                                         className="text-white text-xl p-2 mx-1 mb-1 rounded-lg bg-green-700 transition ease-in-out delay-50 hover:scale-105 hover:bg-green-500 duration-200"
                                                         >
-                                                        Claim
+                                                        {loadingSpinner && Web3Error === null && Web3Success === null && clickedButton === ownedSuccessPhases[key]['id']  ? (
+                                                            <AiOutlineLoading3Quarters fontSize={30} className="text-white inline-block animate-spin" />
+                                                        ) : (
+                                                            <p>Claim</p>
+                                                        )}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -374,9 +416,9 @@ const CollectionsView = () => {
                             )}
 
                             {statsInfo && (
-                                adTypes !== null && advertiseContractBalance !== null ?(
+                                adTypes !== null ?(
                                     <div className="relative text-white text-xl max-h-[650px] h-[650px]">
-                                        <div className="overflow-auto h-[570px]">
+                                        <div className="overflow-auto h-[650px]">
                                         {
                                             Object.keys(adTypes).map((key) => {
                                                 return <div key={key} className="hover:bg-neutral-700 p-2 rounded-xl hover:backdrop-blur-sm hover:drop-shadow-2xl duration-150">
@@ -422,13 +464,41 @@ const CollectionsView = () => {
                                             </div>
                                         )}
                                         </div>
+                                    </div>
+                                ) : (
+                                    <div className="h-[650px] text-white text-xl relative">
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                            <AiOutlineLoading3Quarters fontSize={65} className="text-white inline-block animate-spin" />
+                                        </div>
+                                    </div>
+                                )
+                            )}
+
+                            {advertiseHistory && (
+                                adTransactions !== null && advertiseContractBalance !== null ?(
+                                    <div className="relative text-white text-xl max-h-[650px] h-[650px]">
+                                        <div className="overflow-auto h-[570px]">
+                                        {
+                                            Object.keys(adTransactions).map((key) => {
+                                                return <div key={key} className="hover:bg-neutral-700 p-2 rounded-xl hover:backdrop-blur-sm hover:drop-shadow-2xl duration-150">
+                                                <p>From: {adTransactions[key]['sender']}</p>
+                                                <p>To: {adTransactions[key]['receiver']}</p>
+                                                <p>Collection: {adTransactions[key]['collectionName']}</p>
+                                                <p>Amount: {adTransactions[key]['amount']} ETH</p>
+                                                <p>Type: {adTransactions[key]['adTypeName']}</p>
+                                                <p>Date: {adTransactions[key]['timeOfTransaction']}</p>
+                                                <p>Promoted to: {adTransactions[key]['promoTo']}</p>
+                                                </div>
+                                            }) 
+                                        }
+                                        </div>
                                         <div className="absolute left-0 right-0 bottom-0 p-3 bg-neutral-800 w-full h-[80px]">
                                         <div className="grid gap-2 grid-cols-3 grid-rows-1 text-center">
-                                            <p className="inline-block mr-3">Transactions: <br /> {}</p>
-                                            {true < 0.001 ? (
-                                                <p className="inline-block mr-3">Total amount spend:<br /> {/* {totalCommissionSpend.toFixed(6)} */} ETH</p>
+                                            <p className="inline-block mr-3">Transactions: <br /> {adTransactionsQuantity}</p>
+                                            {totalAdSpend < 0.001 ? (
+                                                <p className="inline-block mr-3">Total amount spend:<br /> {totalAdSpend.toFixed(6)} ETH</p>
                                             ) : (
-                                                <p className="inline-block mr-3">Total amount spend:<br /> {/* {totalCommissionSpend.toFixed(3)} */} ETH</p>
+                                                <p className="inline-block mr-3">Total amount spend:<br /> {totalAdSpend.toFixed(3)} ETH</p>
                                             )}
                                             {true < 0.001 ? (
                                             <button
@@ -464,7 +534,6 @@ const CollectionsView = () => {
                                     </div>
                                 )
                             )}
-
                         </div>
                     </div>
                 </div>

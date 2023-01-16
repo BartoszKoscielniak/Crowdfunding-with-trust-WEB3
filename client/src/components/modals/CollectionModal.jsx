@@ -6,7 +6,7 @@ import { Input } from '..';
 import { useRef } from 'react';
 
 const Modal = ({ open, close, collectionId }) => {
-    const { collections, collectionError, collectionSuccess, setCollectionError, setCollectionSuccess, DepositFunds, openedCollectionModal, setOpenedCollectionModal } = useContext(CollectionContext);
+    const { collections, collectionError, collectionSuccess, setCollectionError, setCollectionSuccess, DepositFunds } = useContext(CollectionContext);
     const { authenticated, bearerToken } = useContext(AccessContext);
     const [amount, setAmount] = useState(0.0001)
     const [loadingSpinner, setLoadingSpinner] = useState(false)
@@ -14,7 +14,7 @@ const Modal = ({ open, close, collectionId }) => {
     const ref = useRef();
 
     const handleChange = (e, name) => {
-        if (e.target.value >= 0.0001) setAmount(e.target.value)
+        setAmount(e.target.value)
     }
 
     const handleRadioChange = (e, name) => {
@@ -52,7 +52,7 @@ const Modal = ({ open, close, collectionId }) => {
     }, [close])
 
     return open && collections[collectionId]['collectionType'] === 'STARTUP' ? (
-        <div className='w-3/4 bg-indigo-900 shadow-lg shadow-indigo-900/50 fixed top-1/2 left-1/2 p-4 rounded-3xl -translate-x-1/2 -translate-y-1/2 z-10' ref={ref}>
+        <div className='w-3/4 bg-neutral-700 shadow-lg shadow-neutral-900/50 fixed top-1/2 left-1/2 p-4 rounded-3xl -translate-x-1/2 -translate-y-1/2 z-10' ref={ref}>
             <AiOutlineCloseCircle fontSize={30} className="text-white inline-block right-2 absolute top-2 cursor-pointer" onClick={() => { close(); setLoadingSpinner(false); setAmount(0.0001); }} />
             <div className='pr-7'>
                 <p className="font-sans text-2xl antialiased p-1 text-white inline-block">
@@ -68,7 +68,12 @@ const Modal = ({ open, close, collectionId }) => {
                     <div className='bottom-1 absolute w-full'>
                         <Input id="amountInput" placeholder="Amount" name="amountInput" type="number" value={amount} handleChange={handleChange} />
                         <button
-                            onClick={() => { sendFunds(radioselected); setLoadingSpinner(true); setCollectionSuccess(null); setCollectionError(null) }}
+                            onClick={() => { 
+                                sendFunds(radioselected);
+                                 setLoadingSpinner(true);
+                                  setCollectionSuccess(null);
+                                   setCollectionError(null) 
+                            }}
                             className="text-white text-xl p-2 w-full rounded-lg bg-indigo-600 transition ease-in-out delay-50 hover:scale-105 hover:bg-indigo-400 duration-200"
                         >
                             {loadingSpinner && collectionError === null && collectionSuccess === null ? (
@@ -101,7 +106,7 @@ const Modal = ({ open, close, collectionId }) => {
             </div>
         </div>
     ) : open && collections[collectionId]['collectionType'] === 'CHARITY' && (
-        <div className='w-3/4 bg-indigo-900 shadow-lg shadow-indigo-900/50 fixed top-1/2 left-1/2 p-4 rounded-3xl -translate-x-1/2 -translate-y-1/2 z-10' ref={ref}>
+        <div className='w-3/4 bg-neutral-700 shadow-lg shadow-indigo-900/50 fixed top-1/2 left-1/2 p-4 rounded-3xl -translate-x-1/2 -translate-y-1/2 z-10' ref={ref}>
             <AiOutlineCloseCircle fontSize={30} className="text-white inline-block right-2 absolute top-2 cursor-pointer" onClick={() => { close(); setLoadingSpinner(false); setAmount(0.0001); }} />
             <div className='pr-7'>
                 <p className="font-sans text-2xl antialiased p-1 text-white inline-block">
@@ -124,7 +129,12 @@ const Modal = ({ open, close, collectionId }) => {
                         Till: {collections[collectionId]['collectionPhase'][0]['till'].substring(0, collections[collectionId]['collectionPhase'][0]['till'].indexOf('T'))}
                     </p>
                     <button
-                        onClick={() => { sendFunds(collections[collectionId]['collectionPhase'][0]['id']); setLoadingSpinner(true); setCollectionSuccess(null); setCollectionError(null) }}
+                        onClick={() => { 
+                            sendFunds(collections[collectionId]['collectionPhase'][0]['id']); 
+                            setLoadingSpinner(true); 
+                            setCollectionSuccess(null); 
+                            setCollectionError(null) 
+                        }}
                         className="text-white text-xl p-2 w-full rounded-lg bg-indigo-600 transition ease-in-out delay-50 hover:scale-105 hover:bg-indigo-400 duration-200"
                     >
                         {loadingSpinner && collectionError === null && collectionSuccess === null ? (

@@ -21,6 +21,9 @@ export const Web3Provider = ({children}) => {
     const [advertiseContractBalance, setAdvertiseContractBalance]                   = useState(null);
     const { setAuthenticated, setAccessError }                                      = useContext(AccessContext);
     const [adTypes, setAdTypes]                                                     = useState(null);
+    const [adTransactions, setAdTransactions]                                       = useState(null);
+    const [totalAdSpend, setTotalAdSpend]                                           = useState(0);
+    const [adTransactionsQuantity, setAdTransactionsQuantity]                       = useState(0);
 
     const setWeb3Error = (msg) => {
         setWeb3SuccessState(null)
@@ -238,6 +241,7 @@ export const Web3Provider = ({children}) => {
                 setWeb3Error(data['error'])
             } else {
                 setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+                CommissionContractBalance(authToken)
             }
         })
         .catch(err => {
@@ -267,6 +271,7 @@ export const Web3Provider = ({children}) => {
                 setWeb3Error(data['error'])
             } else {
                 setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+                AdvertiseContractBalance(authToken)
             }
         })
         .catch(err => {
@@ -303,8 +308,36 @@ export const Web3Provider = ({children}) => {
         });
     }
 
+    const BuyAdvertise = async (authToken, collectionId, advertiseId) => {
+        return await fetch(`${URL}/api/web3/ad/buy?collectionId=${collectionId}&advertiseId=${advertiseId}`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+                'Access-Control-Allow-Origin': "*",
+                'Authorization': authToken
+            },
+        })
+        .then(response => {
+            if(response.status === 403){
+                setAccessError("Access denied. Please log in again.")
+                setAuthenticated(false)
+            }else{
+                return response.json()
+            }
+        })
+        .then(data => {
+            if (data['error'] !== undefined) {
+                setWeb3Error(data['error'])
+            } else {
+                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a> <p className='inline-block'>Refresh page to see result.</p></div>)
+            }
+        })
+        .catch(err => {
+            setWeb3Error(err.message)
+        });
+    }
+
     const GetAdvertiseTypes = async (authToken) => {
-        AdvertiseContractBalance(authToken)
         return await fetch(`${URL}/api/web3/ad/types`, {
             method: 'GET',
             headers: {
@@ -322,6 +355,42 @@ export const Web3Provider = ({children}) => {
                 }
             })
             .then(data => setAdTypes(data))
+            .catch(err => {
+                setWeb3Error("Failed to fetch ad types. Try again later!")
+            });
+    }
+
+    const GetAdvertiseHistory = async (authToken) => {
+        AdvertiseContractBalance(authToken)
+        return await fetch(`${URL}/api/web3/ad/history`, {
+            method: 'GET',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+                'Access-Control-Allow-Origin': "*",
+                'Authorization': authToken
+            },
+        })
+            .then(response => {
+                if(response.status === 403){
+                    setAccessError("Access denied. Please log in again.")
+                    setAuthenticated(false)
+                }else{
+                    return response.json()
+                }
+            })
+            .then(data => {
+                
+                let totalTemp = 0.0;
+                Object.keys(data).map((key) => {
+                    data[key]['promoTo'] = data[key]['promoTo'] .replace("T"," ");
+                    data[key]['timeOfTransaction'] = data[key]['timeOfTransaction'] .replace("T"," ");
+
+                    totalTemp = totalTemp + parseFloat(data[key]['amount'])
+                  })
+                setAdTransactionsQuantity(data.length)
+                setAdTransactions(data)
+                setTotalAdSpend(totalTemp)
+            })
             .catch(err => {
                 setWeb3Error("Failed to fetch transactions. Try again later!")
             });
@@ -386,7 +455,12 @@ export const Web3Provider = ({children}) => {
             GetAdvertiseTypes,
             AddAdvertiseType,
             advertiseContractBalance,
-            WithdrawAdvertiseFunds
+            WithdrawAdvertiseFunds,
+            adTransactions,
+            GetAdvertiseHistory,
+            totalAdSpend,
+            adTransactionsQuantity,
+            BuyAdvertise
             }}
             >
             {children}

@@ -4,7 +4,6 @@ import { BsMouse } from "react-icons/bs";
 import { AccessContext } from "../../context/AccessContext";
 import { ErrorAlert} from '../../components'
 
-
 const Welcome = () => {
   const { accessError, setAccessError } = useContext(AccessContext);
 
@@ -26,20 +25,27 @@ const Welcome = () => {
       <div className="absolute bottom-10 right-1/2 -translate-x-1/2 animate-bounce">
         <BsMouse fontSize={35} className="text-white" />
       </div>
-      <section id="aboutus" className="absolute flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-40 align-center px-20 -bottom-[90%]">
+      <section id="aboutus" className="absolute flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-40 align-center px-20 -bottom-[96%] pt-10">
+        <div className="w-full table-cell pr-1">
+            <Card
+              color={'bg-slate-700'}
+              title={'What we do?'}
+              content={<p className="font-sans leading-normal text-2xl pb-10 inline-block text-white">We provide Crowdfunding system which is integratet with Blockchain technology. It emphasize on security to eliminate risk of being tricked to donate impostor. System consist of contracts which operates with Your funds. With that being said, the most important and trust demanding functionalities are in Your hands. Smart contract code is visible all the time so You can check it and choose, whether it is trustful or not.</p>}
+            />
+        </div>
         <div className="inline-table pb-30">
           <div className="w-1/2 table-cell pr-1">
             <Card
               color={'bg-pink-900'}
               title={'Low commission'}
-              text={'At as lowest level as 0.1% of deposited amount. Charity collection are not affected by commission!'}
+              content={<p className="font-sans leading-normal text-2xl pb-10 inline-block text-white">At as lowest level as 0.1% of deposited amount. Charity collection are not affected by commission!</p>}
             />
           </div>
           <div className="w-1/2 table-cell pl-1">
             <Card
               color={'bg-teal-800'}
               title={'Protected funds'}
-              text={'Your funds are stored in escrow, preventing startup collection owner from stealing Your crypto without fulfilling collection assumptions.'}
+              content={<p className="font-sans leading-normal text-2xl pb-10 inline-block text-white">Your funds are stored in escrow, preventing startup collection owner from stealing Your crypto without fulfilling collection assumptions.</p>}
             />
           </div>
         </div>
@@ -48,14 +54,14 @@ const Welcome = () => {
             <Card
               color={'bg-green-900'}
               title={'Security & Data Backup'}
-              text={'Blockchain do not forget! Even in case of service disaster, blockchain will store Your funds without any loss.'}
+              content={<p className="font-sans leading-normal text-2xl pb-10 inline-block text-white">Blockchain do not forget! Even in case of service disaster, blockchain will store Your funds without any loss.</p>}
             />
           </div>
           <div className="w-1/3 table-cell pl-1">
             <Card
               color={'bg-indigo-900'}
               title={'Charity & Startups'}
-              text={'We support both types to meet all of Your demands.'}
+              content={<p className="font-sans leading-normal text-2xl pb-10 inline-block text-white">We support both types to meet all of Your demands.</p>}
             />
           </div>
         </div>
@@ -63,12 +69,14 @@ const Welcome = () => {
         <Card
               color={'bg-indigo-800	'}
               title={'Public contracts'}
-              text={'Means You can check contract code on blockchain and see how We works!'}
+              content={<div><p className="font-sans leading-normal text-2xl pb-10 text-white">Means You can check contract code on blockchain and see how We works!</p>
+              <a className='underline-offset-1 underline text-2xl p-2 text-white' href={`https://goerli.etherscan.io/address/0x4c8fd932918ab2d546dfa6c8094f3712150e72a6`} target='_blank' rel='noopener noreferrer'>Funds contract</a>
+              <a className='underline-offset-1 underline text-2xl p-2 text-white' href={`https://goerli.etherscan.io/address/0x2ddf9ed285d762736917747694ed036851dfeaf4`} target='_blank' rel='noopener noreferrer'>Commission contract</a>
+              <a className='underline-offset-1 underline text-2xl p-2 text-white' href={`https://goerli.etherscan.io/address/0x13a42739c1d18b49cd818aa8c4d6247a7f383487`} target='_blank' rel='noopener noreferrer'>Advertise contract</a>
+              </div>
+            }
             />    
         </div>  
-{/*         {accessError !== null && (          
-          <ErrorAlert text={accessError} close={() => { setAccessError(null); }} />
-        )} */}
         <div className=" w-full flex md:justify-center justify-between items-center flex-col pt-4 px-4">
           <div className="sm:w-[90%] w-full h-[0.25px] bg-gray-400 mt-5 " />
           <div className="sm:w-[90%] w-full flex justify-between items-center mt-3">

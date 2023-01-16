@@ -36,23 +36,17 @@ const Navbar = ({style}) => {
     )}
     
     return (
-        <nav className={`w-full flex md:justify-center justify-between items-center p-6 z-10 ${style}`}>
+        <nav className={`w-full md:justify-center justify-between p-6 z-10 ${style}`}>
             <div className="md:flex-[0.5] flex-initial justify-center items-center">
             </div>
-            <ul className="w-full flex md:justify-center text-white md:flex list-none flex-row justify-between items-center flex-initail">
-                <li className='font-sans text-2xl antialiased animate-pulse animate-anim-moving basis-1/4 pl-12'>
-                    {!authenticated ? (
-                        <p>Crowdfunding</p>
-                    ) : (
-                    <div>
-                        <p className='font-sans text-2xl antialiased animate-pulse'>Hi, {login.slice(0, 5)}...{login.slice(login.length - 4)}</p>
-                    </div>
-                    )}
+            <ul className="w-full md:justify-center text-white md:flex justify-between">
+                <li className='font-sans text-2xl antialiased animate-pulse basis-1/4 pl-12'>
+                    <p>Crowdfunding</p>
                 </li>
                 <div className='basis-1/2 w-full flex md:justify-center'>
-                {routingArray.map((item, index) => (
-                    <NavbarItem key={item + index} item={item}/>
-                ))}
+                    {routingArray.map((item, index) => (
+                        <NavbarItem key={item + index} item={item}/>
+                    ))}
                 </div>
                 <li className='basis-1/4 pr-12'>
                     <div className='float-right'>
@@ -60,22 +54,20 @@ const Navbar = ({style}) => {
                     <button
                         type="button"
                         onClick={() => setModalOpen(true)}
-                        className="flex flex-row justify-center items-center p-1 rounded-full cursor-pointer"
                     >
-                        <p className="font-sans text-2xl antialiased animate-pulse animate-anim-moving">
+                        <p className="font-sans text-2xl antialiased animate-pulse">
                         Log In
                         </p>
-                    </button>
+                        </button>
                     ) : (
                         <button
                         type="button"
                         onClick={() => Logout()}
-                        className="flex flex-row justify-center items-center p-1 rounded-full cursor-pointer"
-                    >
-                        <p className="font-sans text-2xl antialiased animate-pulse animate-anim-moving">
+                        >
+                        <p className="font-sans text-2xl antialiased animate-pulse">
                         Logout
                         </p>
-                    </button>
+                        </button>
                     )}
                     <LoginModal open = {isLoginOpen} close = {() => setModalOpen(false)} openRegistration = {() => setRegistrationOpen(true)}/>
                     <RegisterModal open = {isRegistrationOpen} close = {() => setRegistrationOpen(false)}/>
@@ -88,9 +80,7 @@ const Navbar = ({style}) => {
                 : <HiMenuAlt4 fontSize={28} className="text-white md:hidden cursor-pointer" onClick={() => setToggleMenu(true)} />}
                 {toggleMenu && (
                     <ul
-                    className="z-10 fixed top-0 right-2 p-3 w-[#70vw] h-screen shadow-2xl md:hidden list-none
-                        flex flex-col justify-start items-end rounded-md blue-glassmorphims text-white animate-slide-in 
-                    "//TODO: pasek dziala niepoprawnie
+                    className=""
                     >
                         <li className="text-xl w-full my-2">
                             <AiOutlineClose onClick={() => setToggleMenu(false)}/>
