@@ -1,6 +1,5 @@
 package com.crowdfunding.crowdfundingapi.collection.phase;
 
-import com.crowdfunding.crowdfundingapi.poll.PollState;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -35,7 +35,7 @@ public class Nonce {
         userService.updateUser(user);
     }
 
-    public boolean verifySignature(String publicAddress, String password, String signature) throws NoSuchAlgorithmException {//TODO:opisac
+    public boolean verifySignature(String publicAddress, String password, String signature) throws NoSuchAlgorithmException {
         String nonce = getNonce(publicAddress, password).getBody().get("result");
 
         byte[] signatureBytes = Numeric.hexStringToByteArray(signature);

@@ -2,7 +2,6 @@ package com.crowdfunding.crowdfundingapi.poll;
 
 import com.crowdfunding.crowdfundingapi.collection.Collection;
 import com.crowdfunding.crowdfundingapi.collection.CollectionRepository;
-import com.crowdfunding.crowdfundingapi.collection.CollectionService;
 import com.crowdfunding.crowdfundingapi.collection.State;
 import com.crowdfunding.crowdfundingapi.config.PreparedResponse;
 import com.crowdfunding.crowdfundingapi.poll.vote.Vote;
@@ -38,7 +37,7 @@ public class PollService {
         List<Poll> polls = repository.findAll();
         polls.forEach(poll -> {
             List<Vote> votes = poll.getVotes();
-            if (poll.getEndDate().isBefore(LocalDateTime.now())){
+            if (poll.getEndDate().isBefore(LocalDateTime.now()) && votes.size() > 0 && poll.getState() == PollState.IN_PROCESS){
                 AtomicInteger acceptedVotesCount = new AtomicInteger();
                 AtomicInteger declinedVotesCount = new AtomicInteger();
                 votes.forEach(vote -> {
@@ -51,12 +50,12 @@ public class PollService {
 
                 if (acceptedVotesCount.get() > declinedVotesCount.get()){
                     poll.setState(PollState.POSITIVE);
-                    fundsService.setCollectionPollEnd(poll.getCollectionPhase().getId());
+                    fundsService.setPollEnd(poll.getCollectionPhase().getId());
                 }
                 else {
                     poll.setState(PollState.NEGATIVE);
-                    fundsService.setCollectionPollEnd(poll.getCollectionPhase().getId());
-                    fundsService.setCollectionFraud(poll.getCollectionPhase().getId());
+                    fundsService.setPollFraud(poll.getCollectionPhase().getId());
+                    fundsService.setPollEnd(poll.getCollectionPhase().getId());
                 }
 
                 Collection collection = poll.getCollectionPhase().getCollection();
@@ -72,6 +71,11 @@ public class PollService {
                     collectionRepository.save(collection);
                 }
 
+                repository.save(poll);
+            }
+
+            if (poll.getEndDate().isBefore(LocalDateTime.now()) && votes.size() == 0){
+                poll.setEndDate(poll.getEndDate().plusDays(1));
                 repository.save(poll);
             }
         });
@@ -91,7 +95,7 @@ public class PollService {
         List<Poll> response = new ArrayList<>();
         List<Poll> toDelete = new ArrayList<>();
         polls.forEach(poll -> {
-            if (poll.getStartDate().isBefore(LocalDateTime.now())){
+            if (poll.getStartDate().isBefore(LocalDateTime.now()) && poll.getState() == PollState.NOT_ACTIVATED){
                 poll.setState(PollState.IN_PROCESS);
                 repository.save(poll);
             }

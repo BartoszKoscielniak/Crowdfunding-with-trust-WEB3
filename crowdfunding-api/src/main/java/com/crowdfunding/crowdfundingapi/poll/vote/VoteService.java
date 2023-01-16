@@ -3,7 +3,6 @@ package com.crowdfunding.crowdfundingapi.poll.vote;
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhase;
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhaseRepository;
 import com.crowdfunding.crowdfundingapi.config.PreparedResponse;
-import com.crowdfunding.crowdfundingapi.poll.PollService;
 import com.crowdfunding.crowdfundingapi.poll.PollState;
 import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
 import com.crowdfunding.crowdfundingapi.support.CollUserType;
@@ -27,7 +26,6 @@ public class VoteService {
     private final CollectionPhaseRepository collectionPhaseRepository;
     private final UserService userService;
     private final RelationRepository relationRepository;
-    private final PollService pollService;
 
     public ResponseEntity<Map<String, String>> addVote(Long phaseId, VoteResult result) {
         User user = userService.getUserFromAuthentication();
