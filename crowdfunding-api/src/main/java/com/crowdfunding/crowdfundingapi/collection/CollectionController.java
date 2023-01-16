@@ -28,8 +28,9 @@ public class CollectionController {
     @GetMapping()
     public ResponseEntity<List<Collection>> getAllCollections(
             @RequestParam(required = false) CollectionType type,
-            @RequestParam(required = false) String name){
-        return service.getAllCollections(type, name);
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Boolean excludeRequester){
+        return service.getAllCollections(type, name, excludeRequester);
     }
 
     @GetMapping(path = "/type")

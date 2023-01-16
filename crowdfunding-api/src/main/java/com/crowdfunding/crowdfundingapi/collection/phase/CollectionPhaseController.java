@@ -26,18 +26,6 @@ public class CollectionPhaseController {
         return service.getCollectionPhases(id);
     }
 
-    @GetMapping(path = "/collectionphases/sustainer/{state}")
-    public ResponseEntity<List<CollectionPhase>> getSupportedPhasesByPollState(
-            @PathVariable PollState state ){
-        return service.getSupportedPhases(state);
-    }
-
-    @GetMapping(path = "/collectionphases/founder/{state}")
-    public ResponseEntity<List<CollectionPhase>> getOwnedPhasesByPollState(
-            @PathVariable PollState state ){
-        return service.getOwnedPhases(state);
-    }
-
     @PostMapping
     public ResponseEntity<Map<String, String>> addPhase(
             @RequestParam Double goal,

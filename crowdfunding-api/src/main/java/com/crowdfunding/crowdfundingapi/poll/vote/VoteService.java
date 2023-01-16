@@ -38,7 +38,7 @@ public class VoteService {
         }
         CollectionPhase phase = optionalPhase.get();
 
-        Optional<CollUserRelation> optionalRelation = relationRepository.findRelationByUseridPhaseid(user.getId(), phase.getCollection().getId());
+        Optional<CollUserRelation> optionalRelation = relationRepository.findRelationByUseridPhaseid(user.getId(), phase.getId());
         if (optionalRelation.isEmpty() || optionalRelation.get().getType() != CollUserType.SUSTAINER){
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new PreparedResponse().getFailureResponse("User does not support phase."));
         }

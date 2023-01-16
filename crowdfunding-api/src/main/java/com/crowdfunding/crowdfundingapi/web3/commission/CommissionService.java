@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 
@@ -112,7 +113,7 @@ public class CommissionService {
                 Field timestampField = struct.getField("timestamp");
                 Object timestampValue = timestampField.get(object);
 
-                LocalDateTime time = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneOffset.UTC);//TODO: strefa czasowa
+                LocalDateTime time = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneId.of("Europe/Warsaw").getRules().getOffset(LocalDateTime.now()));
                 BigDecimal parsedAmount = Convert.fromWei(String.valueOf(amountValue), Convert.Unit.ETHER);
                 BigDecimal parsedCommission = Convert.fromWei(String.valueOf(commissionValue), Convert.Unit.ETHER);
 
@@ -134,6 +135,12 @@ public class CommissionService {
         TransactionReceipt receipt = null;
         try {
             Commission commission = loadFundsContract();
+
+            BigInteger minimalPayout = Convert.toWei("0.05", Convert.Unit.ETHER).toBigInteger();
+            if (commission.getBalance().send().compareTo(minimalPayout) < 0){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Minimum payout of 0.05 ETH is not reached"));
+            }
+
             receipt = commission.withdrawAll(userService.getUserFromAuthentication().getPublicAddress()).send();
             return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(receipt.getTransactionHash()));
         } catch (Exception exception) {

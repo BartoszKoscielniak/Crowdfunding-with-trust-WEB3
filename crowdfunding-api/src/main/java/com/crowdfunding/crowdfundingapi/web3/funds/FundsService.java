@@ -45,6 +45,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -131,8 +132,8 @@ public class FundsService{
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Phase has ended!"));
             }
 
-            if (amount <= 0) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect amount."));
+            if (amount <= 0.0001) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Minimum deposit is 0.0001 ETH"));
             }
 
             Collection collection = collectionPhase.getCollection();
@@ -269,7 +270,7 @@ public class FundsService{
                 if (phaseResponse.getStatusCode() == HttpStatus.OK){
                     phaseName = phaseResponse.getBody().get(0).getCollection().getCollectionName() + " - " + phaseResponse.getBody().get(0).getPhaseName();
                 }
-                LocalDateTime time = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneOffset.UTC);//TODO: strefa czasowa
+                LocalDateTime time = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneId.of("Europe/Warsaw").getRules().getOffset(LocalDateTime.now()));
                 BigDecimal parsedValue = Convert.fromWei(String.valueOf(amountValue), Convert.Unit.ETHER);
 
                 formattedData.add(new FundsService.TransactionStruct(
@@ -387,5 +388,42 @@ public class FundsService{
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new PreparedResponse().getFailureResponse(e.getMessage()));
         }
+    }
+
+    public ResponseEntity<List<CollectionPhase>> getSupportedPhases() {
+        User authUser = userService.getUserFromAuthentication();
+        List<CollectionPhase> phases = collectionPhaseRepository.findSupportedPhasesByState(authUser.getId(), PollState.NEGATIVE, CollUserType.SUSTAINER);
+
+        return phasesWithNotNullTransactions(phases);
+    }
+
+    public ResponseEntity<List<CollectionPhase>> getOwnedPhases() {
+        User authUser = userService.getUserFromAuthentication();
+        List<CollectionPhase> phases = collectionPhaseRepository.findOwnedPhasesByState(authUser.getId(), PollState.POSITIVE, CollUserType.FOUNDER);
+
+        return phasesWithNotNullTransactions(phases);
+    }
+
+    private ResponseEntity<List<CollectionPhase>> phasesWithNotNullTransactions(List<CollectionPhase> phases){
+        List<CollectionPhase> response = new ArrayList<>();
+        ResponseEntity<List<FundsService.TransactionStruct>> transactionHistory = getTransactionHistory(false);
+
+        if (transactionHistory.getStatusCode() != HttpStatus.OK || (transactionHistory.hasBody() && transactionHistory.getBody().size() == 0)){
+            return ResponseEntity.status(transactionHistory.getStatusCode()).body(response);
+        }
+
+        phases.forEach(phase -> {
+            AtomicBoolean addToResponse = new AtomicBoolean(false);
+            transactionHistory.getBody().forEach(transaction -> {
+                if (phase.getId().toString().equals(transaction.phaseId) && !Objects.equals(transaction.amount, BigDecimal.ZERO)){
+                    addToResponse.set(true);
+                }
+            });
+            if (addToResponse.get()){
+                response.add(phase);
+            }
+        });
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

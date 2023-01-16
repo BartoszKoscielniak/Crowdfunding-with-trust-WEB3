@@ -19,6 +19,6 @@ public interface RelationRepository extends JpaRepository<CollUserRelation, Long
     @Query("SELECT r FROM CollUserRelation r WHERE r.user.id = ?1")
     List<CollUserRelation> findRelationByUserid(Long userId);
 
-    @Query("SELECT c FROM CollUserRelation r, Collection c WHERE r.type = ?1 AND r.user.publicAddress = ?2 AND r.collectionRelation.id = c.id")
+    @Query("SELECT c FROM CollUserRelation r, Collection c WHERE r.type = ?1 AND r.user.publicAddress = ?2 AND r.collectionRelation.id = c.id ORDER BY c.promoted DESC")
     List<Collection> findCollectionsByRelation(CollUserType type, String publicAddress);
 }

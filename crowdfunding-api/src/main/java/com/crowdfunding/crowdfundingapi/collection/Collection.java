@@ -43,11 +43,11 @@ public class Collection {
     private Double actualFunds = 0.0;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "collectionRelation", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "collectionRelation", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(nullable = false)
     private List<CollUserRelation> collUserRelations;
 
-    @OneToMany(mappedBy = "collection")
+    @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(nullable = false)
     private List<CollectionPhase> collectionPhase;
 

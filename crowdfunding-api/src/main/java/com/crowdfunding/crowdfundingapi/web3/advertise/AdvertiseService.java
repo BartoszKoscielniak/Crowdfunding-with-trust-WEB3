@@ -13,6 +13,8 @@ import com.crowdfunding.crowdfundingapi.web3.Web3Service;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Function;
@@ -32,11 +34,13 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
 @AllArgsConstructor
+@EnableScheduling
 public class AdvertiseService {
 
     private final Web3j web3j = new Web3().getWeb3j();
@@ -51,18 +55,22 @@ public class AdvertiseService {
     public static class TransactionStruct {
         public String sender;
         public String receiver;
-        public String collectionId;
+        public Integer collectionId;
+        public String collectionName;
         public BigDecimal amount;
-        public String adTypeId;
+        public Integer adTypeId;
+        public String adTypeName;
         public LocalDateTime promoTo;
         public LocalDateTime timeOfTransaction;
 
-        public TransactionStruct(String sender, String receiver, String collectionId, BigDecimal amount, String adTypeId, LocalDateTime promoTo, LocalDateTime timeOfTransaction) {
+        public TransactionStruct(String sender, String receiver, String collectionId, String collectionName, BigDecimal amount, Integer adTypeId, String adTypeName, LocalDateTime promoTo, LocalDateTime timeOfTransaction) {
             this.sender = sender;
             this.receiver = receiver;
-            this.collectionId = collectionId;
+            this.collectionId = Integer.valueOf(collectionId);
+            this.collectionName = collectionName;
             this.amount = amount;
             this.adTypeId = adTypeId;
+            this.adTypeName = adTypeName;
             this.promoTo = promoTo;
             this.timeOfTransaction = timeOfTransaction;
         }
@@ -135,14 +143,22 @@ public class AdvertiseService {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Advertise type not found"));
             }
 
+            BigInteger tillTimestamp = getBoughtAds(collectionId).getBody().component2();//do kiedy
+            BigInteger days = adType.component3().divide(BigInteger.valueOf(24)).divide(BigInteger.valueOf(3600));//duration
+            LocalDateTime promoTo;
+            if (tillTimestamp.compareTo(BigInteger.valueOf(0)) == 0){
+                promoTo = LocalDateTime.now().withHour(23).withMinute(59).withSecond(0).plusDays(days.longValue());
+            }else{
+                promoTo = LocalDateTime.ofEpochSecond(Long.parseLong(tillTimestamp.toString()), 0, ZoneOffset.UTC).withHour(23).withMinute(59).withSecond(0).plusDays(days.longValue());
+            }
+
             ResponseEntity<Map<String, String>> response = web3Service.sendPayableFunction(function, advertiseContract.getContractAddress(), adType.component2());
             if (response.getStatusCode() == HttpStatus.BAD_REQUEST){
                 return response;
             }
 
-            BigInteger tillTimestamp = getBoughtAds(collectionId).getBody().component2();
             collection.setPromoted(true);
-            collection.setPromoTo(LocalDateTime.ofEpochSecond(Long.parseLong(tillTimestamp.toString()), 0, ZoneOffset.UTC).withHour(0).withMinute(0).withSecond(0));
+            collection.setPromoTo(promoTo);
             collectionRepository.save(collection);
 
             return response;
@@ -165,9 +181,26 @@ public class AdvertiseService {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getSuccessResponse("Name length have to be longer than 3 characters"));
             }
 
+            ResponseEntity<List<AdTypeStruct>> adTypes = getAdvertiseTypes();
+            if (adTypes.getStatusCode() != HttpStatus.OK){
+                return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+            }
+
+            BigInteger convertedPrice = Convert.toWei(String.valueOf(price), Convert.Unit.ETHER).toBigInteger();
+            BigInteger convertedDuration = BigInteger.valueOf(duration * 24 * 3600);
+            for (int i = 0; i < adTypes.getBody().size(); i++){
+                if (adTypes.getBody().get(i).name.equals(name)){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Ad type with provided name exist!"));
+                }
+
+                if (Objects.equals(adTypes.getBody().get(i).price, convertedPrice) && Objects.equals(adTypes.getBody().get(i).duration, convertedDuration)){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Ad type with same price and duration exist"));
+                }
+            }
+
+
             Advertise advertiseContract = loadFundsContract();
-            duration = duration * 24 * 3600;
-            TransactionReceipt receipt = advertiseContract.addAdType(name, Convert.toWei(String.valueOf(price), Convert.Unit.ETHER).toBigInteger(), BigInteger.valueOf(duration)).send();
+            TransactionReceipt receipt = advertiseContract.addAdType(name, convertedPrice, convertedDuration).send();
             if (receipt.isStatusOK()){
                 return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(receipt.getTransactionHash()));
             }
@@ -234,15 +267,17 @@ public class AdvertiseService {
                 if (collectionResponse.getStatusCode() == HttpStatus.OK){
                     collectionName = collectionResponse.getBody().getCollectionName();
                 }
-                LocalDateTime timestamp = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneOffset.UTC);
-                LocalDateTime promoTo = LocalDateTime.ofEpochSecond(Long.parseLong(promoToValue.toString()), 0, ZoneOffset.UTC).withHour(0).withMinute(0).withSecond(0);//TODO:przesada
+                LocalDateTime timestamp = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneId.of("Europe/Warsaw").getRules().getOffset(LocalDateTime.now()));
+                LocalDateTime promoTo = LocalDateTime.ofEpochSecond(Long.parseLong(promoToValue.toString()), 0, ZoneId.of("Europe/Warsaw").getRules().getOffset(LocalDateTime.now())).withHour(23).withMinute(59).withSecond(0);
                 BigDecimal parsedValue = Convert.fromWei(String.valueOf(amountValue), Convert.Unit.ETHER);
 
                 formattedData.add(new AdvertiseService.TransactionStruct(
                         senderValue.toString(),
                         receiverValue.toString(),
+                        collectionIdValue.toString(),
                         collectionName,
                         parsedValue,
+                        Integer.parseInt(adTypeValue.toString()),
                         adTypes.getBody().get(Integer.parseInt(adTypeValue.toString())).name,
                         promoTo,
                         timestamp
@@ -281,6 +316,12 @@ public class AdvertiseService {
         TransactionReceipt receipt = null;
         try {
             Advertise advertise = loadFundsContract();
+
+            BigInteger minimalPayout = Convert.toWei("0.05", Convert.Unit.ETHER).toBigInteger();
+            if (advertise.getBalance().send().compareTo(minimalPayout) < 0){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Minimum payout of 0.05 ETH is not reached"));
+            }
+
             receipt = advertise.withdrawAll(userService.getUserFromAuthentication().getPublicAddress()).send();
             return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(receipt.getTransactionHash()));
         } catch (Exception exception) {
@@ -296,5 +337,16 @@ public class AdvertiseService {
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new PreparedResponse().getFailureResponse(e.getMessage()));
         }
+    }
+
+    @Scheduled(cron = "30 0 0 * * *")
+    public void checkCollectionsPromoting(){
+        List<Collection> collections = collectionRepository.findAll();
+        collections.forEach(collection -> {
+            if (collection.getPromoTo() != null && collection.getPromoTo().isBefore(LocalDateTime.now())){
+                collection.setPromoted(false);
+                collectionRepository.save(collection);
+            }
+        });
     }
 }
