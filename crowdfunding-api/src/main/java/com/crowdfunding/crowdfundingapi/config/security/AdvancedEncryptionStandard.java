@@ -28,12 +28,6 @@ public class AdvancedEncryptionStandard {
         return new SecretKeySpec(secretKeyFactory.generateSecret(keySpec).getEncoded(), "AES");
     }
 
-    private static byte[] ivParameterSpec( ) {
-        byte[] parameter = new byte[GCM_TAG_LENGTH];
-        new SecureRandom().nextBytes(parameter);
-        return parameter;
-    }
-
     public static byte[] encrypt(byte[] plaintext) throws Exception {
         Cipher cipher = Cipher.getInstance(ALGO);
         SecretKeySpec keySpec = new SecretKeySpec(keyFromPassword().getEncoded(), "AES");
