@@ -28,7 +28,6 @@ public class WebSecurityConfiguration {
 
     private final PasswordConfig passwordEncoder;
     private final UserService userService;
-    private final Nonce nonce;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
@@ -47,7 +46,7 @@ public class WebSecurityConfiguration {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilter(new AuthenticationFilter(authenticationManager, nonce))
+                .addFilter(new AuthenticationFilter(authenticationManager))
                 .addFilterAfter(new AuthorizationFilter(), AuthenticationFilter.class)
                 .authenticationManager(authenticationManager)
                 .authorizeRequests()

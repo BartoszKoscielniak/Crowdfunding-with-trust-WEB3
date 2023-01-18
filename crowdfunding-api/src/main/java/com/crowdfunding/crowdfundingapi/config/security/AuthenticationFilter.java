@@ -27,7 +27,6 @@ import static org.springframework.http.HttpHeaders.*;
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
-    private final Nonce nonce;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
@@ -41,15 +40,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                     authenticationRequest.getPassword()
             );
 
-            Authentication authenticate = authenticationManager.authenticate(authentication);
+            return authenticationManager.authenticate(authentication);
 
-            if (!nonce.verifySignature(authenticationRequest.getPublicaddress(), authenticationRequest.getPassword() , authenticationRequest.getSignature())){
-                throw new BadCredentialsException("Invalid signature");
-            }
-
-            return authenticate;
-
-        } catch (IOException | NoSuchAlgorithmException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
