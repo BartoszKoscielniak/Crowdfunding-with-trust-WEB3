@@ -35,13 +35,6 @@ public class UserController {
         return userService.getUser(id);
     }
 
-    @GetMapping(path = "/nonce")
-    public ResponseEntity<Map<String, String>> getUsersNonce(
-            @RequestParam String publicAddress,
-            @RequestParam String password){
-        return userService.getUsersNonce(publicAddress, password);
-    }
-
     @PutMapping(path = "/password")
     public ResponseEntity<Map<String, String>> changePassword(
             @RequestParam String oldPassword,

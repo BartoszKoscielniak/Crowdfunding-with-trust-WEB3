@@ -3,7 +3,6 @@ package com.crowdfunding.crowdfundingapi.user.registration;
 import com.crowdfunding.crowdfundingapi.config.PasswordConfig;
 import com.crowdfunding.crowdfundingapi.config.PreparedResponse;
 import com.crowdfunding.crowdfundingapi.config.security.AdvancedEncryptionStandard;
-import com.crowdfunding.crowdfundingapi.config.security.Nonce;
 import com.crowdfunding.crowdfundingapi.user.User;
 import com.crowdfunding.crowdfundingapi.user.UserRepository;
 import com.crowdfunding.crowdfundingapi.user.UserRole;
@@ -14,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -27,7 +24,6 @@ public class UserRegistrationService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final PasswordConfig passwordConfig;
-    private final Nonce nonce;
 
     public ResponseEntity<Map<String, String>> registerUser(String name, String lastname, String privateKey, String password, String email, String phoneNumber) {
         try {
@@ -73,7 +69,7 @@ public class UserRegistrationService {
 
             byte[] privateKeyBytes = AdvancedEncryptionStandard.encrypt(privateKey.getBytes());
 
-            User newUser = new User(publicAddress, name, lastname, email, phoneNumber, privateKeyBytes, passwordConfig.passwordEncoder().encode(password), nonce.generateNonce(), UserRole.USER);
+            User newUser = new User(publicAddress, name, lastname, email, phoneNumber, privateKeyBytes, passwordConfig.passwordEncoder().encode(password), UserRole.USER);
             userRepository.save(newUser);
 
             return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Successfully registered!"));

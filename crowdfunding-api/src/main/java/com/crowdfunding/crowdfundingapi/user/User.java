@@ -36,8 +36,6 @@ public class User implements UserDetails {
     @JsonIgnore
     private String password;
     @JsonIgnore
-    private String nonce;
-    @JsonIgnore
     private boolean isAccountNonExpired = true;
     @JsonIgnore
     private boolean isCredentialsNonExpired = true;
@@ -58,7 +56,7 @@ public class User implements UserDetails {
     private UserRole userRole;
     public User( ) { }
 
-    public User(String publicAddress, String name, String lastname, String email, String phoneNumber, byte[] privateKey, String password, String nonce, UserRole userRole) {
+    public User(String publicAddress, String name, String lastname, String email, String phoneNumber, byte[] privateKey, String password, UserRole userRole) {
         this.publicAddress = publicAddress;
         this.name = name;
         this.lastname = lastname;
@@ -66,7 +64,6 @@ public class User implements UserDetails {
         this.phoneNumber = phoneNumber;
         this.privateKey = privateKey;
         this.password = password;
-        this.nonce = nonce;
         this.userRole = userRole;
     }
 

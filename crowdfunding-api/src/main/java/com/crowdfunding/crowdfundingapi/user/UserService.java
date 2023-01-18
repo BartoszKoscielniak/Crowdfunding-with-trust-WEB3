@@ -41,18 +41,6 @@ public class UserService implements UserDetailsService {
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
-    public ResponseEntity<Map<String, String>> getUsersNonce(String publicAddress, String password) {
-        Optional<User> user = userRepository.findUserByPublicAddress(publicAddress);
-        if (user.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("User with provided address not found!"));
-        }
-
-        if (!passwordConfig.passwordEncoder().matches(password ,user.get().getPassword())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Incorrect password!"));
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(user.get().getNonce()));
-    }
-
     public Optional<User> getUserByPublicAddress(String publicAddress){
         return userRepository.findUserByPublicAddress(publicAddress);
     }

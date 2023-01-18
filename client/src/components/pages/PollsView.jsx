@@ -35,8 +35,12 @@ const CollectionsView = () => {
                         <div className='font-sans text-md antialiased text-xl'>
                             <p>Votes: {polls[key]['votes'].length} / {polls[key]['allowedUsersCount']}</p>
                             <p>Starts: {polls[key]['startDate'].substring(0, polls[key]['startDate'].indexOf('T'))} - {polls[key]['endDate'].substring(0, polls[key]['endDate'].indexOf('T'))}</p>
-                            <p>Proof of evidence: <a className='underline-offset-1 inline-block underline' href={polls[key]['collectionPhase']['proofOfEvidence']} target='_blank' rel='noopener noreferrer'>Evidences</a></p><br />
-                            
+                            {polls[key]['collectionPhase']['proofOfEvidence'].length !== 0 ? (
+                              <div><p>Proof of evidence: <a className='underline-offset-1 inline-block underline' href={polls[key]['collectionPhase']['proofOfEvidence']} target='_blank' rel='noopener noreferrer'>Evidences</a></p><br /></div>
+                            ) : (
+                              <div><br /></div>
+                            )}
+
                             { polls[key]['state'] === 'IN_PROCESS' && (
                               <div>
                               <button

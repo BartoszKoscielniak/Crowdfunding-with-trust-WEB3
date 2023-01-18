@@ -50,69 +50,30 @@ export const AccessProvider = ({children}) => {
         setRegisterData((prevState) => ({...prevState, [name]: e.target.value}));
     }
 
-    const SignNonce = async (login, password) => {
-        return await fetch(`http://localhost:8080/api/user/nonce?publicAddress=${login}&password=${password}`, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*"
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            return data;
-        })
-    }
-
     const PerformLogin = async () => {
         try {
-            const accounts = ethereum.request({method: 'eth_accounts'});
-            accounts.then((c) => {
-                if(c.length === 0){
-                    setAccessError("Download Metamask and log in to account!")
-                }else {
-                    SignNonce(login, password).then((nonceResponse) => {
-                        try {
-                            if(nonceResponse['error'] !== undefined) {
-                                throw Error(nonceResponse['error'])
-                            }
-        
-                            const provider = new ethers.providers.Web3Provider(ethereum);                        
-                            const signature = (provider.getSigner().signMessage(nonceResponse['result'])).then((response) => response).then((data) => {return data}).catch(err => setAccessError(err.message));
-                            signature.then((b) =>{
-                                if (b !== undefined) {
-                                    fetch(`${URL}/login`, {
-                                        method: 'POST',
-                                        body: JSON.stringify({
-                                            "publicaddress": login,
-                                            "password": password,
-                                            "signature": b
-                                        }),
-                                        headers: {
-                                            'Content-type': 'application/json; charset=UTF-8',
-                                            'Access-Control-Allow-Origin': "*"
-                                        },
-                                        })
-                                        .then(response => {
-                                            if (response.status === 200){
-                                                setAuthenticated(true);
-                                            }else {
-                                                setAccessError("Invalid signature! Switch account in Metamask.");
-                                            }
-                                            setBearerToken(response.headers.get('Authorization'))
-                                        })
-                                        .catch(err => {
-                                            setAccessError(err.message);
-                                        });
-                                }
-                            }); 
-                        } catch (error) {
-                            setAccessError(error.message)
-                        }
-                    });
-                }
-            })
-
+            fetch(`${URL}/login`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    "publicaddress": login,
+                    "password": password,
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                    'Access-Control-Allow-Origin': "*"
+                },
+                })
+                .then(response => {
+                    if (response.status === 200){
+                        setAuthenticated(true);
+                    }else {
+                        setAccessError("Invalid login or password");
+                    }
+                    setBearerToken(response.headers.get('Authorization'))
+                })
+                .catch(err => {
+                    setAccessError(err.message);
+                });  
         } catch (error) {
             setAccessError(error.message)
         }
