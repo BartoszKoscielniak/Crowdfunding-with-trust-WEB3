@@ -103,7 +103,7 @@ public class Web3Service {
         return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(transactionResponse.getResult()));
     }
 
-    public ResponseEntity<Map<String, String>> sendEthTransaction(String to, Credentials senderCredentials, BigInteger value) throws IOException {
+    public ResponseEntity<Map<String, String>> sendRefund(String to, Credentials senderCredentials, BigInteger value) throws IOException {
         EthBlock.Block block = web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send().getBlock();
         BigInteger baseFeePerGas = Numeric.toBigInt(block.getBaseFeePerGas());
         BigInteger maxPriorityFeePerGas = new BigInteger("2000000000");

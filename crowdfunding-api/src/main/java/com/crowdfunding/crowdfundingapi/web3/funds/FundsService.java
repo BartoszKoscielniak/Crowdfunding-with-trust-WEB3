@@ -167,7 +167,7 @@ public class FundsService{
                 if (commission.compareTo(BigInteger.valueOf(0)) == 0){
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.getBody());
                 }
-                ResponseEntity<Map<String, String>> refundResult = web3Service.sendEthTransaction(user.getPublicAddress(), web3Service.getUserCredentials(), commission);
+                ResponseEntity<Map<String, String>> refundResult = web3Service.sendRefund(user.getPublicAddress(), web3Service.getUserCredentials(), commission);
                 if (refundResult.getStatusCode() != HttpStatus.OK){
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse(WordUtils.capitalize(response.getBody().get("error")) + ". Commission refund has failed"));
                 }

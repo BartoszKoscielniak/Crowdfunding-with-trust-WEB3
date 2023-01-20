@@ -20,7 +20,7 @@ public class CustomAuthenticationManager implements AuthenticationManager {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String publicAddress = authentication.getPrincipal().toString();
-        String signature = authentication.getCredentials().toString();
+        String password = authentication.getCredentials().toString();
 
         Optional<User> user = userService.getUserByPublicAddress(publicAddress);
         if (user.isEmpty()){
@@ -33,6 +33,6 @@ public class CustomAuthenticationManager implements AuthenticationManager {
 
 
 
-        return UsernamePasswordAuthenticationToken.authenticated(publicAddress, signature, user.get().getAuthorities());
+        return UsernamePasswordAuthenticationToken.authenticated(publicAddress, password, user.get().getAuthorities());
     }
 }

@@ -54,6 +54,7 @@ public class AdvertiseService {
 
     public static class TransactionStruct {
         public String sender;
+        public String senderName;
         public String receiver;
         public Integer collectionId;
         public String collectionName;
@@ -63,8 +64,9 @@ public class AdvertiseService {
         public LocalDateTime promoTo;
         public LocalDateTime timeOfTransaction;
 
-        public TransactionStruct(String sender, String receiver, String collectionId, String collectionName, BigDecimal amount, Integer adTypeId, String adTypeName, LocalDateTime promoTo, LocalDateTime timeOfTransaction) {
+        public TransactionStruct(String sender, String senderName, String receiver, String collectionId, String collectionName, BigDecimal amount, Integer adTypeId, String adTypeName, LocalDateTime promoTo, LocalDateTime timeOfTransaction) {
             this.sender = sender;
+            this.senderName = senderName;
             this.receiver = receiver;
             this.collectionId = Integer.valueOf(collectionId);
             this.collectionName = collectionName;
@@ -143,8 +145,8 @@ public class AdvertiseService {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Advertise type not found"));
             }
 
-            BigInteger tillTimestamp = getBoughtAds(collectionId).getBody().component2();//do kiedy
-            BigInteger days = adType.component3().divide(BigInteger.valueOf(24)).divide(BigInteger.valueOf(3600));//duration
+            BigInteger tillTimestamp = getBoughtAds(collectionId).getBody().component2();
+            BigInteger days = adType.component3().divide(BigInteger.valueOf(24)).divide(BigInteger.valueOf(3600));
             LocalDateTime promoTo;
             if (tillTimestamp.compareTo(BigInteger.valueOf(0)) == 0){
                 promoTo = LocalDateTime.now().withHour(23).withMinute(59).withSecond(0).plusDays(days.longValue());
@@ -270,9 +272,11 @@ public class AdvertiseService {
                 LocalDateTime timestamp = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneId.of("Europe/Warsaw").getRules().getOffset(LocalDateTime.now()));
                 LocalDateTime promoTo = LocalDateTime.ofEpochSecond(Long.parseLong(promoToValue.toString()), 0, ZoneId.of("Europe/Warsaw").getRules().getOffset(LocalDateTime.now())).withHour(23).withMinute(59).withSecond(0);
                 BigDecimal parsedValue = Convert.fromWei(String.valueOf(amountValue), Convert.Unit.ETHER);
+                Optional<User> user = userService.getUserByPublicAddress(senderValue.toString());
 
                 formattedData.add(new AdvertiseService.TransactionStruct(
                         senderValue.toString(),
+                        user.map(value -> value.getName() + " " + value.getLastname()).orElse(""),
                         receiverValue.toString(),
                         collectionIdValue.toString(),
                         collectionName,

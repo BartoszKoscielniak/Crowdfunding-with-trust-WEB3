@@ -2,6 +2,7 @@ package com.crowdfunding.crowdfundingapi.web3.commission;
 
 import com.crowdfunding.crowdfundingapi.collection.CollectionType;
 import com.crowdfunding.crowdfundingapi.config.PreparedResponse;
+import com.crowdfunding.crowdfundingapi.user.User;
 import com.crowdfunding.crowdfundingapi.user.UserService;
 import com.crowdfunding.crowdfundingapi.web3.Web3;
 import com.crowdfunding.crowdfundingapi.web3.Web3Repository;
@@ -27,7 +28,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
@@ -42,19 +42,21 @@ public class CommissionService {
 
     public static class TransactionStruct {
         public String sender;
+        public String senderName;
         public BigDecimal amount;
         public String commissinon;
         public String date;
 
-        public TransactionStruct(String sender, BigDecimal amount, String commissinon, String date) {
+        public TransactionStruct(String sender, String senderName, BigDecimal amount, String commissinon, String date) {
             this.sender = sender;
+            this.senderName = senderName;
             this.amount = amount;
             this.commissinon = commissinon;
             this.date = date;
         }
     }
 
-    private Commission loadFundsContract( ) throws Exception {
+    private Commission loadCommissionContract( ) throws Exception {
         Optional<Web3> fundsContract = repository.findContractByName(CONTRACT_NAME);
         EthBlock.Block block = web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send().getBlock();
         BigInteger baseFeePerGas = Numeric.toBigInt(block.getBaseFeePerGas());
@@ -77,7 +79,7 @@ public class CommissionService {
 
         if (!contract.isValid()){
             repository.delete(fundsContract.get());
-            return loadFundsContract();
+            return loadCommissionContract();
         }
 
         return contract;
@@ -85,7 +87,7 @@ public class CommissionService {
 
     public ResponseEntity<Map<String, String>> getCommissionBalance() {
         try {
-            Commission commission = loadFundsContract();
+            Commission commission = loadCommissionContract();
             return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(String.valueOf(Convert.fromWei(String.valueOf(commission.getBalance().send()), Convert.Unit.ETHER))));
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new PreparedResponse().getFailureResponse(e.getMessage()));
@@ -94,7 +96,7 @@ public class CommissionService {
 
     public ResponseEntity<List<CommissionService.TransactionStruct>> getHistory() {
         try {
-            Commission commission = loadFundsContract();
+            Commission commission = loadCommissionContract();
 
             List commissionTransactions = commission.getCommissionHistory().send();
             List<CommissionService.TransactionStruct> formattedData = new ArrayList<>();
@@ -116,9 +118,11 @@ public class CommissionService {
                 LocalDateTime time = LocalDateTime.ofEpochSecond(Long.parseLong(timestampValue.toString()), 0, ZoneId.of("Europe/Warsaw").getRules().getOffset(LocalDateTime.now()));
                 BigDecimal parsedAmount = Convert.fromWei(String.valueOf(amountValue), Convert.Unit.ETHER);
                 BigDecimal parsedCommission = Convert.fromWei(String.valueOf(commissionValue), Convert.Unit.ETHER);
+                Optional<User> user = userService.getUserByPublicAddress(senderValue.toString());
 
                 formattedData.add(new CommissionService.TransactionStruct(
                         senderValue.toString(),
+                        user.map(value -> value.getName() + " " + value.getLastname()).orElse(""),
                         parsedAmount,
                         parsedCommission.toPlainString(),
                         time.toString()
@@ -134,7 +138,7 @@ public class CommissionService {
     public ResponseEntity<Map<String, String>> withdrawCommission() {
         TransactionReceipt receipt = null;
         try {
-            Commission commission = loadFundsContract();
+            Commission commission = loadCommissionContract();
 
             BigInteger minimalPayout = Convert.toWei("0.05", Convert.Unit.ETHER).toBigInteger();
             if (commission.getBalance().send().compareTo(minimalPayout) < 0){
@@ -151,7 +155,7 @@ public class CommissionService {
 
     public ResponseEntity<Map<String, String>> payCommission(Double amount, CollectionType type)  {
         try {
-            Commission contract = loadFundsContract();
+            Commission contract = loadCommissionContract();
             BigInteger commissionAmount = getCommissionAmountBigInteger(amount, type);
 
             Function function = new Function(
@@ -169,7 +173,7 @@ public class CommissionService {
 
     public ResponseEntity<Map<String, String>> getCommissionAmount(Double amount, CollectionType type) {
         try {
-            Commission commission = loadFundsContract();
+            Commission commission = loadCommissionContract();
             BigInteger receipt = commission.getCommissionRate(Convert.toWei(amount.toString(), Convert.Unit.ETHER).toBigInteger(), type.toString()).send();
             return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse(String.valueOf(Convert.fromWei(String.valueOf(receipt), Convert.Unit.ETHER))));
         }catch (Exception e){
@@ -178,7 +182,7 @@ public class CommissionService {
     }
 
     public BigInteger getCommissionAmountBigInteger(Double amount, CollectionType type) throws Exception {
-        Commission commission = loadFundsContract();
+        Commission commission = loadCommissionContract();
         return commission.getCommissionRate(Convert.toWei(amount.toString(), Convert.Unit.ETHER).toBigInteger(), type.toString()).send();
     }
 }
