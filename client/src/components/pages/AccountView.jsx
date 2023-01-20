@@ -90,7 +90,7 @@ const CollectionsView = () => {
                                     if(transactionData === null) GetFundsTransactions(bearerToken, login)
                                 }}
                                 >
-                                Transaction History
+                                My Transaction History
                                 </button>
                                 <button
                                 className="bg-neutral-700 hover:bg-neutral-600 p-1 mt-1 rounded-xl hover:backdrop-blur-sm hover:drop-shadow-2xl duration-150 w-full"
@@ -364,7 +364,7 @@ const CollectionsView = () => {
                                     {
                                         Object.keys(commissionTransactions).map((key) => {
                                             return <div key={key} className="hover:bg-neutral-700 p-2 rounded-xl hover:backdrop-blur-sm hover:drop-shadow-2xl duration-150">
-                                                <p>From: <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/address/${commissionTransactions[key]['sender']}`} target='_blank' rel='noopener noreferrer'>{commissionTransactions[key]['sender']}</a></p>
+                                                <p>From: {commissionTransactions[key]['senderName']} - <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/address/${commissionTransactions[key]['sender']}`} target='_blank' rel='noopener noreferrer'>{commissionTransactions[key]['sender']}</a></p>
                                                 <p>Amount: {commissionTransactions[key]['amount']} ETH</p>
                                                 <p>Comission: {commissionTransactions[key]['commissinon']} ETH</p>
                                                 <p>{commissionTransactions[key]['date']}</p>
@@ -481,8 +481,7 @@ const CollectionsView = () => {
                                         {
                                             Object.keys(adTransactions).map((key) => {
                                                 return <div key={key} className="hover:bg-neutral-700 p-2 rounded-xl hover:backdrop-blur-sm hover:drop-shadow-2xl duration-150">
-                                                <p>From: {adTransactions[key]['sender']}</p>
-                                                <p>To: {adTransactions[key]['receiver']}</p>
+                                                <p>From: {adTransactions[key]['senderName']} - <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/address/${adTransactions[key]['sender']}`} target='_blank' rel='noopener noreferrer'>{adTransactions[key]['sender']}</a></p>
                                                 <p>Collection: {adTransactions[key]['collectionName']}</p>
                                                 <p>Amount: {adTransactions[key]['amount']} ETH</p>
                                                 <p>Type: {adTransactions[key]['adTypeName']}</p>

@@ -9,7 +9,6 @@ import com.crowdfunding.crowdfundingapi.poll.PollState;
 import com.crowdfunding.crowdfundingapi.support.CollUserRelation;
 import com.crowdfunding.crowdfundingapi.support.CollUserType;
 import com.crowdfunding.crowdfundingapi.user.User;
-import com.crowdfunding.crowdfundingapi.user.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +24,6 @@ public class CollectionPhaseService {
     private final CollectionPhaseRepository repository;
     private final CollectionRepository collectionRepository;
     private final PollRepository pollRepository;
-    private final UserService userService;
 
     public ResponseEntity<CollectionPhase> getPhase(Long id) {
         Optional<CollectionPhase> optionalCollection = repository.findPhaseById(id);
