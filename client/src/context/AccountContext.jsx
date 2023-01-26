@@ -28,7 +28,9 @@ export const AccountProvider = ({children}) => {
             "GET"
         )
         .then(data => {
-            setUserData(data);
+            if(data !== undefined){
+                setUserData(data);
+            }
         })
     }
 
@@ -39,10 +41,12 @@ export const AccountProvider = ({children}) => {
             "PUT"
         )
         .then(data => {
-            if(data['error'] === undefined){
-                setAccountSuccess(data['result'])
-            }else{
-                setAccountError(data['error'])
+            if(data !== undefined){
+                if(data['error'] === undefined){
+                    setAccountSuccess(data['result'])
+                }else{
+                    setAccountError(data['error'])
+                }
             }
         })
     }
@@ -54,10 +58,12 @@ export const AccountProvider = ({children}) => {
             "PUT"
         )
         .then(data => {
-            if(data['error'] === undefined){
-                setAccountSuccess(data['result'])
-            }else{
-                setAccountError(data['error'])
+            if(data !== undefined){
+                if(data !== undefined && data['error'] === undefined){
+                    setAccountSuccess(data['result'])
+                }else{
+                    setAccountError(data['error'])
+                }
             }
         })
     }

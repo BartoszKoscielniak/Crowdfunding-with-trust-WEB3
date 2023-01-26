@@ -39,7 +39,9 @@ export const PollProvider = ({ children }) => {
                 "GET"
             )
             .then(data => {
-                setPolls(data);
+                if(data !== undefined){
+                    setPolls(data);
+                }
             })
         }
     }
@@ -51,7 +53,9 @@ export const PollProvider = ({ children }) => {
             "GET"
         )
         .then(data => {
-            setPolls(data);
+            if(data !== undefined){
+                setPolls(data);
+            }
         })
     }
 
@@ -62,11 +66,13 @@ export const PollProvider = ({ children }) => {
             "POST"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setPollError(data['error'])
-            } else {
-                setPollsuccess(<div><p className='inline-block'>{data['result']}</p></div>)
-                GetAccessiblePolls(authToken)
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setPollError(data['error'])
+                } else {
+                    setPollsuccess(<div><p className='inline-block'>{data['result']}</p></div>)
+                    GetAccessiblePolls(authToken)
+                }
             }
         })
     }
@@ -78,7 +84,9 @@ export const PollProvider = ({ children }) => {
             "GET"
         )
         .then(data => {
-            setPolls(data);
+            if(data !== undefined){
+                setPolls(data);
+            }
         })
     }
 

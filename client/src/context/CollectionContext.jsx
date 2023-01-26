@@ -45,7 +45,9 @@ export const CollectionProvider = ({ children }) => {
             "GET"
         )
         .then(data => {
-            setCollections(data);
+            if(data !== undefined){
+                setCollections(data);
+            }
         })
     }
 
@@ -56,15 +58,17 @@ export const CollectionProvider = ({ children }) => {
             "POST"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                    if(data['error'] === 'replacement transaction underpriced' || data['error'] === 'nonce too low'){
-                        setCollectionError("Please wait until previous transaction is processed")
-                    }else {
-                        setCollectionError(data['error'])
-                    }
-            } else {
-                setCollectionSuccess(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
-                GetAllCollections(authToken)
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                        if(data['error'] === 'replacement transaction underpriced' || data['error'] === 'nonce too low'){
+                            setCollectionError("Please wait until previous transaction is processed")
+                        }else {
+                            setCollectionError(data['error'])
+                        }
+                } else {
+                    setCollectionSuccess(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+                    GetAllCollections(authToken)
+                }
             }
         })
     }
@@ -76,11 +80,13 @@ export const CollectionProvider = ({ children }) => {
             "POST"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setCollectionError(data['error'])
-            } else {
-                setCollectionSuccess(data['result'])
-                GetUsersCollections(authToken)
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setCollectionError(data['error'])
+                } else {
+                    setCollectionSuccess(data['result'])
+                    GetUsersCollections(authToken)
+                }
             }
         })
     }
@@ -92,11 +98,13 @@ export const CollectionProvider = ({ children }) => {
             "DELETE"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setCollectionError(data['error'])
-            } else {
-                setCollectionSuccess(data['result'])
-                window.location.reload();
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setCollectionError(data['error'])
+                } else {
+                    setCollectionSuccess(data['result'])
+                    window.location.reload();
+                }
             }
         })
     }
@@ -118,12 +126,14 @@ export const CollectionProvider = ({ children }) => {
                 "POST"
             )
             .then(data => {
-                if (data['error'] !== undefined) {
-                    setCollectionSuccess(null)
-                    setCollectionError(data['error'])
-                } else {
-                    setCollectionError(null)
-                    setCollectionSuccess("New colletion has been added!")
+                if(data !== undefined){
+                    if (data['error'] !== undefined) {
+                        setCollectionSuccess(null)
+                        setCollectionError(data['error'])
+                    } else {
+                        setCollectionError(null)
+                        setCollectionSuccess("New colletion has been added!")
+                    }
                 }
             })
         }
@@ -136,7 +146,9 @@ export const CollectionProvider = ({ children }) => {
             "GET"
         )
         .then(data => {
+            if(data !== undefined){
             setCollections(data);
+            }
         })
     }
 
@@ -147,7 +159,9 @@ export const CollectionProvider = ({ children }) => {
             "GET"
         )
         .then(data => {
+            if(data !== undefined){
             setSupportedFraudPhases(data);
+            }
         })
     }
 
@@ -158,7 +172,9 @@ export const CollectionProvider = ({ children }) => {
             "GET"
         )
         .then(data => {
+            if(data !== undefined){
             setOwnedSuccessPhases(data);
+            }
         })
     }
 

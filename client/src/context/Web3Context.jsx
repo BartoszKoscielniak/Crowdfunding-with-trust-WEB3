@@ -42,20 +42,22 @@ export const Web3Provider = ({children}) => {
             "GET"
         )
         .then(data => {
-            let totalTemp = 0.0;
-            let biggestTemp = 0.0;
-            Object.keys(data).map((key) => {
-                data[key]['date'] = data[key]['date'] .replace("T"," ");
-                
-                totalTemp = totalTemp + parseFloat(data[key]['amount'])
-                if(biggestTemp < parseFloat(data[key]['amount'])){
-                    biggestTemp = parseFloat(data[key]['amount'])
-                }
-            })
-            setTransactionsQuantity(data.length)
-            setTransactionData(data);
-            setBiggestDeposit(biggestTemp)
-            setTotalSpend(totalTemp)
+            if(data !== undefined){
+                let totalTemp = 0.0;
+                let biggestTemp = 0.0;
+                Object.keys(data).map((key) => {
+                    data[key]['date'] = data[key]['date'] .replace("T"," ");
+                    
+                    totalTemp = totalTemp + parseFloat(data[key]['amount'])
+                    if(biggestTemp < parseFloat(data[key]['amount'])){
+                        biggestTemp = parseFloat(data[key]['amount'])
+                    }
+                })
+                setTransactionsQuantity(data.length)
+                setTransactionData(data);
+                setBiggestDeposit(biggestTemp)
+                setTotalSpend(totalTemp)
+            }
         })
     }
 
@@ -67,15 +69,17 @@ export const Web3Provider = ({children}) => {
             "GET"
         )
         .then(data => {
-            let totalTemp = 0.0;
-            Object.keys(data).map((key) => {
-                data[key]['date'] = data[key]['date'] .replace("T"," ");
-                
-                totalTemp = totalTemp + parseFloat(data[key]['commissinon'])
-            })
-            setCommissionTransactinosQuantity(data.length)
-            setCommissionTransactions(data);
-            setTotalCommissionSpend(totalTemp)
+            if(data !== undefined){
+                let totalTemp = 0.0;
+                Object.keys(data).map((key) => {
+                    data[key]['date'] = data[key]['date'] .replace("T"," ");
+                    
+                    totalTemp = totalTemp + parseFloat(data[key]['commissinon'])
+                })
+                setCommissionTransactinosQuantity(data.length)
+                setCommissionTransactions(data);
+                setTotalCommissionSpend(totalTemp)
+            }
         })
     }
 
@@ -86,10 +90,12 @@ export const Web3Provider = ({children}) => {
             "GET"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setWeb3Error(data['error'])
-            } else {
-                setCommissionContractBalance(parseFloat(data['result']))
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setWeb3Error(data['error'])
+                } else {
+                    setCommissionContractBalance(parseFloat(data['result']))
+                }
             }
         })
     }
@@ -101,10 +107,12 @@ export const Web3Provider = ({children}) => {
             "GET"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setWeb3Error(data['error'])
-            } else {
-                setAdvertiseContractBalance(parseFloat(data['result']))
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setWeb3Error(data['error'])
+                } else {
+                    setAdvertiseContractBalance(parseFloat(data['result']))
+                }
             }
         })
     }
@@ -116,10 +124,12 @@ export const Web3Provider = ({children}) => {
             "POST"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setWeb3Error(data['error'])
-            } else {
-                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setWeb3Error(data['error'])
+                } else {
+                    setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+                }
             }
         })
     }
@@ -131,11 +141,13 @@ export const Web3Provider = ({children}) => {
             "POST"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setWeb3Error(data['error'])
-            } else {
-                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
-                CommissionContractBalance(authToken)
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setWeb3Error(data['error'])
+                } else {
+                    setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+                    CommissionContractBalance(authToken)
+                }
             }
         })
     }
@@ -147,11 +159,13 @@ export const Web3Provider = ({children}) => {
             "POST"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setWeb3Error(data['error'])
-            } else {
-                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
-                AdvertiseContractBalance(authToken)
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setWeb3Error(data['error'])
+                } else {
+                    setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+                    AdvertiseContractBalance(authToken)
+                }
             }
         })
     }
@@ -163,10 +177,12 @@ export const Web3Provider = ({children}) => {
             "POST"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setWeb3Error(data['error'])
-            } else {
-                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setWeb3Error(data['error'])
+                } else {
+                    setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+                }
             }
         })
     }
@@ -178,10 +194,12 @@ export const Web3Provider = ({children}) => {
             "POST"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setWeb3Error(data['error'])
-            } else {
-                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a> <p className='inline-block'>Refresh page to see result.</p></div>)
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setWeb3Error(data['error'])
+                } else {
+                    setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a> <p className='inline-block'>Refresh page to see result.</p></div>)
+                }
             }
         })
     }
@@ -192,7 +210,12 @@ export const Web3Provider = ({children}) => {
             `/api/web3/ad/types`,
             "GET"
         )
-        .then(data => setAdTypes(data))
+        .then(data => {
+            if(data !== undefined){
+                setAdTypes(data)
+            }
+        }
+        )
     }
 
     const GetAdvertiseHistory = async (authToken) => {
@@ -203,17 +226,18 @@ export const Web3Provider = ({children}) => {
             "GET"
         )
         .then(data => {
-            
-            let totalTemp = 0.0;
-            Object.keys(data).map((key) => {
-                data[key]['promoTo'] = data[key]['promoTo'] .replace("T"," ");
-                data[key]['timeOfTransaction'] = data[key]['timeOfTransaction'] .replace("T"," ");
+            if(data !== undefined){
+                let totalTemp = 0.0;
+                Object.keys(data).map((key) => {
+                    data[key]['promoTo'] = data[key]['promoTo'] .replace("T"," ");
+                    data[key]['timeOfTransaction'] = data[key]['timeOfTransaction'] .replace("T"," ");
 
-                totalTemp = totalTemp + parseFloat(data[key]['amount'])
-                })
-            setAdTransactionsQuantity(data.length)
-            setAdTransactions(data)
-            setTotalAdSpend(totalTemp)
+                    totalTemp = totalTemp + parseFloat(data[key]['amount'])
+                    })
+                setAdTransactionsQuantity(data.length)
+                setAdTransactions(data)
+                setTotalAdSpend(totalTemp)
+            }
         })
     }
 
@@ -224,11 +248,13 @@ export const Web3Provider = ({children}) => {
             "POST"
         )
         .then(data => {
-            if (data['error'] !== undefined) {
-                setWeb3Error(data['error'])
-            } else {
-                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
-                GetAdvertiseTypes(authToken)
+            if(data !== undefined){
+                if (data['error'] !== undefined) {
+                    setWeb3Error(data['error'])
+                } else {
+                    setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+                    GetAdvertiseTypes(authToken)
+                }
             }
         })
     }
