@@ -8,8 +8,8 @@ export const AccountProvider = ({children}) => {
     const URL = 'http://localhost:8080';
     const [accountError, setAccountErrorState]           = useState(null);
     const [accountSuccess, setAccountSuccessState]       = useState(null);
-    const [userData, setUserData]                   = useState(null)
-    const { setAuthenticated, setAccessError }      = useContext(AccessContext);
+    const [userData, setUserData]                        = useState(null)
+    const { setAuthenticated, setAccessError }           = useContext(AccessContext);
 
     const setAccountError = (msg) => {
         setAccountSuccessState(null)
@@ -21,23 +21,50 @@ export const AccountProvider = ({children}) => {
         setAccountErrorState(null)
     }
 
-    const handleChange = (e, name) => {
-        if(name == 'loginInput'){
-            setLogin(e.target.value);
-        }
-
-        if(name == 'passwordInput'){
-            setPassword(e.target.value);
-        }
-    }
-
-    const handleChangeRegister = (e, name) => {
-        setRegisterData((prevState) => ({...prevState, [name]: e.target.value}));
-    }
-
     const GetMyInformation = async (authToken) => {
-        return await fetch(`${URL}/api/user/me`, {
-            method: 'GET',
+        performRequest(
+            authToken,
+            `/api/user/me`,
+            "GET"
+        )
+        .then(data => {
+            setUserData(data);
+        })
+    }
+
+    const ChangePassword = async (authToken, oldPassword, newPassword) => {
+        performRequest(
+            authToken,
+            `/api/user/password?oldPassword=${oldPassword}&newPassword=${newPassword}`,
+            "PUT"
+        )
+        .then(data => {
+            if(data['error'] === undefined){
+                setAccountSuccess(data['result'])
+            }else{
+                setAccountError(data['error'])
+            }
+        })
+    }
+
+    const ChangeDetails = async (authToken, name, lastname) => {
+        performRequest(
+            authToken,
+            `/api/user/details?name=${name}&lastname=${lastname}`,
+            "PUT"
+        )
+        .then(data => {
+            if(data['error'] === undefined){
+                setAccountSuccess(data['result'])
+            }else{
+                setAccountError(data['error'])
+            }
+        })
+    }
+
+    const performRequest = async (authToken, url, method) => {
+        return await fetch(`${URL}${url}`, {
+            method: method,
             headers: {
                 'Content-type': 'application/json; charset=UTF-8',
                 'Access-Control-Allow-Origin': "*",
@@ -52,70 +79,9 @@ export const AccountProvider = ({children}) => {
                 return response.json()
             }
         })
-        .then(data => {
-            setUserData(data);
-        })
         .catch(err => {
-            setAccountError(err.message)//setAccountError("Failed to fetch collections. Try again later!")
+            setAccountError(err.message)
         });
-    }
-
-    const ChangePassword = async (authToken, oldPassword, newPassword) => {
-        return await fetch(`${URL}/api/user/password?oldPassword=${oldPassword}&newPassword=${newPassword}`, {
-            method: 'PUT',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-            .then(response => {
-                if(response.status === 403){
-                    setAccessError("Access denied. Please log in again.")
-                    setAuthenticated(false)
-                }else{
-                    return response.json()
-                }
-            })
-            .then(data => {
-                if(data['error'] === undefined){
-                    setAccountSuccess(data['result'])
-                }else{
-                    throw Error(data['error'])
-                }
-            })
-            .catch(err => {
-                setAccountError(err.message)
-            });
-    }
-
-    const ChangeDetails = async (authToken, name, lastname) => {
-        return await fetch(`${URL}/api/user/details?name=${name}&lastname=${lastname}`, {
-            method: 'PUT',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-            .then(response => {
-                if(response.status === 403){
-                    setAccessError("Access denied. Please log in again.")
-                    setAuthenticated(false)
-                }else{
-                    return response.json()
-                }
-            })
-            .then(data => {
-                if(data['error'] === undefined){
-                    setAccountSuccess(data['result'])
-                }else{
-                    throw Error(data['error'])
-                }
-            })
-            .catch(err => {
-                setAccountError(err.message)
-            });
     }
 
     useEffect(() => {

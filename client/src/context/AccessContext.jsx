@@ -18,13 +18,13 @@ const sessionStorageState = (key, receivedValue) => {
 export const AccessProvider = ({children}) => {
     
     const URL = 'http://localhost:8080';
-    const [login, setLogin]                     = sessionStorageState('login', "");
-    const [password, setPassword]               = useState("");
-    const [registerData, setRegisterData]       = useState({nameInput: '', surnameInput: '', emailInput: '', phoneInput: '', keyInput: '', passwordInput: ''})
-    const [accessError, setAccessErrorState]         = useState(null);
-    const [accessSuccess, setAccessSuccessState]     = useState(null)
-    const [authenticated, setAuthenticated]     = sessionStorageState('authenticated', false);
-    const [bearerToken, setBearerToken]         = sessionStorageState('authToken', null);
+    const [login, setLogin]                         = sessionStorageState('login', "");
+    const [password, setPassword]                   = useState("");
+    const [registerData, setRegisterData]           = useState({nameInput: '', surnameInput: '', emailInput: '', phoneInput: '', keyInput: '', passwordInput: ''})
+    const [accessError, setAccessErrorState]        = useState(null);
+    const [accessSuccess, setAccessSuccessState]    = useState(null)
+    const [authenticated, setAuthenticated]         = sessionStorageState('authenticated', false);
+    const [bearerToken, setBearerToken]             = sessionStorageState('authToken', null);
 
     const setAccessError = (msg) => {
         setAccessSuccessState(null)

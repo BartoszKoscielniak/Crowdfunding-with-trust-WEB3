@@ -35,120 +35,56 @@ export const Web3Provider = ({children}) => {
         setWeb3ErrorState(null)
     }
 
-    const GetMyInformation = async (authToken) => {
-        return await fetch(`${URL}/api/user/me`, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-            .then(response => {
-                if(response.status === 403){
-                    setAccessError("Access denied. Please log in again.")
-                    setAuthenticated(false)
-                }else{
-                    return response.json()
-                }
-            })
-            .then(data => {
-                setUserData(data);
-            })
-            .catch(err => {
-                setWeb3Error("Failed to fetch collections. Try again later!")
-            });
-    }
-
     const GetFundsTransactions = async (authToken) => {
-        return await fetch(`${URL}/api/web3/fund/transactionhistory`, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-            .then(response => {
-                if(response.status === 403){
-                    setAccessError("Access denied. Please log in again.")
-                    setAuthenticated(false)
-                }else{
-                    return response.json()
+        performRequest(
+            authToken,
+            `/api/web3/fund/transactionhistory`,
+            "GET"
+        )
+        .then(data => {
+            let totalTemp = 0.0;
+            let biggestTemp = 0.0;
+            Object.keys(data).map((key) => {
+                data[key]['date'] = data[key]['date'] .replace("T"," ");
+                
+                totalTemp = totalTemp + parseFloat(data[key]['amount'])
+                if(biggestTemp < parseFloat(data[key]['amount'])){
+                    biggestTemp = parseFloat(data[key]['amount'])
                 }
             })
-            .then(data => {
-                let totalTemp = 0.0;
-                let biggestTemp = 0.0;
-                Object.keys(data).map((key) => {
-                    data[key]['date'] = data[key]['date'] .replace("T"," ");
-                    
-                    totalTemp = totalTemp + parseFloat(data[key]['amount'])
-                    if(biggestTemp < parseFloat(data[key]['amount'])){
-                        biggestTemp = parseFloat(data[key]['amount'])
-                    }
-                })
-                setTransactionsQuantity(data.length)
-                setTransactionData(data);
-                setBiggestDeposit(biggestTemp)
-                setTotalSpend(totalTemp)
-            })
-            .catch(err => {
-                setWeb3Error("Failed to fetch transactions. Try again later!")
-            });
+            setTransactionsQuantity(data.length)
+            setTransactionData(data);
+            setBiggestDeposit(biggestTemp)
+            setTotalSpend(totalTemp)
+        })
     }
 
     const GetCommissionTransactions = async (authToken) => {
         CommissionContractBalance(authToken)
-        return await fetch(`${URL}/api/web3/commission/history`, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
+        performRequest(
+            authToken,
+            `/api/web3/commission/history`,
+            "GET"
+        )
+        .then(data => {
+            let totalTemp = 0.0;
+            Object.keys(data).map((key) => {
+                data[key]['date'] = data[key]['date'] .replace("T"," ");
+                
+                totalTemp = totalTemp + parseFloat(data[key]['commissinon'])
+            })
+            setCommissionTransactinosQuantity(data.length)
+            setCommissionTransactions(data);
+            setTotalCommissionSpend(totalTemp)
         })
-            .then(response => {
-                if(response.status === 403){
-                    setAccessError("Access denied. Please log in again.")
-                    setAuthenticated(false)
-                }else{
-                    return response.json()
-                }
-            })
-            .then(data => {
-                let totalTemp = 0.0;
-                Object.keys(data).map((key) => {
-                    data[key]['date'] = data[key]['date'] .replace("T"," ");
-                    
-                    totalTemp = totalTemp + parseFloat(data[key]['commissinon'])
-                })
-                setCommissionTransactinosQuantity(data.length)
-                setCommissionTransactions(data);
-                setTotalCommissionSpend(totalTemp)
-            })
-            .catch(err => {
-                setWeb3Error("Failed to fetch transactions. Try again later!")
-            });
     }
 
     const CommissionContractBalance = async (authToken) => {
-        return await fetch(`${URL}/api/web3/commission/balance`, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-        .then(response => {
-            if(response.status === 403){
-                setAccessError("Access denied. Please log in again.")
-                setAuthenticated(false)
-            }else{
-                return response.json()
-            }
-        })
+        performRequest(
+            authToken,
+            `/api/web3/commission/balance`,
+            "GET"
+        )
         .then(data => {
             if (data['error'] !== undefined) {
                 setWeb3Error(data['error'])
@@ -156,28 +92,14 @@ export const Web3Provider = ({children}) => {
                 setCommissionContractBalance(parseFloat(data['result']))
             }
         })
-        .catch(err => {
-            setWeb3Error(err.message)
-        });
     }
 
     const AdvertiseContractBalance = async (authToken) => {
-        return await fetch(`${URL}/api/web3/ad/balance`, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-        .then(response => {
-            if(response.status === 403){
-                setAccessError("Access denied. Please log in again.")
-                setAuthenticated(false)
-            }else{
-                return response.json()
-            }
-        })
+        performRequest(
+            authToken,
+            `/api/web3/ad/balance`,
+            "GET"
+        )
         .then(data => {
             if (data['error'] !== undefined) {
                 setWeb3Error(data['error'])
@@ -185,28 +107,14 @@ export const Web3Provider = ({children}) => {
                 setAdvertiseContractBalance(parseFloat(data['result']))
             }
         })
-        .catch(err => {
-            setWeb3Error(err.message)
-        });
     }
 
     const SendFundsToOwner = async (authToken, phaseId) => {
-        return await fetch(`${URL}/api/web3/fund/sendfundstoowner?phaseId=${phaseId}`, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-        .then(response => {
-            if(response.status === 403){
-                setAccessError("Access denied. Please log in again.")
-                setAuthenticated(false)
-            }else{
-                return response.json()
-            }
-        })
+        performRequest(
+            authToken,
+            `/api/web3/fund/sendfundstoowner?phaseId=${phaseId}`,
+            "POST"
+        )
         .then(data => {
             if (data['error'] !== undefined) {
                 setWeb3Error(data['error'])
@@ -214,28 +122,14 @@ export const Web3Provider = ({children}) => {
                 setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
             }
         })
-        .catch(err => {
-            setWeb3Error(err.message)
-        });
     }
 
     const WithdrawCommission = async (authToken) => {
-        return await fetch(`${URL}/api/web3/commission/withdraw`, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-        .then(response => {
-            if(response.status === 403){
-                setAccessError("Access denied. Please log in again.")
-                setAuthenticated(false)
-            }else{
-                return response.json()
-            }
-        })
+        performRequest(
+            authToken,
+            `/api/web3/commission/withdraw`,
+            "POST"
+        )
         .then(data => {
             if (data['error'] !== undefined) {
                 setWeb3Error(data['error'])
@@ -244,28 +138,14 @@ export const Web3Provider = ({children}) => {
                 CommissionContractBalance(authToken)
             }
         })
-        .catch(err => {
-            setWeb3Error(err.message)
-        });
     }
 
     const WithdrawAdvertiseFunds = async (authToken) => {
-        return await fetch(`${URL}/api/web3/ad/withdraw`, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-        .then(response => {
-            if(response.status === 403){
-                setAccessError("Access denied. Please log in again.")
-                setAuthenticated(false)
-            }else{
-                return response.json()
-            }
-        })
+        performRequest(
+            authToken,
+            `/api/web3/ad/withdraw`,
+            "POST"
+        )
         .then(data => {
             if (data['error'] !== undefined) {
                 setWeb3Error(data['error'])
@@ -274,28 +154,14 @@ export const Web3Provider = ({children}) => {
                 AdvertiseContractBalance(authToken)
             }
         })
-        .catch(err => {
-            setWeb3Error(err.message)
-        });
     }
 
     const SendFundsToDonators = async (authToken, phaseId) => {
-        return await fetch(`${URL}/api/web3/fund/sendfundstodonators?phaseId=${phaseId}`, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-        .then(response => {
-            if(response.status === 403){
-                setAccessError("Access denied. Please log in again.")
-                setAuthenticated(false)
-            }else{
-                return response.json()
-            }
-        })
+        performRequest(
+            authToken,
+            `/api/web3/fund/sendfundstodonators?phaseId=${phaseId}`,
+            "POST"
+        )
         .then(data => {
             if (data['error'] !== undefined) {
                 setWeb3Error(data['error'])
@@ -303,14 +169,73 @@ export const Web3Provider = ({children}) => {
                 setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
             }
         })
-        .catch(err => {
-            setWeb3Error(err.message)
-        });
     }
 
     const BuyAdvertise = async (authToken, collectionId, advertiseId) => {
-        return await fetch(`${URL}/api/web3/ad/buy?collectionId=${collectionId}&advertiseId=${advertiseId}`, {
-            method: 'POST',
+         performRequest(
+            authToken,
+            `/api/web3/ad/buy?collectionId=${collectionId}&advertiseId=${advertiseId}`,
+            "POST"
+        )
+        .then(data => {
+            if (data['error'] !== undefined) {
+                setWeb3Error(data['error'])
+            } else {
+                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a> <p className='inline-block'>Refresh page to see result.</p></div>)
+            }
+        })
+    }
+
+    const GetAdvertiseTypes = async (authToken) => {
+        performRequest(
+            authToken,
+            `/api/web3/ad/types`,
+            "GET"
+        )
+        .then(data => setAdTypes(data))
+    }
+
+    const GetAdvertiseHistory = async (authToken) => {
+        AdvertiseContractBalance(authToken)
+        performRequest(
+            authToken,
+            `/api/web3/ad/history`,
+            "GET"
+        )
+        .then(data => {
+            
+            let totalTemp = 0.0;
+            Object.keys(data).map((key) => {
+                data[key]['promoTo'] = data[key]['promoTo'] .replace("T"," ");
+                data[key]['timeOfTransaction'] = data[key]['timeOfTransaction'] .replace("T"," ");
+
+                totalTemp = totalTemp + parseFloat(data[key]['amount'])
+                })
+            setAdTransactionsQuantity(data.length)
+            setAdTransactions(data)
+            setTotalAdSpend(totalTemp)
+        })
+    }
+
+    const AddAdvertiseType = async (authToken, name, price, duration) => {
+        performRequest(
+            authToken,
+            `/api/web3/ad/add?name=${name}&price=${price}&durationInDays=${duration}`,
+            "POST"
+        )
+        .then(data => {
+            if (data['error'] !== undefined) {
+                setWeb3Error(data['error'])
+            } else {
+                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
+                GetAdvertiseTypes(authToken)
+            }
+        })
+    }
+
+    const performRequest = async (authToken, url, method) => {
+        return await fetch(`${URL}${url}`, {
+            method: method,
             headers: {
                 'Content-type': 'application/json; charset=UTF-8',
                 'Access-Control-Allow-Origin': "*",
@@ -325,105 +250,9 @@ export const Web3Provider = ({children}) => {
                 return response.json()
             }
         })
-        .then(data => {
-            if (data['error'] !== undefined) {
-                setWeb3Error(data['error'])
-            } else {
-                setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a> <p className='inline-block'>Refresh page to see result.</p></div>)
-            }
-        })
         .catch(err => {
-            setWeb3Error(err.message)
+            setWeb3Error("Request has failed. Try again later!")
         });
-    }
-
-    const GetAdvertiseTypes = async (authToken) => {
-        return await fetch(`${URL}/api/web3/ad/types`, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-            .then(response => {
-                if(response.status === 403){
-                    setAccessError("Access denied. Please log in again.")
-                    setAuthenticated(false)
-                }else{
-                    return response.json()
-                }
-            })
-            .then(data => setAdTypes(data))
-            .catch(err => {
-                setWeb3Error("Failed to fetch ad types. Try again later!")
-            });
-    }
-
-    const GetAdvertiseHistory = async (authToken) => {
-        AdvertiseContractBalance(authToken)
-        return await fetch(`${URL}/api/web3/ad/history`, {
-            method: 'GET',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-            .then(response => {
-                if(response.status === 403){
-                    setAccessError("Access denied. Please log in again.")
-                    setAuthenticated(false)
-                }else{
-                    return response.json()
-                }
-            })
-            .then(data => {
-                
-                let totalTemp = 0.0;
-                Object.keys(data).map((key) => {
-                    data[key]['promoTo'] = data[key]['promoTo'] .replace("T"," ");
-                    data[key]['timeOfTransaction'] = data[key]['timeOfTransaction'] .replace("T"," ");
-
-                    totalTemp = totalTemp + parseFloat(data[key]['amount'])
-                  })
-                setAdTransactionsQuantity(data.length)
-                setAdTransactions(data)
-                setTotalAdSpend(totalTemp)
-            })
-            .catch(err => {
-                setWeb3Error("Failed to fetch transactions. Try again later!")
-            });
-    }
-
-    const AddAdvertiseType = async (authToken, name, price, duration) => {
-        return await fetch(`${URL}/api/web3/ad/add?name=${name}&price=${price}&durationInDays=${duration}`, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-                'Access-Control-Allow-Origin': "*",
-                'Authorization': authToken
-            },
-        })
-            .then(response => {
-                if(response.status === 403){
-                    setAccessError("Access denied. Please log in again.")
-                    setAuthenticated(false)
-                }else{
-                    return response.json()
-                }
-            })
-            .then(data => {
-                if (data['error'] !== undefined) {
-                    setWeb3Error(data['error'])
-                } else {
-                    setWeb3Success(<div><p className='inline-block'>Success! Check Your transaction here: </p> <a className='underline-offset-1 inline-block underline' href={`https://goerli.etherscan.io/tx/${data['result']}`} target='_blank' rel='noopener noreferrer'>etherscan.io</a></div>)
-                    GetAdvertiseTypes(authToken)
-                }
-            })
-            .catch(err => {
-                setWeb3Error(err.message)
-            });
     }
 
     useEffect(() => {
