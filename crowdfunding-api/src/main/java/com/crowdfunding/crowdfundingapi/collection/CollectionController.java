@@ -33,12 +33,6 @@ public class CollectionController {
         return service.getAllCollections(type, name, excludeRequester);
     }
 
-    @GetMapping(path = "/type")
-    public ResponseEntity<List<Collection>> getAllCollectionsByType(
-            @RequestParam CollUserType type){
-        return service.getAllCollectionsByType(type);
-    }
-
     @PostMapping
     public ResponseEntity<Map<String, String>> addCollection(
             @RequestParam String description,
@@ -74,9 +68,8 @@ public class CollectionController {
     @PutMapping(path = "/{id}")
     public ResponseEntity<Map<String, String>> updateCollection(
             @PathVariable Long id,
-            @RequestParam(required = false) CollectionType collectionType,
             @RequestParam(required = false) String baseDescription){
-        return service.updateCollection(id, collectionType, baseDescription);
+        return service.updateCollection(id, baseDescription);
     }
 
     @DeleteMapping(path = "/{id}")

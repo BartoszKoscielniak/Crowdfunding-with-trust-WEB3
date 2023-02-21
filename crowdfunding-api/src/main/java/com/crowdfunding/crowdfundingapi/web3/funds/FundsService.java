@@ -119,10 +119,11 @@ public class FundsService{
 
     public ResponseEntity<Map<String, String>> depositFunds(Long phaseId, Double amount) {
         try {
-            CollectionPhase collectionPhase = collectionPhaseService.getPhase(phaseId).getBody();
-            if (collectionPhase == null){
+            List<CollectionPhase> list = collectionPhaseService.getPhase(phaseId).getBody();
+            if (list.isEmpty()){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Phase not found!"));
             }
+            CollectionPhase collectionPhase = list.get(0);
 
             ResponseEntity<User> founder = collectionPhaseService.getCollectionFounder(phaseId);
             User user = userService.getUserFromAuthentication();

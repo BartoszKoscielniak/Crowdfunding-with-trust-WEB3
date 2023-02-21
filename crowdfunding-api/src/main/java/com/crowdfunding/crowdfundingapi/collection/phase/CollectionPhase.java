@@ -3,9 +3,7 @@ package com.crowdfunding.crowdfundingapi.collection.phase;
 import com.crowdfunding.crowdfundingapi.collection.Collection;
 import com.crowdfunding.crowdfundingapi.poll.Poll;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,6 +13,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CollectionPhase {
 
     @Id

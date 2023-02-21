@@ -16,7 +16,7 @@ public class CollectionPhaseController {
     private final CollectionPhaseService service;
 
     @GetMapping(path = "/{id}")
-    public ResponseEntity<CollectionPhase> getPhase(@PathVariable Long id){
+    public ResponseEntity<List<CollectionPhase>> getPhase(@PathVariable Long id){
         return service.getPhase(id);
     }
 
@@ -32,18 +32,17 @@ public class CollectionPhaseController {
             @RequestParam String name,
             @RequestParam String deadline,
             @RequestParam Long collectionId,
-            @RequestParam LocalDateTime till,
             @RequestParam String proofofevidence
             ){
-        return service.addPhase(goal, name, description, deadline, collectionId, till, proofofevidence);
+        return service.addPhase(goal, name, description, deadline, collectionId, proofofevidence);
     }
 
     @PutMapping(path = "/{id}")
     public ResponseEntity<Map<String, String>> updatePhase(
             @PathVariable Long id,
-            @RequestParam(required = false) String baseDescription
+            @RequestParam String basedescription
     ){
-        return service.updatePhase(id, baseDescription);
+        return service.updatePhase(id, basedescription);
     }
 
     @DeleteMapping(path = "/{id}")

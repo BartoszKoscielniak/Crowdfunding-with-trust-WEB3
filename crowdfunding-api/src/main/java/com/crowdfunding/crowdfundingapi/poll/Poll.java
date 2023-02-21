@@ -3,21 +3,19 @@ package com.crowdfunding.crowdfundingapi.poll;
 import com.crowdfunding.crowdfundingapi.collection.phase.CollectionPhase;
 import com.crowdfunding.crowdfundingapi.poll.vote.Vote;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table
 @NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@Builder
 public class Poll {
 
     @Id

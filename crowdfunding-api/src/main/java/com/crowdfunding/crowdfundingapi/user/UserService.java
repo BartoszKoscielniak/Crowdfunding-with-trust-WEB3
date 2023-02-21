@@ -21,46 +21,36 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserService implements UserDetailsService {
 
-    private UserRepository userRepository;
+    private UserRepository repository;
     private final PasswordConfig passwordConfig;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findUserByPublicAddress(username)
+        return repository.findUserByPublicAddress(username)
                 .orElseThrow(() ->
                     new UsernameNotFoundException(String.format("User: %s not found", username))
                 );
     }
 
     public ResponseEntity<List<User>> getAllUsers( ) {
-        return ResponseEntity.status(HttpStatus.OK).body(userRepository.findAll());
+        return ResponseEntity.status(HttpStatus.OK).body(repository.findAll());
     }
 
-    public ResponseEntity<User> getAuthUsers( ) {
-        User user = userRepository.findUserByPublicAddress(getUserFromAuthentication().getPublicAddress()).get();
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+    public ResponseEntity<User> getMyInformation( ) {
+        return ResponseEntity.status(HttpStatus.OK).body(getUserFromAuthentication());
     }
 
     public Optional<User> getUserByPublicAddress(String publicAddress){
-        return userRepository.findUserByPublicAddress(publicAddress);
+        return repository.findUserByPublicAddress(publicAddress);
     }
 
     public void updateUser(User user){
-        userRepository.save(user);
+        repository.save(user);
     }
 
     public User getUserFromAuthentication( ){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return userRepository.findUserByPublicAddress(authentication.getName()).get();
-    }
-
-    public ResponseEntity<User> getUser(Long userId) {
-        Optional<User> user = userRepository.findUserById(userId);
-        if (user.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(user.get());
+        return repository.findUserByPublicAddress(authentication.getName()).get();
     }
 
     public ResponseEntity<Map<String, String>> changePassword(String oldPassword, String newPassword) {
@@ -74,7 +64,7 @@ public class UserService implements UserDetailsService {
             return passwordValidationResult;
         }
         user.setPassword(passwordConfig.passwordEncoder().encode(newPassword));
-        userRepository.save(user);
+        repository.save(user);
         return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Password changed."));
     }
 
@@ -94,12 +84,6 @@ public class UserService implements UserDetailsService {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    public ResponseEntity<User> getMyInformation( ) {
-        User authUser = getUserFromAuthentication();
-        Optional<User> user = userRepository.findUserByPublicAddress(authUser.getPublicAddress());
-        return ResponseEntity.status(HttpStatus.OK).body(user.get());
-    }
-
     public ResponseEntity<Map<String, String>> changeDetails(String name, String lastname) {
         User userAuth = getUserFromAuthentication();
         if (name.length() < 3 || lastname.length() < 3){
@@ -110,10 +94,10 @@ public class UserService implements UserDetailsService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PreparedResponse().getFailureResponse("Details are the same!"));
         }
 
-        User user = userRepository.findUserById(userAuth.getId()).get();
+        User user = repository.findUserById(userAuth.getId()).get();
         user.setName(name);
         user.setLastname(lastname);
-        userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Details changed"));
+        repository.save(user);
+        return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Details changed."));
     }
 }

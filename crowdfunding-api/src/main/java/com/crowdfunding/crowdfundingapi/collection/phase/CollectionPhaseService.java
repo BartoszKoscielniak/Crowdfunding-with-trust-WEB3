@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -25,11 +26,10 @@ public class CollectionPhaseService {
     private final CollectionRepository collectionRepository;
     private final PollRepository pollRepository;
 
-    public ResponseEntity<CollectionPhase> getPhase(Long id) {
+    public ResponseEntity<List<CollectionPhase>> getPhase(Long id) {
         Optional<CollectionPhase> optionalCollection = repository.findPhaseById(id);
 
-        return optionalCollection.map(collection ->
-                ResponseEntity.status(HttpStatus.OK).body(collection)).orElseGet(( ) ->
+        return optionalCollection.map(phase -> ResponseEntity.status(HttpStatus.OK).body(List.of(phase))).orElseGet(( ) ->
                 ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
@@ -41,18 +41,19 @@ public class CollectionPhaseService {
         return ResponseEntity.status(HttpStatus.OK).body(optionalCollection);
     }
 
-    public ResponseEntity<Map<String, String>> addPhase(Double goal, String name, String description, String deadline, Long collectionId, LocalDateTime till, String poe) {
+    public ResponseEntity<Map<String, String>> addPhase(Double goal, String name, String description, String deadline, Long collectionId, String poe) {
         Optional<Collection> optionalCollection = collectionRepository.findCollectionById(collectionId);
         if (optionalCollection.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PreparedResponse().getFailureResponse("Collection with provided ID not found"));
         }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         Collection collection = optionalCollection.get();
-        CollectionPhase newPhase = new CollectionPhase(goal, name, description, collection, till, poe);
+        CollectionPhase newPhase = new CollectionPhase(goal, name, description, collection, LocalDateTime.parse(deadline + " 23:59", formatter), poe);
         Poll poll = new Poll(PollState.NOT_ACTIVATED);
         repository.save(newPhase);
 
         poll.setCollectionPhase(newPhase);
-        poll.setStartDate(LocalDateTime.parse(deadline));
+        poll.setStartDate(LocalDateTime.parse(deadline + " 23:59", formatter));
         pollRepository.save(poll);
 
         return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Phase added"));
@@ -66,9 +67,8 @@ public class CollectionPhaseService {
         }
         CollectionPhase collectionPhase = optionalPhase.get();
 
-        if (baseDescription != null){
-            collectionPhase.setDescription(baseDescription);
-        }
+        collectionPhase.setDescription(baseDescription);
+
         repository.save(collectionPhase);
         return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Phase updated"));
     }
