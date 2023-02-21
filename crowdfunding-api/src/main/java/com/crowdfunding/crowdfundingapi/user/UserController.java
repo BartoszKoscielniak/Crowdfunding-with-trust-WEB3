@@ -24,17 +24,6 @@ public class UserController {
         return userService.getMyInformation();
     }
 
-    @GetMapping(path = "/auth")
-    public ResponseEntity<User> getAuthUsers(){
-        return userService.getAuthUsers();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(
-            @PathVariable Long id){
-        return userService.getUser(id);
-    }
-
     @PutMapping(path = "/password")
     public ResponseEntity<Map<String, String>> changePassword(
             @RequestParam String oldPassword,
