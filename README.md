@@ -1,6 +1,6 @@
 # Crowdfunding with trust WEB3
 
-> WEB3.0 application based on blockchain, combined with Spring Boot and powered by React.js.  
+> WEB3 application based on blockchain, combined with Spring Boot and powered by React.js.  
 
 ## Table of contents
 * [General info](#general-info)
