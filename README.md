@@ -98,6 +98,7 @@ Logic of deposit mechanism both with function to release funds:
 
 * Spring Boot
 * Web3j
+* Mockito
 * Solidity
 * React.js
 * Tailwind CSS
