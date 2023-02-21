@@ -13,7 +13,7 @@
 * [License](#license)
 
 ## General info
-> Application aims to provide system supporting both start-ups and charity collections. Financial security is significantly increased by implementing Smart Contracts. Deposit mechanism assure that funds can be released only after collection phase end which is followed by voting over releasing funds.
+> Application aims to provide system supporting both start-up and charity collections. Financial security is significantly increased by implementing Smart Contracts. Deposit mechanism assure that funds can be released only after collection phase end which is followed by voting over releasing funds. Collection owner is obligated to share with evidences of progress. Supporters are in charge of voting over progress of specified phase. Depending on vote result funds are send to collection owner or are refunded to supporters. 
 
 ## Screenshots
 
