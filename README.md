@@ -1,10 +1,9 @@
-# Crowdfunding-with-trust-WEB3.0
+# Crowdfunding with trust WEB3
 
-> WEB3.0 application based on blockchain, combined with Spring Boot and powered by React.js.
+> WEB3.0 application based on blockchain, combined with Spring Boot and powered by React.js.  
 
 ## Table of contents
 * [General info](#general-info)
-* [Screenshots](#screenshots)
 * [Setup](#setup)
 * [Code Examples](#code-examples)
 * [Tech/framework used](#techframework-used)
@@ -13,105 +12,92 @@
 * [License](#license)
 
 ## General info
->.
->.
-
-## Screenshots
-
-   <details>
-       <summary>Main page</summary>
-    <ul>
-     <img src=""> 
-    </ul>
-   </details>
-	<details>
-       <summary>Wallet</summary>
-    <ul>
-     <img src=""> 
-    </ul>
-   </details>
-	<details>
-       <summary>Coin price chart</summary>
-    <ul>
-     <img src=""> 
-    </ul>
-   </details>
-	<details>
-       <summary>Buy/Sell panel</summary>
-    <ul>
-     <img src=""> 
-    </ul>
-   </details>
+> Application aims to provide system supporting both start-ups and charity collections. Financial security is significantly increased by implementing Smart Contracts. Deposit mechanism assure that funds can be released only after collection phase end which is followed by voting over releasing funds.
 
 ## Setup
 
->1. npm start dev to start React dev on localhost
->2. npx hardhat
->3. npx hardhat run scripts/deploy.js --network ropsten - to deploy contract to blockchain
+> Frontend: 
+>* npm install
+>* npm run dev
 
-> Metamask wallet 
->* Password: **web3.0test**
->* Secret phase: **night, eight, priority, team, album, tooth, seminar, dumb, wedding, churn, save, spice**
+> Backend:
+>* Adjust database specification in _application.properties_
+>* Change Chain ID in _application.properties_
+>* Change node URL in _application.properties_
+>* Change address which deploy Smart Contracts in _application.properties_
 
 ## Code Examples
-Show examples of usage:
+Logic of deposit mechanism both with function to release funds:
 
+        function depositFunds(address _receiver, uint256 _amount, uint256 _phaseId) external payable{
 
-    //SPDX-License-Identifier: UNLICENSED
+        require(msg.sender != _receiver,                        "You cannot deposit funds to own collection");
+        require(_amount > 0,                                    "Incorrect amount");
+        require(fundsDonated[_phaseId].isFraud != true,         "Cannot deposit funds, phase status: fraud");
+        require(fundsDonated[_phaseId].isPollEnded != true,     "Cannot deposit funds to ended phase");
 
-    pragma solidity ^ 0.8.0;
+        if(fundsDonated[_phaseId].receiver == address(0x0)) {
+            fundsDonated[_phaseId].receiver     = _receiver;
+            fundsDonated[_phaseId].amount       = _amount;
+            fundsDonated[_phaseId].isFraud      = false;
+            fundsDonated[_phaseId].isPollEnded  = false;
+            fundsDonated[_phaseId].timestamp    = block.timestamp;
+        } else {
+            fundsDonated[_phaseId].amount       += _amount;
+        }
 
-    contract Transactions {
-    	uint256 transactionsCount;
+        transactionHistory.push(TransactionStruct(
+            msg.sender,
+            address(this),
+            _phaseId,
+            _amount,
+            block.timestamp
+        )); 
 
-    	event Transfer(address sender, address receiver, uint256 amount, 
-                    	string message, uint256 timestamp, string keyword);
+        emit FundsEmition(
+            msg.sender,
+            address(this),
+            _amount,
+            _phaseId,
+            block.timestamp
+        );
 
-    	struct TransferStruct {
-        	address sender;
-        	address receiver;
-        	uint256 amount;
-        	string message;
-        	uint256 timestamp;
-        	string keyword;
-    	}
-
-    	TransferStruct[] transactions;
-
-    	function addToBlockchain(address payable receiver, uint amount, string memory message, string memory keyword) public {
-        	transactionsCount += 1;
-        	transactions.push(TransferStruct(
-            	msg.sender,
-            	receiver,
-            	amount,
-            	message,
-            	block.timestamp,
-            	keyword
-        	));
-
-        	emit Transfer(            
-            	msg.sender,
-            	receiver,
-            	amount,
-            	message,
-            	block.timestamp,
-            	keyword
-        	);
-    	}
-
-    	function getAllTransactions() public view returns (TransferStruct[] memory) {
-        	return transactions;
-    	}
-
-    	function getTransactionsCount() public view returns (uint256) {
-        	return transactionsCount;   
-    	}
+        donationsCount++;
     }
 
+    function sendFundsToOwner(address payable _toReceive, uint256 _phaseId) public {
 
+        require(fundsDonated[_phaseId].receiver != address(0x0),    "Invalid phase ID");
+        require(msg.sender == fundsDonated[_phaseId].receiver,      "Only the collection owner can withdraw funds");
+        require(_toReceive == fundsDonated[_phaseId].receiver,      "Only the collection owner can withdraw funds");
+        require(fundsDonated[_phaseId].amount > 0,                  "Insufficient funds");
+        require(fundsDonated[_phaseId].isPollEnded == true,         "Poll has not end");
+        require(fundsDonated[_phaseId].isFraud == false,            "Phase status is fraud. You cannot withdraw funds!");
+
+        emit FundsEmition(
+            address(this),
+            fundsDonated[_phaseId].receiver,
+            fundsDonated[_phaseId].amount,
+            _phaseId,
+            block.timestamp
+        );
+
+        transactionHistory.push(TransactionStruct(
+            address(this),
+            fundsDonated[_phaseId].receiver,
+            _phaseId,
+            fundsDonated[_phaseId].amount,
+            block.timestamp
+        ));
+
+        _toReceive.transfer(fundsDonated[_phaseId].amount);
+        fundsDonated[_phaseId].amount = 0;
+    }
 
 ## Tech/framework used
 
+* Spring Boot
+* Web3j
 * Solidity
 * React.js
 * Tailwind CSS
@@ -123,5 +109,5 @@ Project is in: _development_ phase :monocle_face:
 [@Bartosz Koscielniak](https://github.com/BartoszKoscielniak)
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/) ©
+[MIT](https://choosealicense.com/licenses/mit/)
 
