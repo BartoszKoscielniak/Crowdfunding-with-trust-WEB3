@@ -4,6 +4,7 @@
 
 ## Table of contents
 * [General info](#general-info)
+* [Screenshots](#screenshots)
 * [Setup](#setup)
 * [Code Examples](#code-examples)
 * [Tech/framework used](#techframework-used)
@@ -13,6 +14,27 @@
 
 ## General info
 > Application aims to provide system supporting both start-ups and charity collections. Financial security is significantly increased by implementing Smart Contracts. Deposit mechanism assure that funds can be released only after collection phase end which is followed by voting over releasing funds.
+
+## Screenshots
+
+   <details>
+       <summary>Main Page</summary>
+    <ul>
+     <img src="crowdfunding-api/src/main/resources/mainpage.png"> 
+    </ul>
+   </details>
+	<details>
+       <summary>Collections Page</summary>
+    <ul>
+     <img src="crowdfunding-api/src/main/resources/collections.png"> 
+    </ul>
+   </details>
+	<details>
+       <summary>Transaction History</summary>
+    <ul>
+     <img src="crowdfunding-api/src/main/resources/transactionhistory.png"> 
+    </ul>
+   </details>
 
 ## Setup
 
