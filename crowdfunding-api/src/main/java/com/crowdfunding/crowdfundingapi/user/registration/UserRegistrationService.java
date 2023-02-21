@@ -8,6 +8,7 @@ import com.crowdfunding.crowdfundingapi.user.UserRepository;
 import com.crowdfunding.crowdfundingapi.user.UserRole;
 import com.crowdfunding.crowdfundingapi.user.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,8 @@ public class UserRegistrationService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final PasswordConfig passwordConfig;
+    @Value("${crowdfunding.pub.address}")
+    private String deploymentAddress;
 
     public ResponseEntity<Map<String, String>> registerUser(String name, String lastname, String privateKey, String password, String email, String phoneNumber) {
         try {
@@ -69,7 +72,12 @@ public class UserRegistrationService {
 
             byte[] privateKeyBytes = AdvancedEncryptionStandard.encrypt(privateKey.getBytes());
 
-            User newUser = new User(publicAddress, name, lastname, email, phoneNumber, privateKeyBytes, passwordConfig.passwordEncoder().encode(password), UserRole.USER);
+            User newUser;
+            if (deploymentAddress.equalsIgnoreCase(publicAddress)){
+                newUser = new User(publicAddress, name, lastname, email, phoneNumber, privateKeyBytes, passwordConfig.passwordEncoder().encode(password), UserRole.ADMIN);
+            } else {
+                newUser = new User(publicAddress, name, lastname, email, phoneNumber, privateKeyBytes, passwordConfig.passwordEncoder().encode(password), UserRole.USER);
+            }
             userRepository.save(newUser);
 
             return ResponseEntity.status(HttpStatus.OK).body(new PreparedResponse().getSuccessResponse("Successfully registered!"));
