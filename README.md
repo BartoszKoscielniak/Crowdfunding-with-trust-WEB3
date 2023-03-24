@@ -13,7 +13,7 @@
 * [License](#license)
 
 ## General info
-> Application aims to provide system supporting both start-up and charity collections. Financial security is significantly increased by implementing Smart Contracts. Deposit mechanism assure that funds can be released only after collection phase end which is followed by voting over releasing funds. Collection owner is obligated to share with evidences of progress. Supporters are in charge of voting over progress of specified phase. Depending on vote result funds are send to collection owner or are refunded to supporters. 
+> Projects subject is associated with the system supporting both charity and start-ups collections. There is implementation of collections phase mechanism both with voting over work progress. These solutions aims to increase the attractiveness and functionality of website. The key task is to increase the security and introducing of financial transparency. To achieve this, application contains of deposit mechanism which secure funds until the end of collection. This solution has been implemented with blockchain and Smart Contracts. Contracts are agreement between the users, that cannot be broken down. These technologies works along with Spring Boot, which is base of website and also frontend JavaScript’s library – React.js.
 
 ## Screenshots
 
