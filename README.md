@@ -13,7 +13,7 @@
 * [License](#license)
 
 ## General info
-> Projects subject is associated with the system supporting both charity and start-ups collections. There is implementation of collections phase mechanism both with voting over work progress. These solutions aims to increase the attractiveness and functionality of website. The key task is to increase the security and introducing of financial transparency. To achieve this, application contains of deposit mechanism which secure funds until the end of collection. This solution has been implemented with blockchain and Smart Contracts. Contracts are agreement between the users, that cannot be broken down. These technologies works along with Spring Boot, which is base of website and also frontend JavaScript’s library – React.js.
+> Project is the system supporting both charity and start-ups collections. There is implementation of collections phase mechanism both with voting over work progress. These solutions aims to increase the attractiveness and functionality of website. The key task is to increase the security and introducing of financial transparency. To achieve this, application contains of deposit mechanism which secure funds until the end of collection. This solution has been implemented with blockchain and Smart Contracts. Contracts are agreement between the users, that cannot be broken down. These technologies works along with Spring Boot, which is base of website and also frontend JavaScript’s library – React.js.
 
 ## Screenshots
 
